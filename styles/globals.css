@@ -210,6 +210,10 @@
     font-style: normal;
     font-variation-settings: "SOFT" 100, "WONK" 1;
   }
+  .font-wedding {
+    font-family: 'Great Vibes', cursive;
+    font-weight: 400;
+  }
   .font-sans {
     font-family: 'DM Sans', sans-serif;
     font-optical-sizing: auto;

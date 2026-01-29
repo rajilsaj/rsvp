@@ -478,7 +478,7 @@ export default function SaveTheDate() {
                 Save to Calendar
               </Button>
             </div>
-            <h1 className="font-display text-6xl font-bold leading-[1.1] tracking-tight sm:text-8xl text-white drop-shadow-lg">
+            <h1 className="font-wedding text-7xl leading-[1.2] tracking-normal sm:text-9xl text-white drop-shadow-lg">
               {wedding.couple.bride} <br />
               <span className="text-primary">&</span> {wedding.couple.groom}
             </h1>
@@ -856,7 +856,7 @@ export default function SaveTheDate() {
 
         <footer className="py-12 mt-12">
           <div className="mx-auto max-w-4xl px-4 text-center">
-            <p className="font-display text-2xl">
+            <p className="font-wedding text-4xl">
               {wedding.couple.bride} & {wedding.couple.groom}
             </p>
             <p className="mt-2 text-muted-foreground">{wedding.dateLabel}</p>
