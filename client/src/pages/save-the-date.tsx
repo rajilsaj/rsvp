@@ -444,10 +444,10 @@ export default function SaveTheDate() {
           title="Background Video"
           frameBorder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300%] h-[300%] min-w-full min-h-full pointer-events-none opacity-50"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300%] h-[300%] min-w-full min-h-full pointer-events-none"
           style={{ objectFit: 'cover' }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/20 to-background/70" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background/50" />
       </motion.div>
 
       <div className="relative z-10">
