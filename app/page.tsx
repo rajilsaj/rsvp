@@ -63,7 +63,7 @@ const incomingEvents: (EventItem & { icon: string; color: string })[] = [
     id: "parents",
     title: "Meeting with Parents",
     date: "May 15, 2026",
-    description: "\"Honor your father and mother.\" — Ephesians 6:2",
+    description: "Traditional introduction and family gathering.",
     icon: "👨‍👩‍👧‍👦",
     color: "from-cyan-400 to-blue-500",
   },
@@ -71,7 +71,7 @@ const incomingEvents: (EventItem & { icon: string; color: string })[] = [
     id: "dinner",
     title: "Pre-Wedding Dinner",
     date: "June 18, 2026",
-    description: "\"They broke bread together with glad and sincere hearts.\" — Acts 2:46",
+    description: "An intimate dinner with our closest friends and family.",
     icon: "🍽️",
     color: "from-blue-500 to-indigo-500",
   },
@@ -79,7 +79,7 @@ const incomingEvents: (EventItem & { icon: string; color: string })[] = [
     id: "rehearsal",
     title: "Wedding Rehearsal",
     date: "June 19, 2026",
-    description: "\"Commit your works to the Lord, and your plans will be established.\" — Proverbs 16:3",
+    description: "Final run-through at the venue.",
     icon: "💒",
     color: "from-indigo-500 to-purple-500",
   },
@@ -87,7 +87,7 @@ const incomingEvents: (EventItem & { icon: string; color: string })[] = [
     id: "wedding",
     title: "Wedding Day",
     date: "June 20, 2026",
-    description: "\"What God has joined together, let no one separate.\" — Mark 10:9",
+    description: "The big day! Join us to celebrate.",
     icon: "💍",
     color: "from-pink-500 to-rose-500",
   },
@@ -480,10 +480,13 @@ export default function SaveTheDate() {
           >
             <div className="mb-6 flex flex-col items-center gap-4">
               <div className="inline-flex items-center gap-3 rounded-full border bg-card/70 px-6 py-3 text-lg font-medium tracking-widest text-muted-foreground backdrop-blur-md">
-                <span className="text-2xl">✿</span>
+                <span className="text-2xl" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>✿</span>
                 <span className="font-display text-xl sm:text-2xl">SAVE THE DATE</span>
-                <span className="text-2xl">✿</span>
+                <span className="text-2xl" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>✿</span>
               </div>
+              <p className="text-white/90 text-sm sm:text-base italic drop-shadow-md mt-2">
+                "What God has joined together, let no one separate." — Mark 10:9
+              </p>
               <Button
                 onClick={handleSaveToCalendar}
                 className="rounded-full px-8 py-6 text-lg font-bold shadow-xl hover:scale-105 transition-transform"
@@ -594,7 +597,7 @@ export default function SaveTheDate() {
                 >
                   <div className="flex flex-col items-center">
                     <div className={`w-16 h-20 bg-gradient-to-b ${event.color} rounded-full rounded-b-full relative flex items-center justify-center shadow-lg`}>
-                      <span className="text-2xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.4)' }}>{event.icon}</span>
+                      <span className="text-2xl">{event.icon}</span>
                       <div className={`absolute -bottom-2 w-3 h-3 bg-gradient-to-b ${event.color} rotate-45`} />
                     </div>
                     
