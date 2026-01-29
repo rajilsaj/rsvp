@@ -886,6 +886,10 @@ export default function SaveTheDate() {
                 Copy Invite Link
               </Button>
             </div>
+            
+            <p className="mt-8 text-xs text-muted-foreground">
+              Made with love for their day by Rajil Vembe
+            </p>
           </div>
         </footer>
       </div>
