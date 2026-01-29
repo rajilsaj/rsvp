@@ -530,18 +530,11 @@ export default function SaveTheDate() {
           </motion.div>
         </section>
 
-        <section className="bg-card/50 backdrop-blur-sm">
-          <div className="mx-auto max-w-4xl px-4 py-24 sm:px-6">
+        <section className="mx-auto max-w-4xl px-4 py-24 sm:px-6">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 text-primary mb-4">
-              <Heart className="h-6 w-6" />
-            </div>
             <h2 className="font-display text-4xl tracking-tight sm:text-5xl">
               Our Story
             </h2>
-            <p className="mt-4 text-muted-foreground max-w-lg mx-auto">
-              A journey of friendship, love, and faith
-            </p>
           </div>
 
           <div className="space-y-16">
@@ -572,20 +565,13 @@ export default function SaveTheDate() {
               </motion.div>
             ))}
           </div>
-          </div>
         </section>
 
         <section className="mx-auto max-w-6xl px-4 py-24 sm:px-6 overflow-hidden">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 text-primary mb-4">
-              <Sparkles className="h-6 w-6" />
-            </div>
+          <div className="text-center mb-12">
             <h2 className="font-display text-4xl tracking-tight sm:text-5xl">
               Upcoming Celebrations
             </h2>
-            <p className="mt-4 text-muted-foreground max-w-lg mx-auto">
-              Important dates leading up to the big day
-            </p>
           </div>
 
           <div className="relative">
@@ -623,18 +609,14 @@ export default function SaveTheDate() {
           </div>
         </section>
 
-        <section className="bg-card/50 backdrop-blur-sm">
-          <div className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
+        <section className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
           <div className="grid gap-12 lg:grid-cols-2">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
             >
-              <div className="inline-flex items-center gap-2 text-primary mb-4">
-                <MapPin className="h-6 w-6" />
-              </div>
-              <h2 className="font-display text-4xl tracking-tight sm:text-5xl mb-4">
+              <h2 className="font-display text-4xl tracking-tight sm:text-5xl mb-6">
                 The Venue
               </h2>
               <p className="text-muted-foreground mb-8 text-lg">
@@ -783,14 +765,10 @@ export default function SaveTheDate() {
               </Card>
             </motion.div>
           </div>
-          </div>
         </section>
 
         <section className="mx-auto max-w-4xl px-4 py-24 sm:px-6">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 text-primary mb-4">
-              <Gift className="h-6 w-6" />
-            </div>
+          <div className="text-center mb-12">
             <h2 className="font-display text-4xl tracking-tight sm:text-5xl">
               Gift Registry
             </h2>
@@ -864,12 +842,8 @@ export default function SaveTheDate() {
           </div>
         </section>
 
-        <section className="bg-card/50 backdrop-blur-sm">
-          <div className="mx-auto max-w-4xl px-4 py-24 sm:px-6">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 text-primary mb-4">
-              <QrCode className="h-6 w-6" />
-            </div>
+        <section className="mx-auto max-w-4xl px-4 py-24 sm:px-6">
+          <div className="text-center mb-12">
             <h2 className="font-display text-4xl tracking-tight sm:text-5xl">
               Find Your Seat
             </h2>
@@ -891,22 +865,14 @@ export default function SaveTheDate() {
               Point your camera at this code to open the seat finder
             </p>
           </Card>
-          </div>
         </section>
 
-        <footer className="bg-card/50 backdrop-blur-sm border-t">
-          <div className="mx-auto max-w-4xl px-4 py-16 text-center">
-            <div className="inline-flex items-center gap-3 mb-4">
-              <span className="text-2xl text-primary">✿</span>
-              <p className="font-wedding text-4xl sm:text-5xl">
-                {wedding.couple.bride} & {wedding.couple.groom}
-              </p>
-              <span className="text-2xl text-primary">✿</span>
-            </div>
-            <p className="text-muted-foreground text-lg">{wedding.dateLabel}</p>
-            <p className="mt-2 text-sm text-muted-foreground italic">
-              "Two are better than one..." — Ecclesiastes 4:9
+        <footer className="py-12 border-t">
+          <div className="mx-auto max-w-4xl px-4 text-center">
+            <p className="font-wedding text-4xl">
+              {wedding.couple.bride} & {wedding.couple.groom}
             </p>
+            <p className="mt-2 text-muted-foreground">{wedding.dateLabel}</p>
 
             <div className="mt-8 flex justify-center gap-4">
               <Button
@@ -920,10 +886,6 @@ export default function SaveTheDate() {
                 Copy Invite Link
               </Button>
             </div>
-            
-            <p className="mt-8 text-xs text-muted-foreground">
-              Made with love for our special day
-            </p>
           </div>
         </footer>
       </div>
