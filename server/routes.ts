@@ -1,9 +1,12 @@
-import { Express } from "express";
-import { createServer, type Server } from "http";
+import type { Express } from "express";
+import type { Server } from "http";
 import { storage } from "./storage";
 import { insertRsvpSchema, insertWishlistClaimSchema } from "@shared/schema";
 
-export async function registerRoutes(app: Express): Promise<Server> {
+export async function registerRoutes(
+  httpServer: Server,
+  app: Express
+): Promise<Server> {
   app.get("/api/rsvps", async (_req, res) => {
     const rsvps = await storage.getRsvps();
     res.json(rsvps);
@@ -37,6 +40,5 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(204).end();
   });
 
-  const httpServer = createServer(app);
   return httpServer;
 }

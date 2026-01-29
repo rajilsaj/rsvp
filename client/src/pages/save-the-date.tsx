@@ -1,34 +1,47 @@
-import { useMemo, useState, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import {
   CalendarDays,
-  CheckCircle2,
   Copy,
   Heart,
   MapPin,
-  PartyPopper,
   Sparkles,
-  Users,
   Gift,
   Armchair,
 } from "lucide-react";
-import weddingBg from "@/assets/images/wedding-bg.png";
 import venueVideo from "@/assets/videos/venue-bg.mp4";
-
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/hooks/use-toast";
-
 import story1 from "@/assets/images/story-1.jpg";
 import story2 from "@/assets/images/story-2.jpg";
 import story3 from "@/assets/images/story-3.jpg";
 import story4 from "@/assets/images/story-4.jpg";
 
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { queryClient } from "@/lib/queryClient";
+
 type RSVPStatus = "yes" | "no" | "maybe";
+
+type Rsvp = {
+  id: number;
+  name: string;
+  phone: string;
+  guests: number;
+  status: string;
+  notes: string | null;
+  seatId: string | null;
+  createdAt: string | null;
+};
+
+type WishlistClaim = {
+  id: number;
+  itemId: string;
+  claimerName: string;
+  createdAt: string | null;
+};
 
 type EventItem = {
   id: string;
@@ -58,20 +71,10 @@ const incomingEvents: EventItem[] = [
   },
 ];
 
-type RSVP = {
-  id: string;
-  name: string;
-  phoneOrEmail: string;
-  guests: number;
-  status: RSVPStatus;
-  notes?: string;
-};
-
 type Seat = {
   id: string;
   table: string;
   seat: string;
-  reservedFor?: string;
 };
 
 type WishlistItem = {
@@ -79,7 +82,6 @@ type WishlistItem = {
   title: string;
   note?: string;
   priority: "Must have" | "Nice to have";
-  claimedBy?: string;
 };
 
 type TimelineItem = {
@@ -87,6 +89,7 @@ type TimelineItem = {
   dateLabel: string;
   title: string;
   description: string;
+  image: string;
 };
 
 const wedding = {
@@ -104,6 +107,79 @@ const wedding = {
   },
 };
 
+const seats: Seat[] = [
+  { id: "t1s1", table: "Table 1", seat: "1" },
+  { id: "t1s2", table: "Table 1", seat: "2" },
+  { id: "t1s3", table: "Table 1", seat: "3" },
+  { id: "t1s4", table: "Table 1", seat: "4" },
+  { id: "t2s1", table: "Table 2", seat: "1" },
+  { id: "t2s2", table: "Table 2", seat: "2" },
+  { id: "t2s3", table: "Table 2", seat: "3" },
+  { id: "t2s4", table: "Table 2", seat: "4" },
+  { id: "t3s1", table: "Table 3", seat: "1" },
+  { id: "t3s2", table: "Table 3", seat: "2" },
+  { id: "t3s3", table: "Table 3", seat: "3" },
+  { id: "t3s4", table: "Table 3", seat: "4" },
+];
+
+const wishlistItems: WishlistItem[] = [
+  {
+    id: "honeymoon",
+    title: "Honeymoon fund contribution",
+    note: "Any amount helps — thank you!",
+    priority: "Must have",
+  },
+  {
+    id: "cookware",
+    title: "Non-stick cookware set",
+    note: "Neutral colors preferred",
+    priority: "Nice to have",
+  },
+  {
+    id: "dinnerware",
+    title: "Dinnerware set (12 pieces)",
+    note: "Simple + timeless",
+    priority: "Nice to have",
+  },
+  {
+    id: "bedding",
+    title: "Linen bedding set",
+    note: "Queen size",
+    priority: "Nice to have",
+  },
+];
+
+const timelineItems: TimelineItem[] = [
+  {
+    id: "meet",
+    dateLabel: "2019",
+    title: "They met",
+    description: "A simple hello that turned into something bigger.",
+    image: story1,
+  },
+  {
+    id: "first-trip",
+    dateLabel: "2021",
+    title: "First trip together",
+    description: "The moment they realized they were a real team.",
+    image: story2,
+  },
+  {
+    id: "proposal",
+    dateLabel: "2025",
+    title: "The proposal",
+    description: "A happy yes — and the rest is history.",
+    image: story3,
+  },
+  {
+    id: "wedding",
+    dateLabel: "2026",
+    title: "Wedding day",
+    description: "Celebrate love, family, and new beginnings.",
+    image: story4,
+  },
+];
+
 function slugify(input: string) {
   return input
     .toLowerCase()
@@ -119,32 +195,53 @@ function formatSeat(seat: Seat) {
 export default function SaveTheDate() {
   const { toast } = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
-  
+
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["start start", "end end"]
+    offset: ["start start", "end end"],
   });
 
   const smoothProgress = useSpring(scrollYProgress, {
     stiffness: 100,
     damping: 30,
-    restDelta: 0.001
+    restDelta: 0.001,
   });
 
   const bgY = useTransform(smoothProgress, [0, 1], ["0%", "20%"]);
   const heroOpacity = useTransform(smoothProgress, [0, 0.2], [1, 0]);
   const heroScale = useTransform(smoothProgress, [0, 0.2], [1, 0.9]);
 
+  const [inviteeName, setInviteeName] = useState("");
+  const [inviteePhone, setInviteePhone] = useState("");
+  const [inviteeStatus, setInviteeStatus] = useState<RSVPStatus>("yes");
+
   const { data: rsvps = [] } = useQuery<Rsvp[]>({
     queryKey: ["/api/rsvps"],
+    queryFn: async () => {
+      const res = await fetch("/api/rsvps");
+      if (!res.ok) throw new Error("Failed to fetch RSVPs");
+      return res.json();
+    },
   });
 
   const { data: claims = [] } = useQuery<WishlistClaim[]>({
     queryKey: ["/api/wishlist-claims"],
+    queryFn: async () => {
+      const res = await fetch("/api/wishlist-claims");
+      if (!res.ok) throw new Error("Failed to fetch claims");
+      return res.json();
+    },
   });
 
   const rsvpMutation = useMutation({
-    mutationFn: async (newRsvp: InsertRsvp) => {
+    mutationFn: async (newRsvp: {
+      name: string;
+      phone: string;
+      guests: number;
+      status: string;
+      notes?: string;
+      seatId?: string;
+    }) => {
       const res = await fetch("/api/rsvps", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -157,14 +254,15 @@ export default function SaveTheDate() {
       queryClient.invalidateQueries({ queryKey: ["/api/rsvps"] });
       toast({
         title: "RSVP received",
-        description: "Thank you — we can’t wait to celebrate with you.",
+        description: "Thank you — we can't wait to celebrate with you.",
       });
-      setInviteeNotes("");
+      setInviteeName("");
+      setInviteePhone("");
     },
   });
 
   const claimMutation = useMutation({
-    mutationFn: async (claim: InsertWishlistClaim) => {
+    mutationFn: async (claim: { itemId: string; claimerName: string }) => {
       const res = await fetch("/api/wishlist-claims", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -194,27 +292,6 @@ export default function SaveTheDate() {
     },
   });
 
-  const [inviteeName, setInviteeName] = useState<string>("");
-
-  const seats = useMemo<Seat[]>(
-    () =>
-      [
-        { id: "t1s1", table: "Table 1", seat: "1", reservedFor: "" },
-        { id: "t1s2", table: "Table 1", seat: "2", reservedFor: "" },
-        { id: "t1s3", table: "Table 1", seat: "3", reservedFor: "" },
-        { id: "t1s4", table: "Table 1", seat: "4", reservedFor: "" },
-        { id: "t2s1", table: "Table 2", seat: "1", reservedFor: "" },
-        { id: "t2s2", table: "Table 2", seat: "2", reservedFor: "" },
-        { id: "t2s3", table: "Table 2", seat: "3", reservedFor: "" },
-        { id: "t2s4", table: "Table 2", seat: "4", reservedFor: "" },
-        { id: "t3s1", table: "Table 3", seat: "1", reservedFor: "" },
-        { id: "t3s2", table: "Table 3", seat: "2", reservedFor: "" },
-        { id: "t3s3", table: "Table 3", seat: "3", reservedFor: "" },
-        { id: "t3s4", table: "Table 3", seat: "4", reservedFor: "" },
-      ].map((s) => ({ ...s })),
-    [],
-  );
-
   const seatAssignments = useMemo(() => {
     const assignments: Record<string, string> = {};
     rsvps.forEach((r) => {
@@ -225,7 +302,7 @@ export default function SaveTheDate() {
     return assignments;
   }, [rsvps]);
 
-  const claimed = useMemo(() => {
+  const claimedItems = useMemo(() => {
     const c: Record<string, string> = {};
     claims.forEach((cl) => {
       c[cl.itemId] = cl.claimerName;
@@ -233,53 +310,18 @@ export default function SaveTheDate() {
     return c;
   }, [claims]);
 
-  const timeline = useMemo<TimelineItem[]>(
-    () =>
-      [
-        {
-          id: "meet",
-          dateLabel: "2019",
-          title: "They met",
-          description: "A simple hello that turned into something bigger.",
-          image: story1,
-        },
-        {
-          id: "first-trip",
-          dateLabel: "2021",
-          title: "First trip together",
-          description: "The moment they realized they were a real team.",
-          image: story2,
-        },
-        {
-          id: "proposal",
-          dateLabel: "2025",
-          title: "The proposal",
-          description: "A happy yes — and the rest is history.",
-          image: story3,
-        },
-        {
-          id: "wedding",
-          dateLabel: "2026",
-          title: "Wedding day",
-          description: "Celebrate love, family, and new beginnings.",
-          image: story4,
-        },
-      ],
-    [],
-  );
-
   const assignedSeatForName = useMemo(() => {
     const key = slugify(inviteeName);
     if (!key) return undefined;
     const seatId = seatAssignments[key];
     if (!seatId) return undefined;
     return seats.find((s) => s.id === seatId);
-  }, [inviteeName, seatAssignments, seats]);
+  }, [inviteeName, seatAssignments]);
 
   const availableSeatIds = useMemo(() => {
     const taken = new Set(Object.values(seatAssignments));
     return seats.filter((s) => !taken.has(s.id)).map((s) => s.id);
-  }, [seatAssignments, seats]);
+  }, [seatAssignments]);
 
   function handleCopyLink() {
     const url = window.location.href;
@@ -292,12 +334,30 @@ export default function SaveTheDate() {
       },
       () => {
         toast({
-          title: "Couldn’t copy",
+          title: "Couldn't copy",
           description: "Please copy the URL from the address bar.",
           variant: "destructive",
         });
-      },
+      }
     );
+  }
+
+  function handleSaveToCalendar() {
+    const title = `Wedding: ${wedding.couple.bride} & ${wedding.couple.groom}`;
+    const details = `Join us for the wedding celebration of ${wedding.couple.bride} and ${wedding.couple.groom} at ${wedding.venue.name}.`;
+    const location = wedding.venue.address;
+
+    const startTime = "20260620T160000";
+    const endTime = "20260620T230000";
+
+    const googleCalendarUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${startTime}/${endTime}&details=${encodeURIComponent(details)}&location=${encodeURIComponent(location)}`;
+
+    window.open(googleCalendarUrl, "_blank");
+
+    toast({
+      title: "Opening Calendar",
+      description: "Redirecting to Google Calendar to save the date.",
+    });
   }
 
   function submitRSVP() {
@@ -312,19 +372,17 @@ export default function SaveTheDate() {
     }
 
     const key = slugify(name);
-    let assignedSeatId: string | undefined = seatAssignments[key];
-    
-    if (!assignedSeatId && availableSeatIds.length > 0) {
-      assignedSeatId = availableSeatIds[0];
+    let seatId: string | undefined;
+    if (key && !seatAssignments[key] && availableSeatIds.length > 0) {
+      seatId = availableSeatIds[0];
     }
 
     rsvpMutation.mutate({
       name,
-      phone: inviteeContact.trim(),
-      guests: Math.max(1, Math.min(10, inviteeCount || 1)),
+      phone: inviteePhone.trim(),
+      guests: 1,
       status: inviteeStatus,
-      notes: inviteeNotes.trim() ? inviteeNotes.trim() : undefined,
-      seatId: assignedSeatId,
+      seatId,
     });
   }
 
@@ -338,45 +396,19 @@ export default function SaveTheDate() {
       });
       return;
     }
-    
-    claimMutation.mutate({
-      itemId,
-      claimerName: name,
-    });
-  }
-
-  function handleSaveToCalendar() {
-    const title = `Wedding: ${wedding.couple.bride} & ${wedding.couple.groom}`;
-    const details = `Join us for the wedding celebration of ${wedding.couple.bride} and ${wedding.couple.groom} at ${wedding.venue.name}.`;
-    const location = wedding.venue.address;
-    
-    // Wedding Date: June 20, 2026 at 4:00 PM
-    const startTime = "20260620T160000";
-    const endTime = "20260620T230000";
-
-    const googleCalendarUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${startTime}/${endTime}&details=${encodeURIComponent(details)}&location=${encodeURIComponent(location)}`;
-    
-    window.open(googleCalendarUrl, "_blank");
-    
-    toast({
-      title: "Opening Calendar",
-      description: "Redirecting to Google Calendar to save the date.",
-    });
+    claimMutation.mutate({ itemId, claimerName: name });
   }
 
   function unclaimItem(itemId: string) {
-    setClaimed((prev) => {
-      if (!prev[itemId]) return prev;
-      const next = { ...prev };
-      delete next[itemId];
-      return next;
-    });
+    unclaimMutation.mutate(itemId);
   }
 
   return (
-    <div ref={containerRef} className="relative min-h-screen overflow-x-hidden bg-background">
-      {/* Parallax Background */}
-      <motion.div 
+    <div
+      ref={containerRef}
+      className="relative min-h-screen overflow-x-hidden bg-background"
+    >
+      <motion.div
         style={{ y: bgY }}
         className="fixed inset-0 z-0 h-[120vh] w-full"
       >
@@ -391,11 +423,9 @@ export default function SaveTheDate() {
         <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-transparent to-background" />
       </motion.div>
 
-      {/* Content */}
       <div className="relative z-10">
-        {/* Hero Section */}
         <section className="flex min-h-screen flex-col items-center justify-center px-4 text-center">
-          <motion.div 
+          <motion.div
             style={{ opacity: heroOpacity, scale: heroScale }}
             className="mx-auto max-w-4xl"
           >
@@ -404,7 +434,7 @@ export default function SaveTheDate() {
                 <Sparkles className="h-4 w-4" />
                 <span>SAVE THE DATE</span>
               </div>
-              <Button 
+              <Button
                 onClick={handleSaveToCalendar}
                 className="rounded-full px-8 py-6 text-lg font-bold shadow-xl hover:scale-105 transition-transform"
               >
@@ -413,80 +443,109 @@ export default function SaveTheDate() {
               </Button>
             </div>
             <h1 className="font-display text-6xl font-bold leading-[1.1] tracking-tight sm:text-8xl">
-              {wedding.couple.bride} <br /> 
+              {wedding.couple.bride} <br />
               <span className="text-primary">&</span> {wedding.couple.groom}
             </h1>
             <p className="mx-auto mt-8 max-w-xl text-lg text-muted-foreground sm:text-xl">
-              A celebration of a beautiful journey. Join us as we start our forever.
+              A celebration of a beautiful journey. Join us as we start our
+              forever.
             </p>
-            
+
             <div className="mt-12 flex flex-wrap justify-center gap-4">
-              <Badge variant="secondary" className="px-4 py-2 text-sm rounded-full">
+              <Badge
+                variant="secondary"
+                className="px-4 py-2 text-sm rounded-full"
+              >
                 <CalendarDays className="mr-2 h-4 w-4" />
                 {wedding.dateLabel}
               </Badge>
-              <Badge variant="secondary" className="px-4 py-2 text-sm rounded-full">
+              <Badge
+                variant="secondary"
+                className="px-4 py-2 text-sm rounded-full"
+              >
                 <MapPin className="mr-2 h-4 w-4" />
                 {wedding.cityLabel}
               </Badge>
             </div>
 
-            <motion.div 
+            <motion.div
               animate={{ y: [0, 10, 0] }}
               transition={{ repeat: Infinity, duration: 2 }}
               className="mt-20 text-muted-foreground"
             >
-              <p className="text-sm uppercase tracking-widest">Scroll to explore</p>
+              <p className="text-sm uppercase tracking-widest">
+                Scroll to explore
+              </p>
               <div className="mx-auto mt-2 h-12 w-[1px] bg-gradient-to-b from-muted-foreground to-transparent" />
             </motion.div>
           </motion.div>
         </section>
 
-        {/* Story Section */}
         <section className="mx-auto max-w-4xl px-4 py-24 sm:px-6">
           <div className="text-center mb-16">
-            <h2 className="font-display text-4xl tracking-tight sm:text-5xl">Our Story</h2>
+            <h2 className="font-display text-4xl tracking-tight sm:text-5xl">
+              Our Story
+            </h2>
             <div className="mx-auto mt-4 h-1 w-12 bg-primary rounded-full" />
           </div>
-          
+
           <div className="space-y-12">
-            {timeline.map((item, index) => (
+            {timelineItems.map((item, index) => (
               <motion.div
                 key={item.id}
                 initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
-                className={`flex gap-8 items-center ${index % 2 === 1 ? 'flex-row-reverse text-right' : ''}`}
+                className={`flex gap-8 items-center ${index % 2 === 1 ? "flex-row-reverse text-right" : ""}`}
               >
                 <div className="hidden sm:block h-32 w-32 shrink-0 overflow-hidden rounded-3xl surface">
-                  <img src={(item as any).image} alt={item.title} className="h-full w-full object-cover" />
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="h-full w-full object-cover"
+                  />
                 </div>
                 <div>
-                  <span className="text-sm font-bold tracking-widest text-primary uppercase">{item.dateLabel}</span>
+                  <span className="text-sm font-bold tracking-widest text-primary uppercase">
+                    {item.dateLabel}
+                  </span>
                   <h3 className="mt-1 text-2xl font-bold">{item.title}</h3>
-                  <p className="mt-2 text-muted-foreground leading-relaxed">{item.description}</p>
+                  <p className="mt-2 text-muted-foreground leading-relaxed">
+                    {item.description}
+                  </p>
                 </div>
               </motion.div>
             ))}
           </div>
         </section>
 
-        {/* Timeline of Incoming Activities */}
         <section className="mx-auto max-w-4xl px-4 py-24 sm:px-6">
           <div className="text-center mb-16">
-            <h2 className="font-display text-4xl tracking-tight sm:text-5xl">Upcoming Celebrations</h2>
-            <p className="mt-4 text-muted-foreground italic">Important dates leading up to the big day</p>
+            <h2 className="font-display text-4xl tracking-tight sm:text-5xl">
+              Upcoming Celebrations
+            </h2>
+            <p className="mt-4 text-muted-foreground italic">
+              Important dates leading up to the big day
+            </p>
           </div>
-          
+
           <div className="grid gap-6">
             {incomingEvents.map((event) => (
-              <Card key={event.id} className="surface rounded-2xl p-6 border-l-4 border-l-primary">
+              <Card
+                key={event.id}
+                className="surface rounded-2xl p-6 border-l-4 border-l-primary"
+              >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
                     <h3 className="text-xl font-bold">{event.title}</h3>
-                    <p className="mt-1 text-muted-foreground">{event.description}</p>
+                    <p className="mt-1 text-muted-foreground">
+                      {event.description}
+                    </p>
                   </div>
-                  <Badge variant="secondary" className="w-fit px-4 py-1.5 rounded-full text-sm">
+                  <Badge
+                    variant="secondary"
+                    className="w-fit px-4 py-1.5 rounded-full text-sm"
+                  >
                     {event.date}
                   </Badge>
                 </div>
@@ -495,7 +554,6 @@ export default function SaveTheDate() {
           </div>
         </section>
 
-        {/* Venue Section */}
         <section className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
           <div className="grid gap-12 lg:grid-cols-2">
             <motion.div
@@ -503,11 +561,14 @@ export default function SaveTheDate() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
             >
-              <h2 className="font-display text-4xl tracking-tight sm:text-5xl mb-6">The Venue</h2>
+              <h2 className="font-display text-4xl tracking-tight sm:text-5xl mb-6">
+                The Venue
+              </h2>
               <p className="text-muted-foreground mb-8 text-lg">
-                We've chosen a place that feels like home. Join us at the {wedding.venue.name} for an unforgettable evening.
+                We've chosen a place that feels like home. Join us at the{" "}
+                {wedding.venue.name} for an unforgettable evening.
               </p>
-              
+
               <Card className="surface rounded-3xl overflow-hidden">
                 <div className="p-8">
                   <div className="flex items-start gap-4">
@@ -515,10 +576,22 @@ export default function SaveTheDate() {
                       <MapPin className="h-6 w-6" />
                     </div>
                     <div>
-                      <h4 className="text-xl font-bold">{wedding.venue.name}</h4>
-                      <p className="mt-2 text-muted-foreground">{wedding.venue.address}</p>
-                      <Button variant="outline" className="mt-6 rounded-full" asChild>
-                        <a href={wedding.venue.mapUrl} target="_blank" rel="noreferrer">
+                      <h4 className="text-xl font-bold">
+                        {wedding.venue.name}
+                      </h4>
+                      <p className="mt-2 text-muted-foreground">
+                        {wedding.venue.address}
+                      </p>
+                      <Button
+                        variant="outline"
+                        className="mt-6 rounded-full"
+                        asChild
+                      >
+                        <a
+                          href={wedding.venue.mapUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
                           Get Directions <span className="ml-2">→</span>
                         </a>
                       </Button>
@@ -538,39 +611,43 @@ export default function SaveTheDate() {
               <Card className="surface rounded-3xl p-8 w-full">
                 <div className="flex items-center justify-between mb-8">
                   <h2 className="font-display text-3xl tracking-tight">RSVP</h2>
-                  <Badge className="rounded-full">{rsvps.length} Attending</Badge>
+                  <Badge className="rounded-full">
+                    {rsvps.filter((r) => r.status === "yes").length} Attending
+                  </Badge>
                 </div>
-                
+
                 <div className="space-y-6">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Your Name</label>
-                      <Input 
+                      <Input
                         value={inviteeName}
                         onChange={(e) => setInviteeName(e.target.value)}
-                        placeholder="Full Name" 
+                        placeholder="Full Name"
                         className="rounded-xl"
                       />
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Phone Number</label>
-                      <Input 
-                        value={inviteeContact}
-                        onChange={(e) => setInviteeContact(e.target.value)}
-                        placeholder="Phone Number" 
+                      <Input
+                        value={inviteePhone}
+                        onChange={(e) => setInviteePhone(e.target.value)}
+                        placeholder="Phone Number"
                         className="rounded-xl"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Will you attend?</label>
+                    <label className="text-sm font-medium">
+                      Will you attend?
+                    </label>
                     <div className="grid grid-cols-3 gap-2">
-                      {['yes', 'maybe', 'no'].map((s) => (
+                      {(["yes", "maybe", "no"] as RSVPStatus[]).map((s) => (
                         <Button
                           key={s}
                           variant={inviteeStatus === s ? "default" : "secondary"}
-                          onClick={() => setInviteeStatus(s as RSVPStatus)}
+                          onClick={() => setInviteeStatus(s)}
                           className="rounded-xl capitalize"
                         >
                           {s}
@@ -579,8 +656,12 @@ export default function SaveTheDate() {
                     </div>
                   </div>
 
-                  <Button className="w-full rounded-xl py-6 text-lg" onClick={submitRSVP}>
-                    Celebrate with us
+                  <Button
+                    className="w-full rounded-xl py-6 text-lg"
+                    onClick={submitRSVP}
+                    disabled={rsvpMutation.isPending}
+                  >
+                    {rsvpMutation.isPending ? "Submitting..." : "Celebrate with us"}
                   </Button>
                 </div>
               </Card>
@@ -588,11 +669,12 @@ export default function SaveTheDate() {
           </div>
         </section>
 
-        {/* Seating & Wishlist Section */}
         <section className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
           <div className="grid gap-12 lg:grid-cols-2">
             <div>
-              <h2 className="font-display text-3xl tracking-tight mb-6">Seating Allocation</h2>
+              <h2 className="font-display text-3xl tracking-tight mb-6">
+                Seating Allocation
+              </h2>
               <Card className="surface rounded-3xl p-6">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="h-12 w-12 rounded-2xl bg-accent/10 flex items-center justify-center text-accent">
@@ -601,32 +683,41 @@ export default function SaveTheDate() {
                   <div>
                     <h4 className="font-bold">Your Table</h4>
                     <p className="text-sm text-muted-foreground">
-                      {assignedSeatForName ? formatSeat(assignedSeatForName) : "RSVP to see your assigned seat"}
+                      {assignedSeatForName
+                        ? formatSeat(assignedSeatForName)
+                        : "RSVP to see your assigned seat"}
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-4 gap-2">
                   {seats.map((seat) => {
-                    const takenBy = Object.entries(seatAssignments).find(([_, id]) => id === seat.id)?.[0];
-                    const isUserSeat = inviteeName && slugify(inviteeName) === Object.entries(seatAssignments).find(([k, v]) => v === seat.id)?.[0];
-                    
+                    const takenBy = Object.entries(seatAssignments).find(
+                      ([, id]) => id === seat.id
+                    )?.[0];
+                    const isUserSeat =
+                      inviteeName &&
+                      slugify(inviteeName) ===
+                        Object.entries(seatAssignments).find(
+                          ([, v]) => v === seat.id
+                        )?.[0];
+
                     return (
-                      <button
+                      <div
                         key={seat.id}
-                        onClick={() => {
-                          const key = slugify(inviteeName);
-                          if (!key) return toast({ title: "Name required", variant: "destructive" });
-                          setSeatAssignments(prev => ({ ...prev, [key]: seat.id }));
-                        }}
                         className={`aspect-square rounded-xl flex flex-col items-center justify-center transition-all ${
-                          isUserSeat ? 'bg-primary text-primary-foreground scale-105 shadow-lg' : 
-                          takenBy ? 'bg-muted/50 opacity-40 cursor-not-allowed' : 'surface hover:bg-accent/10'
+                          isUserSeat
+                            ? "bg-primary text-primary-foreground scale-105 shadow-lg"
+                            : takenBy
+                              ? "bg-muted/50 opacity-40"
+                              : "surface"
                         }`}
                       >
                         <Armchair className="h-4 w-4 mb-1" />
-                        <span className="text-[10px] font-bold">T{seat.table.split(' ')[1]}S{seat.seat}</span>
-                      </button>
+                        <span className="text-[10px] font-bold">
+                          T{seat.table.split(" ")[1]}S{seat.seat}
+                        </span>
+                      </div>
                     );
                   })}
                 </div>
@@ -634,24 +725,47 @@ export default function SaveTheDate() {
             </div>
 
             <div>
-              <h2 className="font-display text-3xl tracking-tight mb-6">Wishlist</h2>
+              <h2 className="font-display text-3xl tracking-tight mb-6">
+                Wishlist
+              </h2>
               <div className="grid gap-4">
-                {wishlist.map((item) => {
-                  const isClaimed = claimed[item.id];
+                {wishlistItems.map((item) => {
+                  const isClaimed = claimedItems[item.id];
                   return (
-                    <Card key={item.id} className="surface rounded-2xl p-5 group">
+                    <Card
+                      key={item.id}
+                      className="surface rounded-2xl p-5 group"
+                    >
                       <div className="flex items-center justify-between">
                         <div>
-                          <Badge variant="secondary" className="mb-2 text-[10px] rounded-full uppercase tracking-widest">{item.priority}</Badge>
+                          <Badge
+                            variant="secondary"
+                            className="mb-2 text-[10px] rounded-full uppercase tracking-widest"
+                          >
+                            {item.priority}
+                          </Badge>
                           <h4 className="font-bold">{item.title}</h4>
-                          <p className="text-sm text-muted-foreground mt-1">{item.note}</p>
-                          {isClaimed && <p className="text-[10px] text-primary font-bold mt-2 uppercase">Claimed by {isClaimed}</p>}
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {item.note}
+                          </p>
+                          {isClaimed && (
+                            <p className="text-[10px] text-primary font-bold mt-2 uppercase">
+                              Claimed by {isClaimed}
+                            </p>
+                          )}
                         </div>
-                        <Button 
+                        <Button
                           variant={isClaimed ? "ghost" : "outline"}
                           size="sm"
                           className="rounded-full"
-                          onClick={() => isClaimed ? unclaimItem(item.id) : claimItem(item.id)}
+                          onClick={() =>
+                            isClaimed
+                              ? unclaimItem(item.id)
+                              : claimItem(item.id)
+                          }
+                          disabled={
+                            claimMutation.isPending || unclaimMutation.isPending
+                          }
                         >
                           {isClaimed ? "Unclaim" : "Claim"}
                         </Button>
@@ -664,13 +778,16 @@ export default function SaveTheDate() {
           </div>
         </section>
 
-        {/* Footer */}
         <footer className="py-20 border-t border-border/50 text-center">
           <div className="flex items-center justify-center gap-2 text-primary mb-4">
             <Heart className="h-5 w-5 fill-current" />
           </div>
           <p className="font-display text-2xl mb-8">See you there!</p>
-          <Button variant="ghost" onClick={handleCopyLink} className="rounded-full text-muted-foreground">
+          <Button
+            variant="ghost"
+            onClick={handleCopyLink}
+            className="rounded-full text-muted-foreground"
+          >
             <Copy className="mr-2 h-4 w-4" />
             Share Invitation Link
           </Button>
@@ -679,4 +796,3 @@ export default function SaveTheDate() {
     </div>
   );
 }
-
