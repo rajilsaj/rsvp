@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { QRCodeSVG } from "qrcode.react";
 import {
   CalendarDays,
   Copy,
@@ -9,6 +10,7 @@ import {
   Sparkles,
   Gift,
   Armchair,
+  QrCode,
 } from "lucide-react";
 import venueVideo from "@/assets/videos/venue-bg.mp4";
 import story1 from "@/assets/images/story-1.jpg";
@@ -838,6 +840,41 @@ export default function SaveTheDate() {
                 })}
               </div>
             </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-4xl px-4 py-24 sm:px-6">
+          <div className="text-center">
+            <div className="inline-flex items-center gap-2 text-primary mb-4">
+              <QrCode className="h-6 w-6" />
+            </div>
+            <h2 className="font-display text-4xl tracking-tight sm:text-5xl mb-4">
+              Digital Seating Chart
+            </h2>
+            <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
+              We saved a seat for our favourite people. Scan the QR code with your phone to find your table assignment.
+            </p>
+            
+            <Card className="surface rounded-3xl p-8 max-w-sm mx-auto">
+              <div className="bg-white p-6 rounded-2xl mb-6">
+                <QRCodeSVG 
+                  value={`${window.location.origin}/find-seat`}
+                  size={200}
+                  level="H"
+                  className="mx-auto"
+                />
+              </div>
+              <p className="text-lg font-bold mb-2">SCAN. SEARCH. SIT.</p>
+              <p className="text-sm text-muted-foreground">
+                Find your table in seconds
+              </p>
+              <a href="/find-seat">
+                <Button variant="outline" className="mt-6 rounded-full">
+                  <Armchair className="mr-2 h-4 w-4" />
+                  Or click here to find your seat
+                </Button>
+              </a>
+            </Card>
           </div>
         </section>
 

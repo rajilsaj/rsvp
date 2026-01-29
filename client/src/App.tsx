@@ -5,11 +5,13 @@ import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import { queryClient } from "./lib/queryClient";
 import SaveTheDate from "@/pages/save-the-date";
+import FindSeat from "@/pages/find-seat";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={SaveTheDate} />
+      <Route path="/find-seat" component={FindSeat} />
       <Route component={NotFound} />
     </Switch>
   );
