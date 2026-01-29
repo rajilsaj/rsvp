@@ -436,15 +436,18 @@ export default function SaveTheDate() {
         style={{ y: bgY }}
         className="fixed inset-0 z-0 h-[120vh] w-full overflow-hidden"
       >
+        <div className="absolute inset-0 bg-background flex items-center justify-center">
+          <div className="animate-pulse text-muted-foreground">Loading...</div>
+        </div>
         <iframe
           src="https://www.youtube.com/embed/gSOCywBff2Q?autoplay=1&mute=1&loop=1&playlist=gSOCywBff2Q&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1"
           title="Background Video"
           frameBorder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300%] h-[300%] min-w-full min-h-full pointer-events-none opacity-60"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300%] h-[300%] min-w-full min-h-full pointer-events-none opacity-50"
           style={{ objectFit: 'cover' }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-transparent to-background" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/20 to-background/70" />
       </motion.div>
 
       <div className="relative z-10">
