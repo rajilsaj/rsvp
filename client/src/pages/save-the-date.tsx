@@ -436,18 +436,17 @@ export default function SaveTheDate() {
         style={{ y: bgY }}
         className="fixed inset-0 z-0 h-[120vh] w-full overflow-hidden"
       >
-        <div className="absolute inset-0 bg-background flex items-center justify-center">
-          <div className="animate-pulse text-muted-foreground">Loading...</div>
+        <div className="absolute inset-0 bg-black flex items-center justify-center">
+          <div className="animate-pulse text-white/50">Loading...</div>
         </div>
         <iframe
-          src="https://www.youtube.com/embed/gSOCywBff2Q?autoplay=1&mute=1&loop=1&playlist=gSOCywBff2Q&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1"
+          src="https://www.youtube.com/embed/gSOCywBff2Q?autoplay=1&mute=1&loop=1&playlist=gSOCywBff2Q&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&vq=hd1080"
           title="Background Video"
           frameBorder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300%] h-[300%] min-w-full min-h-full pointer-events-none"
-          style={{ objectFit: 'cover' }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400%] h-[400%] min-w-full min-h-full pointer-events-none"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background/50" />
+        <div className="absolute inset-0 bg-black/30" />
       </motion.div>
 
       <div className="relative z-10">
@@ -469,11 +468,11 @@ export default function SaveTheDate() {
                 Save to Calendar
               </Button>
             </div>
-            <h1 className="font-display text-6xl font-bold leading-[1.1] tracking-tight sm:text-8xl">
+            <h1 className="font-display text-6xl font-bold leading-[1.1] tracking-tight sm:text-8xl text-white drop-shadow-lg">
               {wedding.couple.bride} <br />
               <span className="text-primary">&</span> {wedding.couple.groom}
             </h1>
-            <p className="mx-auto mt-8 max-w-xl text-lg text-muted-foreground sm:text-xl">
+            <p className="mx-auto mt-8 max-w-xl text-lg text-white/90 sm:text-xl drop-shadow-md">
               A celebration of a beautiful journey. Join us as we start our
               forever.
             </p>
@@ -525,11 +524,11 @@ export default function SaveTheDate() {
                 viewport={{ once: true, margin: "-100px" }}
                 className={`flex flex-col ${index % 2 === 1 ? "sm:flex-row-reverse" : "sm:flex-row"} gap-8 items-center`}
               >
-                <div className="w-full sm:w-1/2 overflow-hidden rounded-3xl surface group cursor-pointer">
+                <div className="w-full sm:w-1/2 overflow-hidden rounded-3xl group cursor-pointer">
                   <img
                     src={item.image}
                     alt={item.title}
-                    className="w-full h-64 sm:h-80 object-cover transition-transform duration-500 group-hover:scale-110"
+                    className="w-full h-64 sm:h-80 object-cover transition-transform duration-500 group-hover:scale-110 rounded-3xl"
                   />
                 </div>
                 <div className={`w-full sm:w-1/2 ${index % 2 === 1 ? "sm:text-right" : ""}`}>
