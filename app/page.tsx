@@ -97,11 +97,13 @@ const wedding = {
   },
   dateLabel: "Saturday • 20 June 2026",
   timeLabel: "4:00 PM",
-  cityLabel: "City, Country",
+  cityLabel: "Youngsville, NC",
   venue: {
-    name: "Venue Name",
-    address: "Street address, City",
-    mapUrl: "https://maps.google.com/?q=wedding%20venue",
+    name: "Pine Hill Pavilion",
+    address: "375 Moores Pond Rd, Youngsville, NC 27596",
+    phone: "(919) 746-3331",
+    email: "Pinehillpavilion@gmail.com",
+    mapUrl: "https://maps.google.com/?q=375+Moores+Pond+Rd+Youngsville+NC+27596",
   },
 };
 
@@ -604,6 +606,12 @@ export default function SaveTheDate() {
                       </h4>
                       <p className="mt-2 text-muted-foreground">
                         {wedding.venue.address}
+                      </p>
+                      <p className="mt-2 text-muted-foreground">
+                        Call/Text: <a href={`tel:${wedding.venue.phone}`} className="hover:text-primary">{wedding.venue.phone}</a>
+                      </p>
+                      <p className="mt-1 text-muted-foreground">
+                        Email: <a href={`mailto:${wedding.venue.email}`} className="hover:text-primary">{wedding.venue.email}</a>
                       </p>
                       <Button
                         variant="outline"
