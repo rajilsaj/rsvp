@@ -594,6 +594,19 @@ export default function SaveTheDate() {
                 {wedding.venue.name} for an unforgettable evening.
               </p>
 
+              <div className="rounded-3xl overflow-hidden mb-6">
+                <iframe
+                  width="100%"
+                  height="250"
+                  src="https://www.youtube.com/embed/gSOCywBff2Q"
+                  title="Venue Video"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="rounded-3xl"
+                />
+              </div>
+
               <Card className="surface rounded-3xl overflow-hidden">
                 <div className="p-8">
                   <div className="flex items-start gap-4">
