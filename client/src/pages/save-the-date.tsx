@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import {
@@ -214,6 +214,23 @@ export default function SaveTheDate() {
   const [inviteeName, setInviteeName] = useState("");
   const [inviteePhone, setInviteePhone] = useState("");
   const [inviteeStatus, setInviteeStatus] = useState<RSVPStatus>("yes");
+  const [myRsvp, setMyRsvp] = useState<Rsvp | null>(null);
+
+  useEffect(() => {
+    const savedPhone = localStorage.getItem("wedding_rsvp_phone");
+    if (savedPhone) {
+      setInviteePhone(savedPhone);
+      fetch(`/api/rsvps/lookup?phone=${encodeURIComponent(savedPhone)}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((rsvp) => {
+          if (rsvp) {
+            setMyRsvp(rsvp);
+            setInviteeName(rsvp.name);
+          }
+        })
+        .catch(() => {});
+    }
+  }, []);
 
   const { data: rsvps = [] } = useQuery<Rsvp[]>({
     queryKey: ["/api/rsvps"],
@@ -250,14 +267,16 @@ export default function SaveTheDate() {
       if (!res.ok) throw new Error("Failed to submit RSVP");
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: (data: Rsvp) => {
       queryClient.invalidateQueries({ queryKey: ["/api/rsvps"] });
+      localStorage.setItem("wedding_rsvp_phone", data.phone);
+      setMyRsvp(data);
       toast({
         title: "RSVP received",
-        description: "Thank you — we can't wait to celebrate with you.",
+        description: data.seatId
+          ? `You've been assigned to ${seats.find(s => s.id === data.seatId)?.table || "a table"}!`
+          : "Thank you — we can't wait to celebrate with you.",
       });
-      setInviteeName("");
-      setInviteePhone("");
     },
   });
 
@@ -311,12 +330,15 @@ export default function SaveTheDate() {
   }, [claims]);
 
   const assignedSeatForName = useMemo(() => {
+    if (myRsvp?.seatId) {
+      return seats.find((s) => s.id === myRsvp.seatId);
+    }
     const key = slugify(inviteeName);
     if (!key) return undefined;
     const seatId = seatAssignments[key];
     if (!seatId) return undefined;
     return seats.find((s) => s.id === seatId);
-  }, [inviteeName, seatAssignments]);
+  }, [inviteeName, seatAssignments, myRsvp]);
 
   const availableSeatIds = useMemo(() => {
     const taken = new Set(Object.values(seatAssignments));
@@ -616,6 +638,27 @@ export default function SaveTheDate() {
                   </Badge>
                 </div>
 
+                {myRsvp ? (
+                  <div className="space-y-6 text-center">
+                    <div className="rounded-2xl bg-primary/10 p-6">
+                      <Heart className="h-10 w-10 mx-auto text-primary mb-4" />
+                      <h3 className="text-xl font-bold mb-2">You're all set, {myRsvp.name}!</h3>
+                      <p className="text-muted-foreground">
+                        {myRsvp.status === "yes" 
+                          ? "We're excited to celebrate with you!" 
+                          : myRsvp.status === "maybe" 
+                            ? "We hope you can make it!" 
+                            : "We'll miss you at the celebration."}
+                      </p>
+                      {myRsvp.seatId && assignedSeatForName && (
+                        <div className="mt-4 p-4 bg-background rounded-xl">
+                          <p className="text-sm text-muted-foreground">Your seat assignment</p>
+                          <p className="text-lg font-bold text-primary">{formatSeat(assignedSeatForName)}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
                 <div className="space-y-6">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
@@ -664,6 +707,7 @@ export default function SaveTheDate() {
                     {rsvpMutation.isPending ? "Submitting..." : "Celebrate with us"}
                   </Button>
                 </div>
+                )}
               </Card>
             </motion.div>
           </div>
@@ -695,12 +739,7 @@ export default function SaveTheDate() {
                     const takenBy = Object.entries(seatAssignments).find(
                       ([, id]) => id === seat.id
                     )?.[0];
-                    const isUserSeat =
-                      inviteeName &&
-                      slugify(inviteeName) ===
-                        Object.entries(seatAssignments).find(
-                          ([, v]) => v === seat.id
-                        )?.[0];
+                    const isUserSeat = myRsvp?.seatId === seat.id;
 
                     return (
                       <div

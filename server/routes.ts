@@ -12,6 +12,18 @@ export async function registerRoutes(
     res.json(rsvps);
   });
 
+  app.get("/api/rsvps/lookup", async (req, res) => {
+    const phone = req.query.phone as string;
+    if (!phone) {
+      return res.status(400).json({ message: "Phone number required" });
+    }
+    const rsvp = await storage.getRsvpByPhone(phone);
+    if (!rsvp) {
+      return res.status(404).json({ message: "RSVP not found" });
+    }
+    res.json(rsvp);
+  });
+
   app.post("/api/rsvps", async (req, res) => {
     const parsed = insertRsvpSchema.safeParse(req.body);
     if (!parsed.success) {
