@@ -523,11 +523,11 @@ export default function SaveTheDate() {
                 viewport={{ once: true, margin: "-100px" }}
                 className={`flex flex-col ${index % 2 === 1 ? "sm:flex-row-reverse" : "sm:flex-row"} gap-8 items-center`}
               >
-                <div className="w-full sm:w-1/2 overflow-hidden rounded-3xl group cursor-pointer">
+                <div className="w-full sm:w-1/2 overflow-hidden rounded-none group cursor-pointer">
                   <img
                     src={item.image}
                     alt={item.title}
-                    className="w-full h-64 sm:h-80 object-cover transition-transform duration-500 group-hover:scale-110 rounded-3xl"
+                    className="w-full h-64 sm:h-80 object-cover transition-transform duration-500 group-hover:scale-110 rounded-none"
                   />
                 </div>
                 <div className={`w-full sm:w-1/2 ${index % 2 === 1 ? "sm:text-right" : ""}`}>
@@ -558,7 +558,7 @@ export default function SaveTheDate() {
             {incomingEvents.map((event) => (
               <Card
                 key={event.id}
-                className="surface rounded-2xl p-6 border-l-4 border-l-primary"
+                className="surface rounded-none p-6 border-l-4 border-l-primary"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
@@ -594,10 +594,10 @@ export default function SaveTheDate() {
                 {wedding.venue.name} for an unforgettable evening.
               </p>
 
-              <Card className="surface rounded-3xl overflow-hidden">
+              <Card className="surface rounded-none overflow-hidden">
                 <div className="p-8">
                   <div className="flex items-start gap-4">
-                    <div className="rounded-2xl bg-primary/10 p-3 text-primary">
+                    <div className="rounded-none bg-primary/10 p-3 text-primary">
                       <MapPin className="h-6 w-6" />
                     </div>
                     <div>
@@ -639,7 +639,7 @@ export default function SaveTheDate() {
               transition={{ delay: 0.2 }}
               className="flex items-center"
             >
-              <Card className="surface rounded-3xl p-8 w-full">
+              <Card className="surface rounded-none p-8 w-full">
                 <div className="flex items-center justify-between mb-8">
                   <h2 className="font-display text-3xl tracking-tight">RSVP</h2>
                   <Badge className="rounded-full">
@@ -649,7 +649,7 @@ export default function SaveTheDate() {
 
                 {myRsvp ? (
                   <div className="space-y-6 text-center">
-                    <div className="rounded-2xl bg-primary/10 p-6">
+                    <div className="rounded-none bg-primary/10 p-6">
                       <Heart className="h-10 w-10 mx-auto text-primary mb-4" />
                       <h3 className="text-xl font-bold mb-2">You're all set, {myRsvp.name}!</h3>
                       <p className="text-muted-foreground">
@@ -752,7 +752,7 @@ export default function SaveTheDate() {
               return (
                 <Card
                   key={item.id}
-                  className={`surface rounded-2xl p-6 transition-all ${claimer ? "opacity-60" : ""}`}
+                  className={`surface rounded-none p-6 transition-all ${claimer ? "opacity-60" : ""}`}
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
@@ -823,8 +823,8 @@ export default function SaveTheDate() {
             </p>
           </div>
 
-          <Card className="surface rounded-3xl p-8 text-center max-w-sm mx-auto">
-            <div className="bg-white p-6 rounded-2xl inline-block">
+          <Card className="surface rounded-none p-8 text-center max-w-sm mx-auto">
+            <div className="bg-white p-6 rounded-none inline-block">
               <QRCodeSVG
                 value={typeof window !== 'undefined' ? `${window.location.origin}/find-seat` : '/find-seat'}
                 size={200}
