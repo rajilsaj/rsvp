@@ -1,23 +1,27 @@
-"use client";
-
-import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { Toaster } from "@/components/ui/toaster";
+import type { Metadata } from "next";
+import { Providers } from "./providers";
 import "@/styles/globals.css";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchInterval: false,
-      refetchOnWindowFocus: false,
-      staleTime: Infinity,
-      retry: false,
-    },
-    mutations: {
-      retry: false,
-    },
+export const metadata: Metadata = {
+  title: "Save the Date — Wedding",
+  description: "A beautiful save-the-date with venue details, RSVP, seating, wishlist, and a love story timeline.",
+  openGraph: {
+    title: "Save the Date — Wedding",
+    description: "A beautiful save-the-date with venue details, RSVP, seating, wishlist, and a love story timeline.",
+    type: "website",
+    images: ["https://replit.com/public/images/opengraph.png"],
   },
-});
+  twitter: {
+    card: "summary_large_image",
+    site: "@replit",
+    title: "Save the Date — Wedding",
+    description: "A beautiful save-the-date with venue details, RSVP, seating, wishlist, and a love story timeline.",
+    images: ["https://replit.com/public/images/opengraph.png"],
+  },
+  icons: {
+    icon: "/favicon.png",
+  },
+};
 
 export default function RootLayout({
   children,
@@ -27,29 +31,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <meta charSet="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-        <meta property="og:title" content="Save the Date — Wedding" />
-        <meta property="og:description" content="A beautiful save-the-date with venue details, RSVP, seating, wishlist, and a love story timeline." />
-        <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://replit.com/public/images/opengraph.png" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:site" content="@replit" />
-        <meta name="twitter:title" content="Save the Date — Wedding" />
-        <meta name="twitter:description" content="A beautiful save-the-date with venue details, RSVP, seating, wishlist, and a love story timeline." />
-        <meta name="twitter:image" content="https://replit.com/public/images/opengraph.png" />
-        <link rel="icon" type="image/png" href="/favicon.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Fraunces:ital,opsz,wght@0,9..144,200..900;1,9..144,200..900&display=swap" rel="stylesheet" />
       </head>
       <body>
-        <QueryClientProvider client={queryClient}>
-          <TooltipProvider>
-            <Toaster />
-            {children}
-          </TooltipProvider>
-        </QueryClientProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
