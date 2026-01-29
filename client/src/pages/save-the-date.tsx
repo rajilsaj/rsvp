@@ -135,13 +135,66 @@ export default function SaveTheDate() {
   const heroOpacity = useTransform(smoothProgress, [0, 0.2], [1, 0]);
   const heroScale = useTransform(smoothProgress, [0, 0.2], [1, 0.9]);
 
-  const [inviteeName, setInviteeName] = useState<string>("");
-  const [inviteeCount, setInviteeCount] = useState<number>(1);
-  const [inviteeContact, setInviteeContact] = useState<string>("");
-  const [inviteeNotes, setInviteeNotes] = useState<string>("");
-  const [inviteeStatus, setInviteeStatus] = useState<RSVPStatus>("yes");
+  const { data: rsvps = [] } = useQuery<Rsvp[]>({
+    queryKey: ["/api/rsvps"],
+  });
 
-  const [rsvps, setRsvps] = useState<RSVP[]>([]);
+  const { data: claims = [] } = useQuery<WishlistClaim[]>({
+    queryKey: ["/api/wishlist-claims"],
+  });
+
+  const rsvpMutation = useMutation({
+    mutationFn: async (newRsvp: InsertRsvp) => {
+      const res = await fetch("/api/rsvps", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newRsvp),
+      });
+      if (!res.ok) throw new Error("Failed to submit RSVP");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/rsvps"] });
+      toast({
+        title: "RSVP received",
+        description: "Thank you — we can’t wait to celebrate with you.",
+      });
+      setInviteeNotes("");
+    },
+  });
+
+  const claimMutation = useMutation({
+    mutationFn: async (claim: InsertWishlistClaim) => {
+      const res = await fetch("/api/wishlist-claims", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(claim),
+      });
+      if (!res.ok) throw new Error("Failed to claim item");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/wishlist-claims"] });
+      toast({
+        title: "Saved",
+        description: "Thanks — this item is now marked as claimed.",
+      });
+    },
+  });
+
+  const unclaimMutation = useMutation({
+    mutationFn: async (itemId: string) => {
+      const res = await fetch(`/api/wishlist-claims/${itemId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Failed to unclaim item");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/wishlist-claims"] });
+    },
+  });
+
+  const [inviteeName, setInviteeName] = useState<string>("");
 
   const seats = useMemo<Seat[]>(
     () =>
@@ -162,42 +215,23 @@ export default function SaveTheDate() {
     [],
   );
 
-  const [seatAssignments, setSeatAssignments] = useState<Record<string, string>>(
-    {},
-  );
+  const seatAssignments = useMemo(() => {
+    const assignments: Record<string, string> = {};
+    rsvps.forEach((r) => {
+      if (r.seatId) {
+        assignments[slugify(r.name)] = r.seatId;
+      }
+    });
+    return assignments;
+  }, [rsvps]);
 
-  const wishlist = useMemo<WishlistItem[]>(
-    () =>
-      [
-        {
-          id: "honeymoon",
-          title: "Honeymoon fund contribution",
-          note: "Any amount helps — thank you!",
-          priority: "Must have",
-        },
-        {
-          id: "cookware",
-          title: "Non‑stick cookware set",
-          note: "Neutral colors preferred",
-          priority: "Nice to have",
-        },
-        {
-          id: "dinnerware",
-          title: "Dinnerware set (12 pieces)",
-          note: "Simple + timeless",
-          priority: "Nice to have",
-        },
-        {
-          id: "bedding",
-          title: "Linen bedding set",
-          note: "Queen size",
-          priority: "Nice to have",
-        },
-      ],
-    [],
-  );
-
-  const [claimed, setClaimed] = useState<Record<string, string>>({});
+  const claimed = useMemo(() => {
+    const c: Record<string, string> = {};
+    claims.forEach((cl) => {
+      c[cl.itemId] = cl.claimerName;
+    });
+    return c;
+  }, [claims]);
 
   const timeline = useMemo<TimelineItem[]>(
     () =>
@@ -277,30 +311,21 @@ export default function SaveTheDate() {
       return;
     }
 
-    const id = `${Date.now()}`;
-    const newRSVP: RSVP = {
-      id,
+    const key = slugify(name);
+    let assignedSeatId: string | undefined = seatAssignments[key];
+    
+    if (!assignedSeatId && availableSeatIds.length > 0) {
+      assignedSeatId = availableSeatIds[0];
+    }
+
+    rsvpMutation.mutate({
       name,
-      phoneOrEmail: inviteeContact.trim(),
+      phone: inviteeContact.trim(),
       guests: Math.max(1, Math.min(10, inviteeCount || 1)),
       status: inviteeStatus,
       notes: inviteeNotes.trim() ? inviteeNotes.trim() : undefined,
-    };
-
-    setRsvps((prev) => [newRSVP, ...prev]);
-
-    const key = slugify(name);
-    if (key && !seatAssignments[key] && availableSeatIds.length > 0) {
-      const seatId = availableSeatIds[0];
-      setSeatAssignments((prev) => ({ ...prev, [key]: seatId }));
-    }
-
-    toast({
-      title: "RSVP received",
-      description: "Thank you — we can’t wait to celebrate with you.",
+      seatId: assignedSeatId,
     });
-
-    setInviteeNotes("");
   }
 
   function claimItem(itemId: string) {
@@ -313,14 +338,10 @@ export default function SaveTheDate() {
       });
       return;
     }
-    setClaimed((prev) => {
-      if (prev[itemId]) return prev;
-      return { ...prev, [itemId]: name };
-    });
-
-    toast({
-      title: "Saved",
-      description: "Thanks — this item is now marked as claimed.",
+    
+    claimMutation.mutate({
+      itemId,
+      claimerName: name,
     });
   }
 
