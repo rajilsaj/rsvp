@@ -58,38 +58,34 @@ type EventItem = {
   description: string;
 };
 
-const incomingEvents: (EventItem & { icon: string; color: string })[] = [
+const incomingEvents: (EventItem & { color: string })[] = [
   {
     id: "parents",
     title: "Meeting with Parents",
     date: "May 15, 2026",
     description: "Traditional introduction and family gathering.",
-    icon: "👨‍👩‍👧‍👦",
-    color: "from-emerald-600 to-emerald-700",
+    color: "bg-emerald-600",
   },
   {
     id: "dinner",
     title: "Pre-Wedding Dinner",
     date: "June 18, 2026",
     description: "An intimate dinner with our closest friends and family.",
-    icon: "🍽️",
-    color: "from-amber-500 to-amber-600",
+    color: "bg-amber-500",
   },
   {
     id: "rehearsal",
     title: "Wedding Rehearsal",
     date: "June 19, 2026",
     description: "Final run-through at the venue.",
-    icon: "💒",
-    color: "from-rose-300 to-rose-400",
+    color: "bg-rose-400",
   },
   {
     id: "wedding",
     title: "Wedding Day",
     date: "June 20, 2026",
     description: "The big day! Join us to celebrate.",
-    icon: "💍",
-    color: "from-rose-700 to-rose-800",
+    color: "bg-rose-700",
   },
 ];
 
@@ -583,35 +579,32 @@ export default function SaveTheDate() {
           </div>
 
           <div className="relative">
-            <div className="hidden sm:block absolute top-16 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-600 via-amber-500 via-rose-300 to-rose-700" />
+            <div className="hidden sm:block absolute top-4 left-[12.5%] right-[12.5%] h-px bg-border" />
             
-            <div className="flex flex-col sm:flex-row sm:justify-between gap-8 sm:gap-4">
+            <div className="flex flex-col sm:flex-row sm:justify-between gap-12 sm:gap-6">
               {incomingEvents.map((event, index) => (
                 <motion.div
                   key={event.id}
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: index * 0.15 }}
+                  transition={{ delay: index * 0.1 }}
                   className="flex-1 text-center"
                 >
                   <div className="flex flex-col items-center">
-                    <div className={`w-16 h-20 bg-gradient-to-b ${event.color} rounded-full rounded-b-full relative flex items-center justify-center shadow-lg`}>
-                      <span className="text-2xl">{event.icon}</span>
-                      <div className={`absolute -bottom-2 w-3 h-3 bg-gradient-to-b ${event.color} rotate-45`} />
-                    </div>
+                    <div className={`w-8 h-8 ${event.color} rounded-full shadow-md ring-4 ring-background`} />
                     
-                    <div className="mt-8 px-2">
-                      <h3 className="text-lg font-bold text-foreground">{event.title}</h3>
-                      <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                        {event.description}
-                      </p>
+                    <div className="mt-6">
                       <Badge
-                        variant="secondary"
-                        className="mt-3 px-3 py-1 rounded-full text-xs"
+                        variant="outline"
+                        className="mb-3 px-3 py-1 rounded-full text-xs font-medium"
                       >
                         {event.date}
                       </Badge>
+                      <h3 className="text-base font-semibold text-foreground">{event.title}</h3>
+                      <p className="mt-2 text-sm text-muted-foreground leading-relaxed max-w-[200px] mx-auto">
+                        {event.description}
+                      </p>
                     </div>
                   </div>
                 </motion.div>
