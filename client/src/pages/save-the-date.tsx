@@ -152,33 +152,47 @@ const wishlistItems: WishlistItem[] = [
 const timelineItems: TimelineItem[] = [
   {
     id: "meet",
-    dateLabel: "2019",
-    title: "They met",
-    description: "A simple hello that turned into something bigger.",
+    dateLabel: "2015",
+    title: "A friendship begins",
+    description: "Their journey began as a simple friendship — but it was truly the answer to a whispered prayer from both Grace and Noelvie.",
     image: story1,
   },
   {
-    id: "first-trip",
-    dateLabel: "2021",
-    title: "First trip together",
-    description: "The moment they realized they were a real team.",
+    id: "first-date",
+    dateLabel: "First Date",
+    title: "The Chinese buffet",
+    description: "At a Chinese Buffet restaurant, Grace gently used his own hands to wipe Noelvie's nose — a tender act that showed his true heart: caring, selfless, and real.",
     image: story2,
   },
   {
     id: "proposal",
-    dateLabel: "2025",
-    title: "The proposal",
-    description: "A happy yes — and the rest is history.",
+    dateLabel: "2017",
+    title: "The engagement",
+    description: "After two beautiful years of growing together, Grace asked Noelvie to be his fiancee at a traditional engagement filled with family and friends.",
     image: story3,
   },
   {
     id: "wedding",
     dateLabel: "2026",
     title: "Wedding day",
-    description: "Celebrate love, family, and new beginnings.",
+    description: "Now, after years of knowing, growing, laughing, praying, and loving deeply — they are ready to celebrate with family and friends.",
     image: story4,
   },
 ];
+
+const loveStory = `Grace and Noelvie's journey began as a simple friendship in 2015 — but it was truly the answer to a whispered prayer from both of them.
+
+What first caught Grace's eye was a photo of Noelvie, standing behind the counter at Wendy's, wearing her cap and filled with hard work and perseverance. Even in that simple uniform, she looked effortlessly beautiful — her bright smile, her focused eyes, and the warmth she radiated made him want to know the heart behind that pretty face. And all these years later, that same beauty still captivates him every single day.
+
+Their first date was at a Chinese Buffet restaurant. On the way there, Noelvie, who was very sick and had a runny nose, didn't have a tissue. Without hesitation, Grace gently used his own hands to wipe her nose for her — a small, tender act that showed his true heart: caring, selfless, and real. That night, they sat together sharing good food and endless laughter.
+
+Their second date was just as meaningful. They sat together in a parked car under the night sky, watching a sermon and sharing dreams about putting God first — deciding that faith would always be the foundation of their love.
+
+After two beautiful years of growing together, Grace asked Noelvie to be his fiancee at a traditional engagement filled with family and friends. From that moment, they continued to build their bond through honest love, friendship, and faith.
+
+Now, after several wonderful years of knowing each other, growing together, laughing, praying, and loving deeply, Grace and Noelvie are ready to share their joy through their traditional marriage celebration and white wedding — honoring what began in quiet prayers and gentle promises.
+
+And if you're wondering who said "I love you" first — of course, it was Grace!`;
 
 function slugify(input: string) {
   return input
@@ -539,6 +553,16 @@ export default function SaveTheDate() {
               </motion.div>
             ))}
           </div>
+
+          <Card className="surface rounded-3xl p-8 mt-16">
+            <div className="prose prose-lg max-w-none text-muted-foreground leading-relaxed">
+              {loveStory.split('\n\n').map((paragraph, i) => (
+                <p key={i} className={i === loveStory.split('\n\n').length - 1 ? "text-primary font-medium italic" : ""}>
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+          </Card>
         </section>
 
         <section className="mx-auto max-w-4xl px-4 py-24 sm:px-6">
