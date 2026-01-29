@@ -324,6 +324,25 @@ export default function SaveTheDate() {
     });
   }
 
+  function handleSaveToCalendar() {
+    const title = `Wedding: ${wedding.couple.bride} & ${wedding.couple.groom}`;
+    const details = `Join us for the wedding celebration of ${wedding.couple.bride} and ${wedding.couple.groom} at ${wedding.venue.name}.`;
+    const location = wedding.venue.address;
+    
+    // Wedding Date: June 20, 2026 at 4:00 PM
+    const startTime = "20260620T160000";
+    const endTime = "20260620T230000";
+
+    const googleCalendarUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${startTime}/${endTime}&details=${encodeURIComponent(details)}&location=${encodeURIComponent(location)}`;
+    
+    window.open(googleCalendarUrl, "_blank");
+    
+    toast({
+      title: "Opening Calendar",
+      description: "Redirecting to Google Calendar to save the date.",
+    });
+  }
+
   function unclaimItem(itemId: string) {
     setClaimed((prev) => {
       if (!prev[itemId]) return prev;
@@ -359,9 +378,18 @@ export default function SaveTheDate() {
             style={{ opacity: heroOpacity, scale: heroScale }}
             className="mx-auto max-w-4xl"
           >
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border bg-card/70 px-4 py-1.5 text-xs font-medium tracking-wide text-muted-foreground backdrop-blur-md">
-              <Sparkles className="h-4 w-4" />
-              <span>SAVE THE DATE</span>
+            <div className="mb-6 flex flex-col items-center gap-4">
+              <div className="inline-flex items-center gap-2 rounded-full border bg-card/70 px-4 py-1.5 text-xs font-medium tracking-wide text-muted-foreground backdrop-blur-md">
+                <Sparkles className="h-4 w-4" />
+                <span>SAVE THE DATE</span>
+              </div>
+              <Button 
+                onClick={handleSaveToCalendar}
+                className="rounded-full px-8 py-6 text-lg font-bold shadow-xl hover:scale-105 transition-transform"
+              >
+                <CalendarDays className="mr-2 h-5 w-5" />
+                Save to Calendar
+              </Button>
             </div>
             <h1 className="font-display text-6xl font-bold leading-[1.1] tracking-tight sm:text-8xl">
               {wedding.couple.bride} <br /> 
