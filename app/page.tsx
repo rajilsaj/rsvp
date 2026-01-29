@@ -20,6 +20,16 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import dynamic from "next/dynamic";
+
+const VenueMap = dynamic(() => import("@/components/VenueMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[400px] bg-muted rounded-2xl flex items-center justify-center">
+      <div className="text-muted-foreground">Loading map...</div>
+    </div>
+  ),
+});
 
 type RSVPStatus = "yes" | "no" | "maybe";
 
@@ -630,6 +640,14 @@ export default function SaveTheDate() {
                   </div>
                 </div>
               </Card>
+
+              <div className="mt-8">
+                <h3 className="text-xl font-bold mb-4">Explore the Area</h3>
+                <VenueMap />
+                <p className="text-sm text-muted-foreground mt-4 text-center" data-testid="map-legend">
+                  Red marker: Wedding venue • Blue markers: Nearby attractions
+                </p>
+              </div>
             </motion.div>
 
             <motion.div
