@@ -65,7 +65,7 @@ const incomingEvents: (EventItem & { icon: string; color: string })[] = [
     date: "May 15, 2026",
     description: "Traditional introduction and family gathering.",
     icon: "👨‍👩‍👧‍👦",
-    color: "from-cyan-400 to-blue-500",
+    color: "from-emerald-600 to-emerald-700",
   },
   {
     id: "dinner",
@@ -73,7 +73,7 @@ const incomingEvents: (EventItem & { icon: string; color: string })[] = [
     date: "June 18, 2026",
     description: "An intimate dinner with our closest friends and family.",
     icon: "🍽️",
-    color: "from-blue-500 to-indigo-500",
+    color: "from-amber-500 to-amber-600",
   },
   {
     id: "rehearsal",
@@ -81,7 +81,7 @@ const incomingEvents: (EventItem & { icon: string; color: string })[] = [
     date: "June 19, 2026",
     description: "Final run-through at the venue.",
     icon: "💒",
-    color: "from-indigo-500 to-purple-500",
+    color: "from-rose-300 to-rose-400",
   },
   {
     id: "wedding",
@@ -89,7 +89,7 @@ const incomingEvents: (EventItem & { icon: string; color: string })[] = [
     date: "June 20, 2026",
     description: "The big day! Join us to celebrate.",
     icon: "💍",
-    color: "from-pink-500 to-rose-500",
+    color: "from-rose-700 to-rose-800",
   },
 ];
 
@@ -583,7 +583,7 @@ export default function SaveTheDate() {
           </div>
 
           <div className="relative">
-            <div className="hidden sm:block absolute top-16 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-400 via-purple-500 to-rose-500" />
+            <div className="hidden sm:block absolute top-16 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-600 via-amber-500 via-rose-300 to-rose-700" />
             
             <div className="flex flex-col sm:flex-row sm:justify-between gap-8 sm:gap-4">
               {incomingEvents.map((event, index) => (
