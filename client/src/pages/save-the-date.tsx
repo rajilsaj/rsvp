@@ -13,6 +13,7 @@ import {
   Armchair,
 } from "lucide-react";
 import weddingBg from "@/assets/images/wedding-bg.png";
+import venueVideo from "@/assets/videos/venue-bg.mp4";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -302,12 +303,15 @@ export default function SaveTheDate() {
         style={{ y: bgY }}
         className="fixed inset-0 z-0 h-[120vh] w-full"
       >
-        <img 
-          src={weddingBg} 
-          alt="Wedding Background" 
-          className="h-full w-full object-cover opacity-40"
+        <video
+          src={venueVideo}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="h-full w-full object-cover opacity-60"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-transparent to-background" />
       </motion.div>
 
       {/* Content */}
