@@ -434,15 +434,15 @@ export default function SaveTheDate() {
     >
       <motion.div
         style={{ y: bgY }}
-        className="fixed inset-0 z-0 h-[120vh] w-full"
+        className="fixed inset-0 z-0 h-[120vh] w-full overflow-hidden"
       >
-        <video
-          src={venueVideo}
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="h-full w-full object-cover opacity-60"
+        <iframe
+          src="https://www.youtube.com/embed/gSOCywBff2Q?autoplay=1&mute=1&loop=1&playlist=gSOCywBff2Q&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1"
+          title="Background Video"
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300%] h-[300%] min-w-full min-h-full pointer-events-none opacity-60"
+          style={{ objectFit: 'cover' }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-transparent to-background" />
       </motion.div>
@@ -579,22 +579,7 @@ export default function SaveTheDate() {
           </div>
         </section>
 
-        <section className="relative py-24 overflow-hidden">
-          <div className="absolute inset-0 z-0">
-            <iframe
-              width="100%"
-              height="100%"
-              src="https://www.youtube.com/embed/gSOCywBff2Q?autoplay=1&mute=1&loop=1&playlist=gSOCywBff2Q&controls=0&showinfo=0&rel=0&modestbranding=1"
-              title="Venue Video Background"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              className="w-full h-full object-cover scale-150 pointer-events-none"
-              style={{ minHeight: '100%', minWidth: '100%' }}
-            />
-            <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" />
-          </div>
-          
-          <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
+        <section className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
           <div className="grid gap-12 lg:grid-cols-2">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -728,7 +713,6 @@ export default function SaveTheDate() {
                 )}
               </Card>
             </motion.div>
-          </div>
           </div>
         </section>
 
