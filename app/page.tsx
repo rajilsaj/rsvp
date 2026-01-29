@@ -645,10 +645,7 @@ export default function SaveTheDate() {
               <div className="mt-8">
                 <h3 className="text-xl font-bold mb-4">Explore the Area</h3>
                 <VenueMap />
-                <p className="text-sm text-muted-foreground mt-4 text-center" data-testid="map-legend">
-                  Red marker: Wedding venue • Blue markers: Nearby attractions
-                </p>
-              </div>
+                              </div>
             </motion.div>
 
             <motion.div
