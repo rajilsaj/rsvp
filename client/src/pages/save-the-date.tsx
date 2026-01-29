@@ -23,7 +23,40 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 
+import story1 from "@/assets/images/story-1.jpg";
+import story2 from "@/assets/images/story-2.jpg";
+import story3 from "@/assets/images/story-3.jpg";
+import story4 from "@/assets/images/story-4.jpg";
+
 type RSVPStatus = "yes" | "no" | "maybe";
+
+type EventItem = {
+  id: string;
+  title: string;
+  date: string;
+  description: string;
+};
+
+const incomingEvents: EventItem[] = [
+  {
+    id: "parents",
+    title: "Meeting with Parents",
+    date: "May 15, 2026",
+    description: "Traditional introduction and family gathering.",
+  },
+  {
+    id: "dinner",
+    title: "Pre-Wedding Dinner",
+    date: "June 18, 2026",
+    description: "An intimate dinner with our closest friends and family.",
+  },
+  {
+    id: "rehearsal",
+    title: "Wedding Rehearsal",
+    date: "June 19, 2026",
+    description: "Final run-through at the venue.",
+  },
+];
 
 type RSVP = {
   id: string;
@@ -174,24 +207,28 @@ export default function SaveTheDate() {
           dateLabel: "2019",
           title: "They met",
           description: "A simple hello that turned into something bigger.",
+          image: story1,
         },
         {
           id: "first-trip",
           dateLabel: "2021",
           title: "First trip together",
           description: "The moment they realized they were a real team.",
+          image: story2,
         },
         {
           id: "proposal",
           dateLabel: "2025",
           title: "The proposal",
           description: "A happy yes — and the rest is history.",
+          image: story3,
         },
         {
           id: "wedding",
           dateLabel: "2026",
           title: "Wedding day",
           description: "Celebrate love, family, and new beginnings.",
+          image: story4,
         },
       ],
     [],
@@ -372,8 +409,8 @@ export default function SaveTheDate() {
                 viewport={{ once: true, margin: "-100px" }}
                 className={`flex gap-8 items-center ${index % 2 === 1 ? 'flex-row-reverse text-right' : ''}`}
               >
-                <div className="hidden sm:flex h-20 w-20 shrink-0 items-center justify-center rounded-3xl surface text-primary">
-                  <Heart className="h-8 w-8" />
+                <div className="hidden sm:block h-32 w-32 shrink-0 overflow-hidden rounded-3xl surface">
+                  <img src={(item as any).image} alt={item.title} className="h-full w-full object-cover" />
                 </div>
                 <div>
                   <span className="text-sm font-bold tracking-widest text-primary uppercase">{item.dateLabel}</span>
@@ -381,6 +418,30 @@ export default function SaveTheDate() {
                   <p className="mt-2 text-muted-foreground leading-relaxed">{item.description}</p>
                 </div>
               </motion.div>
+            ))}
+          </div>
+        </section>
+
+        {/* Timeline of Incoming Activities */}
+        <section className="mx-auto max-w-4xl px-4 py-24 sm:px-6">
+          <div className="text-center mb-16">
+            <h2 className="font-display text-4xl tracking-tight sm:text-5xl">Upcoming Celebrations</h2>
+            <p className="mt-4 text-muted-foreground italic">Important dates leading up to the big day</p>
+          </div>
+          
+          <div className="grid gap-6">
+            {incomingEvents.map((event) => (
+              <Card key={event.id} className="surface rounded-2xl p-6 border-l-4 border-l-primary">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-xl font-bold">{event.title}</h3>
+                    <p className="mt-1 text-muted-foreground">{event.description}</p>
+                  </div>
+                  <Badge variant="secondary" className="w-fit px-4 py-1.5 rounded-full text-sm">
+                    {event.date}
+                  </Badge>
+                </div>
+              </Card>
             ))}
           </div>
         </section>
@@ -443,11 +504,11 @@ export default function SaveTheDate() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Contact</label>
+                      <label className="text-sm font-medium">Phone Number</label>
                       <Input 
                         value={inviteeContact}
                         onChange={(e) => setInviteeContact(e.target.value)}
-                        placeholder="Email or Phone" 
+                        placeholder="Phone Number" 
                         className="rounded-xl"
                       />
                     </div>
