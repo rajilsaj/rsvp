@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { useMemo, useState, useRef } from "react";
+import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import {
   CalendarDays,
   CheckCircle2,
@@ -12,12 +12,12 @@ import {
   Gift,
   Armchair,
 } from "lucide-react";
+import weddingBg from "@/assets/images/wedding-bg.png";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
@@ -84,6 +84,22 @@ function formatSeat(seat: Seat) {
 
 export default function SaveTheDate() {
   const { toast } = useToast();
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"]
+  });
+
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
+
+  const bgY = useTransform(smoothProgress, [0, 1], ["0%", "20%"]);
+  const heroOpacity = useTransform(smoothProgress, [0, 0.2], [1, 0]);
+  const heroScale = useTransform(smoothProgress, [0, 0.2], [1, 0.9]);
 
   const [inviteeName, setInviteeName] = useState<string>("");
   const [inviteeCount, setInviteeCount] = useState<number>(1);
@@ -280,762 +296,273 @@ export default function SaveTheDate() {
   }
 
   return (
-    <div className="min-h-dvh bg-background text-foreground">
-      <div
-        className="grain relative overflow-hidden"
-        data-testid="section-hero"
+    <div ref={containerRef} className="relative min-h-screen overflow-x-hidden bg-background">
+      {/* Parallax Background */}
+      <motion.div 
+        style={{ y: bgY }}
+        className="fixed inset-0 z-0 h-[120vh] w-full"
       >
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-48 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,hsl(var(--primary)/.35),transparent_70%)] blur-2xl" />
-          <div className="absolute -bottom-56 -left-40 h-[520px] w-[520px] rounded-full bg-[radial-gradient(circle_at_center,hsl(var(--accent)/.30),transparent_70%)] blur-2xl" />
-          <div className="absolute -bottom-48 -right-44 h-[520px] w-[520px] rounded-full bg-[radial-gradient(circle_at_center,hsl(var(--secondary)/.75),transparent_70%)] blur-2xl" />
-        </div>
+        <img 
+          src={weddingBg} 
+          alt="Wedding Background" 
+          className="h-full w-full object-cover opacity-40"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background" />
+      </motion.div>
 
-        <div className="mx-auto max-w-6xl px-4 pb-10 pt-10 sm:px-6 sm:pb-14 sm:pt-14">
-          <div className="flex items-start justify-between gap-3">
-            <div className="inline-flex items-center gap-2 rounded-full border bg-card/70 px-3 py-1 text-xs text-muted-foreground shadow-sm">
+      {/* Content */}
+      <div className="relative z-10">
+        {/* Hero Section */}
+        <section className="flex min-h-screen flex-col items-center justify-center px-4 text-center">
+          <motion.div 
+            style={{ opacity: heroOpacity, scale: heroScale }}
+            className="mx-auto max-w-4xl"
+          >
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border bg-card/70 px-4 py-1.5 text-xs font-medium tracking-wide text-muted-foreground backdrop-blur-md">
               <Sparkles className="h-4 w-4" />
-              <span data-testid="text-save-the-date">Save the date</span>
+              <span>SAVE THE DATE</span>
+            </div>
+            <h1 className="font-display text-6xl font-bold leading-[1.1] tracking-tight sm:text-8xl">
+              {wedding.couple.bride} <br /> 
+              <span className="text-primary">&</span> {wedding.couple.groom}
+            </h1>
+            <p className="mx-auto mt-8 max-w-xl text-lg text-muted-foreground sm:text-xl">
+              A celebration of a beautiful journey. Join us as we start our forever.
+            </p>
+            
+            <div className="mt-12 flex flex-wrap justify-center gap-4">
+              <Badge variant="secondary" className="px-4 py-2 text-sm rounded-full">
+                <CalendarDays className="mr-2 h-4 w-4" />
+                {wedding.dateLabel}
+              </Badge>
+              <Badge variant="secondary" className="px-4 py-2 text-sm rounded-full">
+                <MapPin className="mr-2 h-4 w-4" />
+                {wedding.cityLabel}
+              </Badge>
             </div>
 
-            <Button
-              variant="secondary"
-              className="gap-2"
-              onClick={handleCopyLink}
-              data-testid="button-copy-link"
+            <motion.div 
+              animate={{ y: [0, 10, 0] }}
+              transition={{ repeat: Infinity, duration: 2 }}
+              className="mt-20 text-muted-foreground"
             >
-              <Copy className="h-4 w-4" />
-              Copy invite link
-            </Button>
+              <p className="text-sm uppercase tracking-widest">Scroll to explore</p>
+              <div className="mx-auto mt-2 h-12 w-[1px] bg-gradient-to-b from-muted-foreground to-transparent" />
+            </motion.div>
+          </motion.div>
+        </section>
+
+        {/* Story Section */}
+        <section className="mx-auto max-w-4xl px-4 py-24 sm:px-6">
+          <div className="text-center mb-16">
+            <h2 className="font-display text-4xl tracking-tight sm:text-5xl">Our Story</h2>
+            <div className="mx-auto mt-4 h-1 w-12 bg-primary rounded-full" />
           </div>
-
-          <div className="mt-8 grid gap-8 lg:grid-cols-[1.15fr_.85fr]">
-            <div>
-              <motion.h1
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                className="font-display text-4xl leading-[1.05] tracking-tight sm:text-6xl"
-                data-testid="text-title"
+          
+          <div className="space-y-12">
+            {timeline.map((item, index) => (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                className={`flex gap-8 items-center ${index % 2 === 1 ? 'flex-row-reverse text-right' : ''}`}
               >
-                {wedding.couple.bride} & {wedding.couple.groom}
-              </motion.h1>
-              <motion.p
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.05 }}
-                className="mt-4 max-w-xl text-base text-muted-foreground sm:text-lg"
-                data-testid="text-subtitle"
-              >
-                You’re warmly invited to celebrate love, laughter, and a forever kind of
-                day.
-              </motion.p>
+                <div className="hidden sm:flex h-20 w-20 shrink-0 items-center justify-center rounded-3xl surface text-primary">
+                  <Heart className="h-8 w-8" />
+                </div>
+                <div>
+                  <span className="text-sm font-bold tracking-widest text-primary uppercase">{item.dateLabel}</span>
+                  <h3 className="mt-1 text-2xl font-bold">{item.title}</h3>
+                  <p className="mt-2 text-muted-foreground leading-relaxed">{item.description}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </section>
 
-              <div className="mt-6 flex flex-wrap items-center gap-2">
-                <Badge
-                  variant="secondary"
-                  className="gap-2 rounded-full"
-                  data-testid="badge-date"
-                >
-                  <CalendarDays className="h-4 w-4" />
-                  {wedding.dateLabel}
-                </Badge>
-                <Badge
-                  variant="secondary"
-                  className="gap-2 rounded-full"
-                  data-testid="badge-time"
-                >
-                  <PartyPopper className="h-4 w-4" />
-                  {wedding.timeLabel}
-                </Badge>
-                <Badge
-                  variant="secondary"
-                  className="gap-2 rounded-full"
-                  data-testid="badge-city"
-                >
-                  <MapPin className="h-4 w-4" />
-                  {wedding.cityLabel}
-                </Badge>
-              </div>
-
-              <div className="mt-8 grid gap-3 sm:grid-cols-2">
-                <Card className="surface rounded-2xl p-4" data-testid="card-venue">
-                  <div className="flex items-start gap-3">
-                    <div className="mt-0.5 rounded-xl bg-[hsl(var(--primary)/.10)] p-2 text-[hsl(var(--primary))]">
-                      <MapPin className="h-5 w-5" />
+        {/* Venue Section */}
+        <section className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
+          <div className="grid gap-12 lg:grid-cols-2">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              <h2 className="font-display text-4xl tracking-tight sm:text-5xl mb-6">The Venue</h2>
+              <p className="text-muted-foreground mb-8 text-lg">
+                We've chosen a place that feels like home. Join us at the {wedding.venue.name} for an unforgettable evening.
+              </p>
+              
+              <Card className="surface rounded-3xl overflow-hidden">
+                <div className="p-8">
+                  <div className="flex items-start gap-4">
+                    <div className="rounded-2xl bg-primary/10 p-3 text-primary">
+                      <MapPin className="h-6 w-6" />
                     </div>
                     <div>
-                      <div
-                        className="text-sm font-semibold"
-                        data-testid="text-venue-name"
-                      >
-                        {wedding.venue.name}
-                      </div>
-                      <div
-                        className="mt-1 text-sm text-muted-foreground"
-                        data-testid="text-venue-address"
-                      >
-                        {wedding.venue.address}
-                      </div>
-                      <a
-                        className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-[hsl(var(--accent))] hover:underline"
-                        href={wedding.venue.mapUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        data-testid="link-open-map"
-                      >
-                        Open map
-                        <span aria-hidden>→</span>
-                      </a>
-                    </div>
-                  </div>
-                </Card>
-
-                <Card
-                  className="surface rounded-2xl p-4"
-                  data-testid="card-seat-preview"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="mt-0.5 rounded-xl bg-[hsl(var(--accent)/.12)] p-2 text-[hsl(var(--accent))]">
-                      <Armchair className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-semibold" data-testid="text-seat">
-                        Your seat (after RSVP)
-                      </div>
-                      <div
-                        className="mt-1 text-sm text-muted-foreground"
-                        data-testid="text-seat-value"
-                      >
-                        {assignedSeatForName
-                          ? formatSeat(assignedSeatForName)
-                          : "RSVP to get an automatic seat suggestion."}
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              </div>
-            </div>
-
-            <Card className="surface rounded-3xl p-5" data-testid="card-rsvp">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <div className="rounded-xl bg-[hsl(var(--primary)/.10)] p-2 text-[hsl(var(--primary))]">
-                    <Users className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <div className="font-semibold" data-testid="text-rsvp-title">
-                      RSVP
-                    </div>
-                    <div
-                      className="text-sm text-muted-foreground"
-                      data-testid="text-rsvp-subtitle"
-                    >
-                      Let us know if you can make it.
-                    </div>
-                  </div>
-                </div>
-                <Badge
-                  className="rounded-full"
-                  data-testid="badge-rsvp-count"
-                >
-                  {rsvps.length} received
-                </Badge>
-              </div>
-
-              <div className="mt-4 grid gap-3">
-                <div>
-                  <div
-                    className="mb-1 text-sm font-medium"
-                    data-testid="label-name"
-                  >
-                    Your name
-                  </div>
-                  <Input
-                    value={inviteeName}
-                    onChange={(e) => setInviteeName(e.target.value)}
-                    placeholder="e.g., Amina Hassan"
-                    data-testid="input-name"
-                  />
-                </div>
-
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div>
-                    <div
-                      className="mb-1 text-sm font-medium"
-                      data-testid="label-contact"
-                    >
-                      Phone or email
-                    </div>
-                    <Input
-                      value={inviteeContact}
-                      onChange={(e) => setInviteeContact(e.target.value)}
-                      placeholder="Optional"
-                      data-testid="input-contact"
-                    />
-                  </div>
-                  <div>
-                    <div
-                      className="mb-1 text-sm font-medium"
-                      data-testid="label-guests"
-                    >
-                      Guests
-                    </div>
-                    <Input
-                      type="number"
-                      value={inviteeCount}
-                      onChange={(e) => setInviteeCount(Number(e.target.value))}
-                      min={1}
-                      max={10}
-                      data-testid="input-guests"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid gap-2">
-                  <div
-                    className="text-sm font-medium"
-                    data-testid="label-status"
-                  >
-                    Attendance
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    <Button
-                      type="button"
-                      variant={inviteeStatus === "yes" ? "default" : "secondary"}
-                      className="w-full"
-                      onClick={() => setInviteeStatus("yes")}
-                      data-testid="button-status-yes"
-                    >
-                      Yes
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={inviteeStatus === "maybe" ? "default" : "secondary"}
-                      className="w-full"
-                      onClick={() => setInviteeStatus("maybe")}
-                      data-testid="button-status-maybe"
-                    >
-                      Maybe
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={inviteeStatus === "no" ? "default" : "secondary"}
-                      className="w-full"
-                      onClick={() => setInviteeStatus("no")}
-                      data-testid="button-status-no"
-                    >
-                      No
-                    </Button>
-                  </div>
-                </div>
-
-                <div>
-                  <div
-                    className="mb-1 text-sm font-medium"
-                    data-testid="label-notes"
-                  >
-                    Note (dietary, etc.)
-                  </div>
-                  <Textarea
-                    value={inviteeNotes}
-                    onChange={(e) => setInviteeNotes(e.target.value)}
-                    placeholder="Optional"
-                    className="min-h-[88px]"
-                    data-testid="input-notes"
-                  />
-                </div>
-
-                <Button
-                  className="mt-1 w-full"
-                  onClick={submitRSVP}
-                  data-testid="button-submit-rsvp"
-                >
-                  <CheckCircle2 className="mr-2 h-4 w-4" />
-                  Submit RSVP
-                </Button>
-
-                <div
-                  className="rounded-2xl border bg-card/60 p-3 text-sm text-muted-foreground"
-                  data-testid="status-storage"
-                >
-                  This is a prototype: RSVPs, seating, and wishlist claims are stored
-                  only in this browser session.
-                </div>
-              </div>
-            </Card>
-          </div>
-        </div>
-      </div>
-
-      <div className="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
-        <Tabs defaultValue="timeline" className="mt-6" data-testid="tabs-main">
-          <TabsList className="grid w-full grid-cols-4" data-testid="tabs-list">
-            <TabsTrigger value="timeline" data-testid="tab-timeline">
-              <Heart className="mr-2 h-4 w-4" />
-              Timeline
-            </TabsTrigger>
-            <TabsTrigger value="venue" data-testid="tab-venue">
-              <MapPin className="mr-2 h-4 w-4" />
-              Venue
-            </TabsTrigger>
-            <TabsTrigger value="wishlist" data-testid="tab-wishlist">
-              <Gift className="mr-2 h-4 w-4" />
-              Wishlist
-            </TabsTrigger>
-            <TabsTrigger value="seating" data-testid="tab-seating">
-              <Armchair className="mr-2 h-4 w-4" />
-              Seating
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="timeline" className="mt-6">
-            <section className="grid gap-4" data-testid="section-timeline">
-              <div className="flex items-end justify-between gap-4">
-                <div>
-                  <h2
-                    className="font-display text-2xl tracking-tight"
-                    data-testid="text-timeline-title"
-                  >
-                    Their story
-                  </h2>
-                  <p
-                    className="mt-1 text-sm text-muted-foreground"
-                    data-testid="text-timeline-subtitle"
-                  >
-                    A few milestones we love.
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid gap-3">
-                {timeline.map((item) => (
-                  <Card
-                    key={item.id}
-                    className="surface rounded-2xl p-4"
-                    data-testid={`card-timeline-${item.id}`}
-                  >
-                    <div className="flex items-start gap-4">
-                      <div
-                        className="flex h-10 w-10 items-center justify-center rounded-xl bg-[hsl(var(--primary)/.10)] text-[hsl(var(--primary))]"
-                        data-testid={`badge-timeline-${item.id}`}
-                      >
-                        <Heart className="h-5 w-5" />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <div
-                            className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
-                            data-testid={`text-timeline-date-${item.id}`}
-                          >
-                            {item.dateLabel}
-                          </div>
-                          <Separator orientation="vertical" className="h-4" />
-                          <div
-                            className="text-sm font-semibold"
-                            data-testid={`text-timeline-title-${item.id}`}
-                          >
-                            {item.title}
-                          </div>
-                        </div>
-                        <div
-                          className="mt-1 text-sm text-muted-foreground"
-                          data-testid={`text-timeline-desc-${item.id}`}
-                        >
-                          {item.description}
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </section>
-          </TabsContent>
-
-          <TabsContent value="venue" className="mt-6">
-            <section className="grid gap-4" data-testid="section-venue">
-              <Card className="surface rounded-2xl p-5" data-testid="card-venue-full">
-                <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="max-w-xl">
-                    <h2
-                      className="font-display text-2xl tracking-tight"
-                      data-testid="text-venue-title"
-                    >
-                      Venue details
-                    </h2>
-                    <p
-                      className="mt-1 text-sm text-muted-foreground"
-                      data-testid="text-venue-desc"
-                    >
-                      Tap the map link for directions. We’ll share dress code and program
-                      closer to the date.
-                    </p>
-
-                    <div className="mt-4 grid gap-3">
-                      <div className="rounded-2xl border bg-card/60 p-4">
-                        <div
-                          className="text-sm font-semibold"
-                          data-testid="text-venue-name-2"
-                        >
-                          {wedding.venue.name}
-                        </div>
-                        <div
-                          className="mt-1 text-sm text-muted-foreground"
-                          data-testid="text-venue-address-2"
-                        >
-                          {wedding.venue.address}
-                        </div>
-                        <a
-                          className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-[hsl(var(--accent))] hover:underline"
-                          href={wedding.venue.mapUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          data-testid="link-open-map-2"
-                        >
-                          Open in Google Maps
-                          <span aria-hidden>→</span>
+                      <h4 className="text-xl font-bold">{wedding.venue.name}</h4>
+                      <p className="mt-2 text-muted-foreground">{wedding.venue.address}</p>
+                      <Button variant="outline" className="mt-6 rounded-full" asChild>
+                        <a href={wedding.venue.mapUrl} target="_blank" rel="noreferrer">
+                          Get Directions <span className="ml-2">→</span>
                         </a>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="w-full max-w-sm">
-                    <div className="surface rounded-2xl p-4">
-                      <div className="flex items-center gap-2">
-                        <div className="rounded-xl bg-[hsl(var(--accent)/.12)] p-2 text-[hsl(var(--accent))]">
-                          <MapPin className="h-5 w-5" />
-                        </div>
-                        <div>
-                          <div className="text-sm font-semibold" data-testid="text-quick">
-                            Quick info
-                          </div>
-                          <div
-                            className="text-xs text-muted-foreground"
-                            data-testid="text-quick-sub"
-                          >
-                            Handy details at a glance.
-                          </div>
-                        </div>
-                      </div>
-                      <div className="mt-4 grid gap-2 text-sm">
-                        <div className="flex items-center justify-between">
-                          <span className="text-muted-foreground">Date</span>
-                          <span data-testid="text-quick-date">{wedding.dateLabel}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-muted-foreground">Time</span>
-                          <span data-testid="text-quick-time">{wedding.timeLabel}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-muted-foreground">City</span>
-                          <span data-testid="text-quick-city">{wedding.cityLabel}</span>
-                        </div>
-                      </div>
+                      </Button>
                     </div>
                   </div>
                 </div>
               </Card>
-            </section>
-          </TabsContent>
+            </motion.div>
 
-          <TabsContent value="wishlist" className="mt-6">
-            <section className="grid gap-4" data-testid="section-wishlist">
-              <div>
-                <h2
-                  className="font-display text-2xl tracking-tight"
-                  data-testid="text-wishlist-title"
-                >
-                  Wishlist
-                </h2>
-                <p
-                  className="mt-1 text-sm text-muted-foreground"
-                  data-testid="text-wishlist-subtitle"
-                >
-                  If you’d like to gift something, here are a few ideas.
-                </p>
-              </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="flex items-center"
+            >
+              <Card className="surface rounded-3xl p-8 w-full">
+                <div className="flex items-center justify-between mb-8">
+                  <h2 className="font-display text-3xl tracking-tight">RSVP</h2>
+                  <Badge className="rounded-full">{rsvps.length} Attending</Badge>
+                </div>
+                
+                <div className="space-y-6">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Your Name</label>
+                      <Input 
+                        value={inviteeName}
+                        onChange={(e) => setInviteeName(e.target.value)}
+                        placeholder="Full Name" 
+                        className="rounded-xl"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Contact</label>
+                      <Input 
+                        value={inviteeContact}
+                        onChange={(e) => setInviteeContact(e.target.value)}
+                        placeholder="Email or Phone" 
+                        className="rounded-xl"
+                      />
+                    </div>
+                  </div>
 
-              <div className="grid gap-3 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Will you attend?</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {['yes', 'maybe', 'no'].map((s) => (
+                        <Button
+                          key={s}
+                          variant={inviteeStatus === s ? "default" : "secondary"}
+                          onClick={() => setInviteeStatus(s as RSVPStatus)}
+                          className="rounded-xl capitalize"
+                        >
+                          {s}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <Button className="w-full rounded-xl py-6 text-lg" onClick={submitRSVP}>
+                    Celebrate with us
+                  </Button>
+                </div>
+              </Card>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Seating & Wishlist Section */}
+        <section className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
+          <div className="grid gap-12 lg:grid-cols-2">
+            <div>
+              <h2 className="font-display text-3xl tracking-tight mb-6">Seating Allocation</h2>
+              <Card className="surface rounded-3xl p-6">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="h-12 w-12 rounded-2xl bg-accent/10 flex items-center justify-center text-accent">
+                    <Armchair className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold">Your Table</h4>
+                    <p className="text-sm text-muted-foreground">
+                      {assignedSeatForName ? formatSeat(assignedSeatForName) : "RSVP to see your assigned seat"}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-4 gap-2">
+                  {seats.map((seat) => {
+                    const takenBy = Object.entries(seatAssignments).find(([_, id]) => id === seat.id)?.[0];
+                    const isUserSeat = inviteeName && slugify(inviteeName) === Object.entries(seatAssignments).find(([k, v]) => v === seat.id)?.[0];
+                    
+                    return (
+                      <button
+                        key={seat.id}
+                        onClick={() => {
+                          const key = slugify(inviteeName);
+                          if (!key) return toast({ title: "Name required", variant: "destructive" });
+                          setSeatAssignments(prev => ({ ...prev, [key]: seat.id }));
+                        }}
+                        className={`aspect-square rounded-xl flex flex-col items-center justify-center transition-all ${
+                          isUserSeat ? 'bg-primary text-primary-foreground scale-105 shadow-lg' : 
+                          takenBy ? 'bg-muted/50 opacity-40 cursor-not-allowed' : 'surface hover:bg-accent/10'
+                        }`}
+                      >
+                        <Armchair className="h-4 w-4 mb-1" />
+                        <span className="text-[10px] font-bold">T{seat.table.split(' ')[1]}S{seat.seat}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </Card>
+            </div>
+
+            <div>
+              <h2 className="font-display text-3xl tracking-tight mb-6">Wishlist</h2>
+              <div className="grid gap-4">
                 {wishlist.map((item) => {
-                  const isClaimed = Boolean(claimed[item.id]);
+                  const isClaimed = claimed[item.id];
                   return (
-                    <Card
-                      key={item.id}
-                      className="surface rounded-2xl p-4"
-                      data-testid={`card-wishlist-${item.id}`}
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <div
-                              className="text-sm font-semibold"
-                              data-testid={`text-wishlist-item-${item.id}`}
-                            >
-                              {item.title}
-                            </div>
-                            <Badge
-                              variant="secondary"
-                              className="rounded-full"
-                              data-testid={`badge-wishlist-priority-${item.id}`}
-                            >
-                              {item.priority}
-                            </Badge>
-                          </div>
-                          {item.note ? (
-                            <div
-                              className="mt-1 text-sm text-muted-foreground"
-                              data-testid={`text-wishlist-note-${item.id}`}
-                            >
-                              {item.note}
-                            </div>
-                          ) : null}
-                          {isClaimed ? (
-                            <div
-                              className="mt-3 text-xs text-muted-foreground"
-                              data-testid={`status-wishlist-claimed-${item.id}`}
-                            >
-                              Claimed by <span className="font-medium">{claimed[item.id]}</span>
-                            </div>
-                          ) : (
-                            <div
-                              className="mt-3 text-xs text-muted-foreground"
-                              data-testid={`status-wishlist-open-${item.id}`}
-                            >
-                              Not claimed yet
-                            </div>
-                          )}
+                    <Card key={item.id} className="surface rounded-2xl p-5 group">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Badge variant="secondary" className="mb-2 text-[10px] rounded-full uppercase tracking-widest">{item.priority}</Badge>
+                          <h4 className="font-bold">{item.title}</h4>
+                          <p className="text-sm text-muted-foreground mt-1">{item.note}</p>
+                          {isClaimed && <p className="text-[10px] text-primary font-bold mt-2 uppercase">Claimed by {isClaimed}</p>}
                         </div>
-
-                        <div className="flex shrink-0 flex-col gap-2">
-                          {!isClaimed ? (
-                            <Button
-                              onClick={() => claimItem(item.id)}
-                              className="gap-2"
-                              data-testid={`button-claim-${item.id}`}
-                            >
-                              <Gift className="h-4 w-4" />
-                              Claim
-                            </Button>
-                          ) : (
-                            <Button
-                              variant="secondary"
-                              onClick={() => unclaimItem(item.id)}
-                              data-testid={`button-unclaim-${item.id}`}
-                            >
-                              Unclaim
-                            </Button>
-                          )}
-                        </div>
+                        <Button 
+                          variant={isClaimed ? "ghost" : "outline"}
+                          size="sm"
+                          className="rounded-full"
+                          onClick={() => isClaimed ? unclaimItem(item.id) : claimItem(item.id)}
+                        >
+                          {isClaimed ? "Unclaim" : "Claim"}
+                        </Button>
                       </div>
                     </Card>
                   );
                 })}
               </div>
-            </section>
-          </TabsContent>
-
-          <TabsContent value="seating" className="mt-6">
-            <section className="grid gap-4" data-testid="section-seating">
-              <div>
-                <h2
-                  className="font-display text-2xl tracking-tight"
-                  data-testid="text-seating-title"
-                >
-                  Seating allocation
-                </h2>
-                <p
-                  className="mt-1 text-sm text-muted-foreground"
-                  data-testid="text-seating-subtitle"
-                >
-                  RSVP assigns an available seat automatically. You can also pick a seat
-                  manually here.
-                </p>
-              </div>
-
-              <Card className="surface rounded-2xl p-5" data-testid="card-seating">
-                <div className="grid gap-4 lg:grid-cols-[.9fr_1.1fr]">
-                  <div>
-                    <div className="rounded-2xl border bg-card/60 p-4">
-                      <div
-                        className="text-sm font-semibold"
-                        data-testid="text-your-seat-title"
-                      >
-                        Your assigned seat
-                      </div>
-                      <div
-                        className="mt-1 text-sm text-muted-foreground"
-                        data-testid="text-your-seat-value"
-                      >
-                        {assignedSeatForName
-                          ? formatSeat(assignedSeatForName)
-                          : "Add your name above, then RSVP (or pick a seat)."}
-                      </div>
-                      <div className="mt-3 flex gap-2">
-                        <Button
-                          variant="secondary"
-                          className="gap-2"
-                          onClick={() => {
-                            const key = slugify(inviteeName);
-                            if (!key) {
-                              toast({
-                                title: "Add your name",
-                                description: "Type your name first.",
-                                variant: "destructive",
-                              });
-                              return;
-                            }
-                            if (availableSeatIds.length === 0) {
-                              toast({
-                                title: "No seats left",
-                                description: "All seats in this prototype are taken.",
-                                variant: "destructive",
-                              });
-                              return;
-                            }
-                            setSeatAssignments((prev) => ({
-                              ...prev,
-                              [key]: availableSeatIds[0],
-                            }));
-                            toast({
-                              title: "Seat assigned",
-                              description: "We picked the next available seat.",
-                            });
-                          }}
-                          data-testid="button-auto-seat"
-                        >
-                          <Sparkles className="h-4 w-4" />
-                          Auto assign
-                        </Button>
-
-                        <Button
-                          variant="secondary"
-                          onClick={() => {
-                            const key = slugify(inviteeName);
-                            if (!key) return;
-                            setSeatAssignments((prev) => {
-                              if (!prev[key]) return prev;
-                              const next = { ...prev };
-                              delete next[key];
-                              return next;
-                            });
-                          }}
-                          data-testid="button-clear-seat"
-                        >
-                          Clear
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 rounded-2xl border bg-card/60 p-4">
-                      <div
-                        className="text-sm font-semibold"
-                        data-testid="text-seats-left"
-                      >
-                        Seats left
-                      </div>
-                      <div
-                        className="mt-1 text-sm text-muted-foreground"
-                        data-testid="text-seats-left-value"
-                      >
-                        {availableSeatIds.length} available
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      {seats.map((seat) => {
-                        const takenBy = Object.entries(seatAssignments).find(
-                          ([, seatId]) => seatId === seat.id,
-                        )?.[0];
-                        const isTaken = Boolean(takenBy);
-                        const displayName =
-                          isTaken && takenBy ? takenBy.replace(/-/g, " ") : "";
-
-                        return (
-                          <button
-                            key={seat.id}
-                            className={`surface group relative w-full rounded-2xl p-4 text-left transition hover:translate-y-[-1px] ${
-                              isTaken ? "opacity-75" : ""
-                            }`}
-                            onClick={() => {
-                              const key = slugify(inviteeName);
-                              if (!key) {
-                                toast({
-                                  title: "Add your name",
-                                  description: "Type your name first.",
-                                  variant: "destructive",
-                                });
-                                return;
-                              }
-                              const taken = new Set(Object.values(seatAssignments));
-                              const seatIsTaken = taken.has(seat.id);
-                              const currentlyAssigned = seatAssignments[key];
-
-                              if (seatIsTaken && currentlyAssigned !== seat.id) {
-                                toast({
-                                  title: "Seat taken",
-                                  description: "Pick another seat.",
-                                  variant: "destructive",
-                                });
-                                return;
-                              }
-
-                              setSeatAssignments((prev) => ({ ...prev, [key]: seat.id }));
-                            }}
-                            data-testid={`button-seat-${seat.id}`}
-                          >
-                            <div className="flex items-start justify-between gap-3">
-                              <div>
-                                <div
-                                  className="text-sm font-semibold"
-                                  data-testid={`text-seat-label-${seat.id}`}
-                                >
-                                  {formatSeat(seat)}
-                                </div>
-                                <div
-                                  className="mt-1 text-xs text-muted-foreground"
-                                  data-testid={`text-seat-status-${seat.id}`}
-                                >
-                                  {isTaken
-                                    ? `Reserved for ${displayName}`
-                                    : "Available"}
-                                </div>
-                              </div>
-                              <div
-                                className={`rounded-xl p-2 ${
-                                  isTaken
-                                    ? "bg-[hsl(var(--muted)/.6)] text-muted-foreground"
-                                    : "bg-[hsl(var(--accent)/.12)] text-[hsl(var(--accent))]"
-                                }`}
-                              >
-                                <Armchair className="h-5 w-5" />
-                              </div>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            </section>
-          </TabsContent>
-        </Tabs>
-
-        <footer
-          className="mt-12 flex flex-col items-center gap-2 text-center text-sm text-muted-foreground"
-          data-testid="footer"
-        >
-          <div className="inline-flex items-center gap-2">
-            <Heart className="h-4 w-4 text-[hsl(var(--primary))]" />
-            <span data-testid="text-footer">With love, we can’t wait to celebrate.</span>
+            </div>
           </div>
-          <div data-testid="text-footer-note">
-            Tip: replace the names, date, venue and timeline text with your real details.
+        </section>
+
+        {/* Footer */}
+        <footer className="py-20 border-t border-border/50 text-center">
+          <div className="flex items-center justify-center gap-2 text-primary mb-4">
+            <Heart className="h-5 w-5 fill-current" />
           </div>
+          <p className="font-display text-2xl mb-8">See you there!</p>
+          <Button variant="ghost" onClick={handleCopyLink} className="rounded-full text-muted-foreground">
+            <Copy className="mr-2 h-4 w-4" />
+            Share Invitation Link
+          </Button>
         </footer>
       </div>
     </div>
   );
 }
+
