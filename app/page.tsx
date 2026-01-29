@@ -465,9 +465,10 @@ export default function SaveTheDate() {
             className="mx-auto max-w-4xl"
           >
             <div className="mb-6 flex flex-col items-center gap-4">
-              <div className="inline-flex items-center gap-2 rounded-full border bg-card/70 px-4 py-1.5 text-xs font-medium tracking-wide text-muted-foreground backdrop-blur-md">
-                <Sparkles className="h-4 w-4" />
-                <span>SAVE THE DATE</span>
+              <div className="inline-flex items-center gap-3 rounded-full border bg-card/70 px-6 py-3 text-lg font-medium tracking-widest text-muted-foreground backdrop-blur-md">
+                <span className="text-2xl">✿</span>
+                <span className="font-display text-xl sm:text-2xl">SAVE THE DATE</span>
+                <span className="text-2xl">✿</span>
               </div>
               <Button
                 onClick={handleSaveToCalendar}
@@ -856,7 +857,7 @@ export default function SaveTheDate() {
           </Card>
         </section>
 
-        <footer className="border-t py-12 mt-12">
+        <footer className="py-12 mt-12">
           <div className="mx-auto max-w-4xl px-4 text-center">
             <p className="font-display text-2xl">
               {wedding.couple.bride} & {wedding.couple.groom}
