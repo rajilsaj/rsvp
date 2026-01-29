@@ -579,7 +579,22 @@ export default function SaveTheDate() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
+        <section className="relative py-24 overflow-hidden">
+          <div className="absolute inset-0 z-0">
+            <iframe
+              width="100%"
+              height="100%"
+              src="https://www.youtube.com/embed/gSOCywBff2Q?autoplay=1&mute=1&loop=1&playlist=gSOCywBff2Q&controls=0&showinfo=0&rel=0&modestbranding=1"
+              title="Venue Video Background"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              className="w-full h-full object-cover scale-150 pointer-events-none"
+              style={{ minHeight: '100%', minWidth: '100%' }}
+            />
+            <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" />
+          </div>
+          
+          <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
           <div className="grid gap-12 lg:grid-cols-2">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -593,19 +608,6 @@ export default function SaveTheDate() {
                 We've chosen a place that feels like home. Join us at the{" "}
                 {wedding.venue.name} for an unforgettable evening.
               </p>
-
-              <div className="rounded-3xl overflow-hidden mb-6">
-                <iframe
-                  width="100%"
-                  height="250"
-                  src="https://www.youtube.com/embed/gSOCywBff2Q"
-                  title="Venue Video"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="rounded-3xl"
-                />
-              </div>
 
               <Card className="surface rounded-3xl overflow-hidden">
                 <div className="p-8">
@@ -726,6 +728,7 @@ export default function SaveTheDate() {
                 )}
               </Card>
             </motion.div>
+          </div>
           </div>
         </section>
 
