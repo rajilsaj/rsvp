@@ -57,8 +57,8 @@ type TimelineItem = {
 
 const wedding = {
   couple: {
-    bride: "Your Sister",
-    groom: "Partner",
+    bride: "Grace",
+    groom: "Noelvie",
   },
   dateLabel: "Saturday • 20 June 2026",
   timeLabel: "4:00 PM",
