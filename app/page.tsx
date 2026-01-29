@@ -58,24 +58,38 @@ type EventItem = {
   description: string;
 };
 
-const incomingEvents: EventItem[] = [
+const incomingEvents: (EventItem & { icon: string; color: string })[] = [
   {
     id: "parents",
     title: "Meeting with Parents",
     date: "May 15, 2026",
     description: "Traditional introduction and family gathering.",
+    icon: "👨‍👩‍👧‍👦",
+    color: "from-cyan-400 to-blue-500",
   },
   {
     id: "dinner",
     title: "Pre-Wedding Dinner",
     date: "June 18, 2026",
     description: "An intimate dinner with our closest friends and family.",
+    icon: "🍽️",
+    color: "from-blue-500 to-indigo-500",
   },
   {
     id: "rehearsal",
     title: "Wedding Rehearsal",
     date: "June 19, 2026",
     description: "Final run-through at the venue.",
+    icon: "💒",
+    color: "from-indigo-500 to-purple-500",
+  },
+  {
+    id: "wedding",
+    title: "Wedding Day",
+    date: "June 20, 2026",
+    description: "The big day! Join us to celebrate.",
+    icon: "💍",
+    color: "from-pink-500 to-rose-500",
   },
 ];
 
@@ -555,7 +569,7 @@ export default function SaveTheDate() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-4xl px-4 py-24 sm:px-6">
+        <section className="mx-auto max-w-6xl px-4 py-24 sm:px-6 overflow-hidden">
           <div className="text-center mb-16">
             <h2 className="font-display text-4xl tracking-tight sm:text-5xl">
               Upcoming Celebrations
@@ -565,28 +579,41 @@ export default function SaveTheDate() {
             </p>
           </div>
 
-          <div className="grid gap-6">
-            {incomingEvents.map((event) => (
-              <Card
-                key={event.id}
-                className="surface rounded-2xl p-6 border-l-4 border-l-primary"
-              >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
-                    <h3 className="text-xl font-bold">{event.title}</h3>
-                    <p className="mt-1 text-muted-foreground">
-                      {event.description}
-                    </p>
+          <div className="relative">
+            <div className="hidden sm:block absolute top-16 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-400 via-purple-500 to-rose-500" />
+            
+            <div className="flex flex-col sm:flex-row sm:justify-between gap-8 sm:gap-4">
+              {incomingEvents.map((event, index) => (
+                <motion.div
+                  key={event.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.15 }}
+                  className="flex-1 text-center"
+                >
+                  <div className="flex flex-col items-center">
+                    <div className={`w-16 h-20 bg-gradient-to-b ${event.color} rounded-full rounded-b-full relative flex items-center justify-center shadow-lg`}>
+                      <span className="text-2xl">{event.icon}</span>
+                      <div className={`absolute -bottom-2 w-3 h-3 bg-gradient-to-b ${event.color} rotate-45`} />
+                    </div>
+                    
+                    <div className="mt-8 px-2">
+                      <h3 className="text-lg font-bold text-foreground">{event.title}</h3>
+                      <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                        {event.description}
+                      </p>
+                      <Badge
+                        variant="secondary"
+                        className="mt-3 px-3 py-1 rounded-full text-xs"
+                      >
+                        {event.date}
+                      </Badge>
+                    </div>
                   </div>
-                  <Badge
-                    variant="secondary"
-                    className="w-fit px-4 py-1.5 rounded-full text-sm"
-                  >
-                    {event.date}
-                  </Badge>
-                </div>
-              </Card>
-            ))}
+                </motion.div>
+              ))}
+            </div>
           </div>
         </section>
 
