@@ -182,20 +182,6 @@ const timelineItems: TimelineItem[] = [
   },
 ];
 
-const loveStory = `Grace and Noelvie's journey began as a simple friendship in 2015 — but it was truly the answer to a whispered prayer from both of them.
-
-What first caught Grace's eye was a photo of Noelvie, standing behind the counter at Wendy's, wearing her cap and filled with hard work and perseverance. Even in that simple uniform, she looked effortlessly beautiful — her bright smile, her focused eyes, and the warmth she radiated made him want to know the heart behind that pretty face. And all these years later, that same beauty still captivates him every single day.
-
-Their first date was at a Chinese Buffet restaurant. On the way there, Noelvie, who was very sick and had a runny nose, didn't have a tissue. Without hesitation, Grace gently used his own hands to wipe her nose for her — a small, tender act that showed his true heart: caring, selfless, and real. That night, they sat together sharing good food and endless laughter.
-
-Their second date was just as meaningful. They sat together in a parked car under the night sky, watching a sermon and sharing dreams about putting God first — deciding that faith would always be the foundation of their love.
-
-After two beautiful years of growing together, Grace asked Noelvie to be his fiancee at a traditional engagement filled with family and friends. From that moment, they continued to build their bond through honest love, friendship, and faith.
-
-Now, after several wonderful years of knowing each other, growing together, laughing, praying, and loving deeply, Grace and Noelvie are ready to share their joy through their traditional marriage celebration and white wedding — honoring what began in quiet prayers and gentle promises.
-
-And if you're wondering who said "I love you" first — of course, it was Grace!`;
-
 function slugify(input: string) {
   return input
     .toLowerCase()
@@ -527,28 +513,28 @@ export default function SaveTheDate() {
             <div className="mx-auto mt-4 h-1 w-12 bg-primary rounded-full" />
           </div>
 
-          <div className="space-y-12">
+          <div className="space-y-16">
             {timelineItems.map((item, index) => (
               <motion.div
                 key={item.id}
-                initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
-                className={`flex gap-8 items-center ${index % 2 === 1 ? "flex-row-reverse text-right" : ""}`}
+                className={`flex flex-col ${index % 2 === 1 ? "sm:flex-row-reverse" : "sm:flex-row"} gap-8 items-center`}
               >
-                <div className="hidden sm:block h-32 w-32 shrink-0 overflow-hidden rounded-3xl surface">
+                <div className="w-full sm:w-1/2 overflow-hidden rounded-3xl surface group cursor-pointer">
                   <img
                     src={item.image}
                     alt={item.title}
-                    className="h-full w-full object-cover"
+                    className="w-full h-64 sm:h-80 object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                 </div>
-                <div>
+                <div className={`w-full sm:w-1/2 ${index % 2 === 1 ? "sm:text-right" : ""}`}>
                   <span className="text-sm font-bold tracking-widest text-primary uppercase">
                     {item.dateLabel}
                   </span>
-                  <h3 className="mt-1 text-2xl font-bold">{item.title}</h3>
-                  <p className="mt-2 text-muted-foreground leading-relaxed">
+                  <h3 className="mt-2 text-3xl font-bold">{item.title}</h3>
+                  <p className="mt-3 text-muted-foreground leading-relaxed text-lg">
                     {item.description}
                   </p>
                 </div>
@@ -556,15 +542,6 @@ export default function SaveTheDate() {
             ))}
           </div>
 
-          <Card className="surface rounded-3xl p-8 mt-16">
-            <div className="prose prose-lg max-w-none text-muted-foreground leading-relaxed">
-              {loveStory.split('\n\n').map((paragraph, i) => (
-                <p key={i} className={i === loveStory.split('\n\n').length - 1 ? "text-primary font-medium italic" : ""}>
-                  {paragraph}
-                </p>
-              ))}
-            </div>
-          </Card>
         </section>
 
         <section className="mx-auto max-w-4xl px-4 py-24 sm:px-6">
