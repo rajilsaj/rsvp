@@ -3,16 +3,16 @@ import { Providers } from "./providers";
 import "@/styles/globals.css";
 
 export const metadata: Metadata = {
-  title: "Save the Date — Grace & Noelvie",
+  title: "Grace & Noelvie — Our Wedding",
   description: "Join us to celebrate the wedding of Grace & Noelvie on June 20, 2026. RSVP, find your seat, and explore our story.",
   openGraph: {
-    title: "Save the Date — Grace & Noelvie",
+    title: "Grace & Noelvie — Our Wedding",
     description: "Join us to celebrate the wedding of Grace & Noelvie on June 20, 2026.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Save the Date — Grace & Noelvie",
+    title: "Grace & Noelvie — Our Wedding",
     description: "Join us to celebrate the wedding of Grace & Noelvie on June 20, 2026.",
   },
   icons: {
