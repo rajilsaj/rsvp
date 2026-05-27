@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { QRCodeSVG } from "qrcode.react";
@@ -212,7 +213,27 @@ function formatSeat(seat: Seat) {
   return `${seat.table} • Seat ${seat.seat}`;
 }
 
+// Cookie helpers
+function getCookie(name: string) {
+  const nameEQ = name + "=";
+  const ca = document.cookie.split(";");
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) === " ") c = c.substring(1, c.length);
+    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+  }
+  return null;
+}
+
+function setCookie(name: string, value: string, days: number = 365) {
+  const date = new Date();
+  date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+  const expires = "; expires=" + date.toUTCString();
+  document.cookie = name + "=" + (value || "") + expires + "; path=/";
+}
+
 export default function SaveTheDate() {
+  const router = useRouter();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -236,29 +257,53 @@ export default function SaveTheDate() {
   const [inviteePhone, setInviteePhone] = useState("");
   const [inviteeStatus, setInviteeStatus] = useState<RSVPStatus>("yes");
   const [myRsvp, setMyRsvp] = useState<Rsvp | null>(null);
+  const [qrOrigin, setQrOrigin] = useState("");
 
   useEffect(() => {
-    const savedPhone = localStorage.getItem("wedding_rsvp_phone");
-    if (savedPhone) {
-      setInviteePhone(savedPhone);
-      fetch(`/api/rsvps/lookup?phone=${encodeURIComponent(savedPhone)}`)
-        .then((res) => (res.ok ? res.json() : null))
-        .then((rsvp) => {
-          if (rsvp) {
-            setMyRsvp(rsvp);
-            setInviteeName(rsvp.name);
-          }
-        })
-        .catch(() => {});
-    }
+    setQrOrigin(window.location.origin);
   }, []);
 
+  useEffect(() => {
+    const savedName = getCookie("wedding_rsvp_name");
+    const savedPhone = getCookie("wedding_rsvp_phone");
+    
+    if (!savedName) {
+      router.push("/rsvp");
+      return;
+    }
+    
+    setInviteePhone(savedPhone || "");
+    fetch(`/api/guests`)
+      .then((res) => (res.ok ? res.json() : []))
+      .then((guests: any[]) => {
+        const rsvp = guests.find(g => 
+          g.names.trim().toLowerCase() === savedName.trim().toLowerCase()
+        );
+        if (rsvp) {
+          setMyRsvp({
+            ...rsvp,
+            name: rsvp.names,
+            status: rsvp.attending,
+            guests: (rsvp.plusOnes || 0) + 1
+          });
+          setInviteeName(rsvp.names);
+        }
+      })
+      .catch(() => {});
+  }, [router]);
+
   const { data: rsvps = [] } = useQuery<Rsvp[]>({
-    queryKey: ["/api/rsvps"],
+    queryKey: ["/api/guests"],
     queryFn: async () => {
-      const res = await fetch("/api/rsvps");
+      const res = await fetch("/api/guests");
       if (!res.ok) throw new Error("Failed to fetch RSVPs");
-      return res.json();
+      const data = await res.json();
+      return data.map((r: any) => ({ 
+        ...r, 
+        name: r.names,
+        status: r.attending,
+        guests: (r.plusOnes || 0) + 1
+      }));
     },
   });
 
@@ -280,17 +325,23 @@ export default function SaveTheDate() {
       notes?: string;
       seatId?: string;
     }) => {
-      const res = await fetch("/api/rsvps", {
+      const res = await fetch("/api/rsvp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newRsvp),
+        body: JSON.stringify({
+          names: newRsvp.name,
+          phone: newRsvp.phone,
+          attending: newRsvp.status,
+          plusOnes: newRsvp.guests - 1,
+        }),
       });
       if (!res.ok) throw new Error("Failed to submit RSVP");
       return res.json();
     },
     onSuccess: (data: Rsvp) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/rsvps"] });
-      localStorage.setItem("wedding_rsvp_phone", data.phone);
+      queryClient.invalidateQueries({ queryKey: ["/api/guests"] });
+      setCookie("wedding_rsvp_name", data.name);
+      setCookie("wedding_rsvp_phone", data.phone);
       setMyRsvp(data);
       toast({
         title: "RSVP received",
@@ -475,20 +526,18 @@ export default function SaveTheDate() {
             className="mx-auto max-w-4xl"
           >
             <div className="mb-6 flex flex-col items-center gap-4">
-              <div className="inline-flex items-center gap-3 rounded-full border bg-card/70 px-6 py-3 text-lg font-medium tracking-widest text-muted-foreground backdrop-blur-md">
-                <span className="text-2xl" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>✿</span>
-                <span className="font-display text-xl sm:text-2xl">SAVE THE DATE</span>
-                <span className="text-2xl" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>✿</span>
-              </div>
               <p className="text-white/90 text-sm sm:text-base italic drop-shadow-md mt-2">
                 "What God has joined together, let no one separate." — Mark 10:9
               </p>
               <Button
-                onClick={handleSaveToCalendar}
+                onClick={() => {
+                  const el = document.getElementById("rsvp-section");
+                  if (el) el.scrollIntoView({ behavior: "smooth" });
+                }}
                 className="rounded-full px-8 py-6 text-lg font-bold shadow-xl hover:scale-105 transition-transform"
               >
-                <CalendarDays className="mr-2 h-5 w-5" />
-                Save to Calendar
+                <Heart className="mr-2 h-5 w-5 fill-current" />
+                RSVP Now
               </Button>
             </div>
             <h1 className="font-wedding text-7xl leading-[1.2] tracking-normal sm:text-9xl text-white drop-shadow-lg">
@@ -609,7 +658,7 @@ export default function SaveTheDate() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
+        <section id="rsvp-section" className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
           <div className="grid gap-12 lg:grid-cols-2">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -855,7 +904,7 @@ export default function SaveTheDate() {
           <Card className="surface rounded-2xl p-8 text-center max-w-sm mx-auto">
             <div className="bg-white p-6 rounded-2xl inline-block">
               <QRCodeSVG
-                value={typeof window !== 'undefined' ? `${window.location.origin}/find-seat` : '/find-seat'}
+                value={qrOrigin ? `${qrOrigin}/find-seat` : "/find-seat"}
                 size={200}
                 level="H"
                 includeMargin={false}
@@ -867,7 +916,7 @@ export default function SaveTheDate() {
           </Card>
         </section>
 
-        <footer className="py-12 border-t">
+        <footer className="py-12">
           <div className="mx-auto max-w-4xl px-4 text-center">
             <p className="font-wedding text-4xl">
               {wedding.couple.bride} & {wedding.couple.groom}
