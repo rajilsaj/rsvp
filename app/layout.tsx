@@ -3,20 +3,17 @@ import { Providers } from "./providers";
 import "@/styles/globals.css";
 
 export const metadata: Metadata = {
-  title: "Save the Date — Wedding",
-  description: "A beautiful save-the-date with venue details, RSVP, seating, wishlist, and a love story timeline.",
+  title: "Save the Date — Grace & Noelvie",
+  description: "Join us to celebrate the wedding of Grace & Noelvie on June 20, 2026. RSVP, find your seat, and explore our story.",
   openGraph: {
-    title: "Save the Date — Wedding",
-    description: "A beautiful save-the-date with venue details, RSVP, seating, wishlist, and a love story timeline.",
+    title: "Save the Date — Grace & Noelvie",
+    description: "Join us to celebrate the wedding of Grace & Noelvie on June 20, 2026.",
     type: "website",
-    images: ["https://replit.com/public/images/opengraph.png"],
   },
   twitter: {
     card: "summary_large_image",
-    site: "@replit",
-    title: "Save the Date — Wedding",
-    description: "A beautiful save-the-date with venue details, RSVP, seating, wishlist, and a love story timeline.",
-    images: ["https://replit.com/public/images/opengraph.png"],
+    title: "Save the Date — Grace & Noelvie",
+    description: "Join us to celebrate the wedding of Grace & Noelvie on June 20, 2026.",
   },
   icons: {
     icon: "/favicon.png",
