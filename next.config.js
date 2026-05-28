@@ -3,6 +3,9 @@ const nextConfig = {
   reactStrictMode: true,
   serverExternalPackages: ["googleapis", "twilio", "resend"],
   allowedDevOrigins: ["10.5.0.2"],
-};
+  turbopack: {
+    root: ".",
+  },
+}
 
-export default nextConfig;
+export default nextConfig
