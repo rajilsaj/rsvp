@@ -45,3 +45,6 @@ coverage/
 
 #Script
 rewrite.py
+
+# Google credentials
+credentials.json
