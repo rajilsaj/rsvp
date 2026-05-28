@@ -242,6 +242,7 @@ export default function SaveTheDate() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  const [checking, setChecking] = useState(true);
   const [inviteeName, setInviteeName] = useState("");
   const [inviteePhone, setInviteePhone] = useState("");
   const [inviteeStatus, setInviteeStatus] = useState<RSVPStatus>("yes");
@@ -271,6 +272,7 @@ export default function SaveTheDate() {
     const savedName = getCookie("wedding_rsvp_name");
     const savedPhone = getCookie("wedding_rsvp_phone");
     if (!savedName) { router.push("/rsvp"); return; }
+    setChecking(false);
     setInviteePhone(savedPhone || "");
     fetch(`/api/guests`)
       .then((res) => (res.ok ? res.json() : []))
@@ -374,6 +376,14 @@ export default function SaveTheDate() {
     let seatId: string | undefined;
     if (key && !seatAssignments[key] && availableSeatIds.length > 0) seatId = availableSeatIds[0];
     rsvpMutation.mutate({ name, phone: inviteePhone.trim(), guests: 1, status: inviteeStatus, seatId });
+  }
+
+  if (checking) {
+    return (
+      <div className="min-h-[100dvh] bg-[#faf9f6] flex items-center justify-center">
+        <div className="w-6 h-6 rounded-full border-2 border-teal-accent border-t-transparent animate-spin" />
+      </div>
+    );
   }
 
   return (

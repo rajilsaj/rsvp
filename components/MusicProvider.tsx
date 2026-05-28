@@ -16,6 +16,8 @@ export const useMusic = () => useContext(MusicContext);
 const VIDEO_ID = "2bOXtkFb9FY";
 let _player: any = null;
 let _ready = false;
+let _userHasInteracted = false;
+let _interactionListenerSet = false;
 const _listeners = new Set<(playing: boolean, ready: boolean) => void>();
 
 function notify(playing: boolean, ready: boolean) {
@@ -34,6 +36,32 @@ function getOrCreateDiv() {
   return el;
 }
 
+function tryPlay() {
+  if (_player && _ready && _player.getPlayerState?.() !== 1) {
+    _player.playVideo();
+  }
+}
+
+function addInteractionListeners() {
+  if (_interactionListenerSet || typeof document === "undefined") return;
+  _interactionListenerSet = true;
+
+  function onInteract() {
+    if (_userHasInteracted) return;
+    _userHasInteracted = true;
+    tryPlay();
+    document.removeEventListener("click", onInteract);
+    document.removeEventListener("touchstart", onInteract);
+    document.removeEventListener("keydown", onInteract);
+    document.removeEventListener("scroll", onInteract);
+  }
+
+  document.addEventListener("click", onInteract, { passive: true });
+  document.addEventListener("touchstart", onInteract, { passive: true });
+  document.addEventListener("keydown", onInteract, { passive: true });
+  document.addEventListener("scroll", onInteract, { passive: true });
+}
+
 function createPlayer() {
   if (_player) return;
   getOrCreateDiv();
@@ -41,7 +69,7 @@ function createPlayer() {
   _player = new (window as any).YT.Player("yt-bg-player", {
     videoId: VIDEO_ID,
     playerVars: {
-      autoplay: 1,
+      autoplay: 0,
       controls: 0,
       loop: 1,
       playlist: VIDEO_ID,
@@ -51,8 +79,10 @@ function createPlayer() {
     events: {
       onReady: () => {
         _ready = true;
-        _player?.playVideo();
-        notify(true, true);
+        if (_userHasInteracted) {
+          _player?.playVideo();
+        }
+        notify(false, true);
       },
       onStateChange: (e: any) => {
         if (e.data === 1) notify(true, true);           // playing
@@ -65,6 +95,7 @@ function createPlayer() {
 
 function bootstrapYT() {
   if (typeof window === "undefined") return;
+  addInteractionListeners();
   if (_player) return; // already running
 
   if ((window as any).YT?.Player) {
@@ -102,6 +133,7 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
     if (_player && _ready) {
       setReady(true);
       setPlaying(_player.getPlayerState?.() === 1);
+      addInteractionListeners();
     } else {
       bootstrapYT();
     }

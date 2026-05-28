@@ -4,6 +4,17 @@ All notable changes to this project are documented here.
 
 ---
 
+## [Unreleased] — 2026-05-28
+
+### Fixed
+- **Homepage Flash for Unregistered Users**: The full homepage was rendering before the cookie check `useEffect` fired, causing a visible flash of content before the redirect to `/rsvp`. Added a `checking` state to `app/page.tsx` that renders a minimal spinner while the cookie is verified — unregistered users now see nothing before being sent to the RSVP page.
+- **Music Autoplay Blocked by Browser**: The YouTube player's `onReady` callback called `playVideo()` asynchronously, which browsers silently block under their autoplay policy (audio started outside a user gesture is not allowed). Replaced this with document-level interaction listeners (`click`, `scroll`, `touchstart`, `keydown`) in `components/MusicProvider.tsx` — music now starts automatically on the first user interaction without requiring the dedicated play button.
+
+### Changed
+- **MusicProvider autoplay strategy**: Changed `autoplay: 1` to `autoplay: 0` in the YouTube player config and shifted play responsibility to the first-interaction listener. `onReady` no longer unconditionally calls `playVideo()` — it only does so if the user has already interacted. `onStateChange` remains the source of truth for the playing/paused state.
+
+---
+
 ## [Unreleased] — 2026-05-27
 
 ### Added
