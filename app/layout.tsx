@@ -1,6 +1,26 @@
 import type { Metadata } from "next";
+import { DM_Sans, Fraunces, Great_Vibes } from "next/font/google";
 import { Providers } from "./providers";
 import "@/styles/globals.css";
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "block", // Use 'block' to hide text until font is ready, minimizing FOUT
+});
+
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "block",
+});
+
+const greatVibes = Great_Vibes({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-wedding",
+  display: "block",
+});
 
 export const metadata: Metadata = {
   title: "Grace & Noelvie — Our Wedding",
@@ -26,13 +46,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Fraunces:ital,opsz,wght@0,9..144,200..900;1,9..144,200..900&family=Great+Vibes&display=swap" rel="stylesheet" />
-      </head>
-      <body>
+    <html lang="en" className={`${dmSans.variable} ${fraunces.variable} ${greatVibes.variable}`}>
+      <body className="antialiased">
         <Providers>{children}</Providers>
       </body>
     </html>

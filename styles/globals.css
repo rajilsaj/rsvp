@@ -1,200 +1,71 @@
 @import "tailwindcss";
-@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Wedding Color Palette - Extracted from floral arrangement */
-  /* Burgundy/Wine, Dusty Pink, Cream, Sage Green, Gold, Peach */
-  
-  --md-primary: oklch(0.35 0.12 15);
-  --md-on-primary: oklch(0.98 0.01 60);
-  --md-primary-container: oklch(0.88 0.04 15);
-  --md-on-primary-container: oklch(0.25 0.1 15);
+  /* Wedding Color Palette - Material Design 3 inspired */
+  --md-primary: oklch(0.45 0.12 165); /* Adjusted to a more vibrant teal-green */
+  --md-on-primary: oklch(1 0 0);
+  --md-primary-container: oklch(0.92 0.04 165);
+  --md-on-primary-container: oklch(0.25 0.08 165);
   
   --md-secondary: oklch(0.55 0.06 140);
   --md-on-secondary: oklch(1 0 0);
   --md-secondary-container: oklch(0.92 0.03 140);
   --md-on-secondary-container: oklch(0.3 0.05 140);
   
-  --md-tertiary: oklch(0.7 0.08 70);
-  --md-on-tertiary: oklch(0.25 0.05 70);
-  --md-tertiary-container: oklch(0.92 0.04 70);
-  --md-on-tertiary-container: oklch(0.35 0.06 70);
+  --md-surface: oklch(0.98 0.01 60);
+  --md-on-surface: oklch(0.2 0.02 165);
   
-  --md-error: oklch(0.5 0.2 25);
-  --md-on-error: oklch(1 0 0);
-  --md-error-container: oklch(0.94 0.05 25);
-  --md-on-error-container: oklch(0.25 0.12 25);
-  
-  --md-surface: oklch(0.98 0.008 60);
-  --md-on-surface: oklch(0.25 0.02 15);
-  --md-surface-variant: oklch(0.94 0.015 60);
-  --md-on-surface-variant: oklch(0.45 0.03 15);
-  --md-surface-container-lowest: oklch(0.99 0.005 60);
-  --md-surface-container-low: oklch(0.96 0.01 60);
-  --md-surface-container: oklch(0.94 0.012 60);
-  --md-surface-container-high: oklch(0.92 0.015 60);
-  --md-surface-container-highest: oklch(0.90 0.018 60);
-  
-  --md-outline: oklch(0.6 0.03 15);
-  --md-outline-variant: oklch(0.82 0.02 60);
-  
-  /* Map to existing variables */
+  /* The "Mint" background from the RSVP page */
+  --mint-bg: #c5e0da;
+  --teal-accent: #3d8b7a;
+  --dark-teal: #1d3d37;
+  --error-color: #e11d48;
+
+  /* Standard Tailwind variables mapping */
   --background: var(--md-surface);
   --foreground: var(--md-on-surface);
-  --card: var(--md-surface-container-low);
-  --card-foreground: var(--md-on-surface);
-  --popover: var(--md-surface-container);
-  --popover-foreground: var(--md-on-surface);
-  --primary: var(--md-primary);
-  --primary-foreground: var(--md-on-primary);
-  --secondary: var(--md-secondary-container);
-  --secondary-foreground: var(--md-on-secondary-container);
-  --muted: var(--md-surface-variant);
-  --muted-foreground: var(--md-on-surface-variant);
-  --accent: var(--md-tertiary-container);
-  --accent-foreground: var(--md-on-tertiary-container);
-  --destructive: var(--md-error);
-  --destructive-foreground: var(--md-on-error);
-  --border: var(--md-outline-variant);
-  --input: var(--md-outline-variant);
-  --ring: var(--md-primary);
-  
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  
-  /* MD3 Shape System */
-  --radius: 1rem;
-  --radius-xs: 0.25rem;
-  --radius-sm: 0.5rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.75rem;
-  --radius-full: 9999px;
-  
-  --sidebar: var(--md-surface-container-low);
-  --sidebar-foreground: var(--md-on-surface);
-  --sidebar-primary: var(--md-primary);
-  --sidebar-primary-foreground: var(--md-on-primary);
-  --sidebar-accent: var(--md-secondary-container);
-  --sidebar-accent-foreground: var(--md-on-secondary-container);
-  --sidebar-border: var(--md-outline-variant);
-  --sidebar-ring: var(--md-primary);
+  --primary: var(--teal-accent);
+  --primary-foreground: white;
+  --border: oklch(0.9 0.01 165);
 }
 
-.dark {
-  /* Wedding Color Palette - Dark Theme */
-  --md-primary: oklch(0.75 0.08 15);
-  --md-on-primary: oklch(0.2 0.08 15);
-  --md-primary-container: oklch(0.3 0.1 15);
-  --md-on-primary-container: oklch(0.88 0.04 15);
-  
-  --md-secondary: oklch(0.75 0.05 140);
-  --md-on-secondary: oklch(0.2 0.04 140);
-  --md-secondary-container: oklch(0.3 0.04 140);
-  --md-on-secondary-container: oklch(0.92 0.03 140);
-  
-  --md-tertiary: oklch(0.8 0.06 70);
-  --md-on-tertiary: oklch(0.25 0.05 70);
-  --md-tertiary-container: oklch(0.35 0.06 70);
-  --md-on-tertiary-container: oklch(0.92 0.04 70);
-  
-  --md-error: oklch(0.8 0.12 25);
-  --md-on-error: oklch(0.3 0.15 25);
-  --md-error-container: oklch(0.4 0.15 25);
-  --md-on-error-container: oklch(0.94 0.05 25);
-  
-  --md-surface: oklch(0.15 0.01 60);
-  --md-on-surface: oklch(0.92 0.01 60);
-  --md-surface-variant: oklch(0.28 0.02 60);
-  --md-on-surface-variant: oklch(0.8 0.015 60);
-  --md-surface-container-lowest: oklch(0.1 0.008 60);
-  --md-surface-container-low: oklch(0.18 0.01 60);
-  --md-surface-container: oklch(0.2 0.012 60);
-  --md-surface-container-high: oklch(0.24 0.014 60);
-  --md-surface-container-highest: oklch(0.28 0.016 60);
-  
-  --md-outline: oklch(0.55 0.02 15);
-  --md-outline-variant: oklch(0.35 0.02 60);
-  
-  /* Map to existing variables */
-  --background: var(--md-surface);
-  --foreground: var(--md-on-surface);
-  --card: var(--md-surface-container-low);
-  --card-foreground: var(--md-on-surface);
-  --popover: var(--md-surface-container);
-  --popover-foreground: var(--md-on-surface);
-  --primary: var(--md-primary);
-  --primary-foreground: var(--md-on-primary);
-  --secondary: var(--md-secondary-container);
-  --secondary-foreground: var(--md-on-secondary-container);
-  --muted: var(--md-surface-variant);
-  --muted-foreground: var(--md-on-surface-variant);
-  --accent: var(--md-tertiary-container);
-  --accent-foreground: var(--md-on-tertiary-container);
-  --destructive: var(--md-error);
-  --destructive-foreground: var(--md-on-error);
-  --border: var(--md-outline-variant);
-  --input: var(--md-outline-variant);
-  --ring: var(--md-primary);
-  
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  
-  --sidebar: var(--md-surface-container-low);
-  --sidebar-foreground: var(--md-on-surface);
-  --sidebar-primary: var(--md-primary);
-  --sidebar-primary-foreground: var(--md-on-primary);
-  --sidebar-accent: var(--md-secondary-container);
-  --sidebar-accent-foreground: var(--md-on-secondary-container);
-  --sidebar-border: var(--md-outline-variant);
-  --sidebar-ring: var(--md-primary);
-}
-
-@theme inline {
+@theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --radius-sm: var(--radius-sm);
-  --radius-md: var(--radius-md);
-  --radius-lg: var(--radius-lg);
-  --radius-xl: var(--radius-xl);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
+  --color-input: var(--border);
+  --color-ring: var(--primary);
+  
+  --color-card: var(--background);
+  --color-card-foreground: var(--foreground);
+  
+  --color-popover: var(--background);
+  --color-popover-foreground: var(--foreground);
+  
+  --color-secondary: var(--md-secondary-container);
+  --color-secondary-foreground: var(--md-on-secondary-container);
+  
+  --color-muted: var(--md-secondary-container);
+  --color-muted-foreground: var(--md-on-secondary-container);
+  
+  --color-accent: var(--md-primary-container);
+  --color-accent-foreground: var(--md-on-primary-container);
+  
+  --color-destructive: var(--error-color);
+  --color-destructive-foreground: white;
+
+  --color-mint: var(--mint-bg);
+  --color-teal-accent: var(--teal-accent);
+  --color-dark-teal: var(--dark-teal);
+  --color-error: var(--error-color);
+  
+  --font-wedding: var(--font-wedding), cursive;
+  --font-display: var(--font-display), serif;
+  --font-sans: var(--font-sans), sans-serif;
 }
 
 @layer base {
@@ -205,61 +76,24 @@
     @apply bg-background text-foreground font-sans antialiased;
   }
   .font-display {
-    font-family: 'Fraunces', serif;
+    font-family: var(--font-display), serif;
     font-optical-sizing: auto;
     font-style: normal;
     font-variation-settings: "SOFT" 100, "WONK" 1;
   }
   .font-wedding {
-    font-family: 'Great Vibes', cursive;
+    font-family: var(--font-wedding), cursive;
     font-weight: 400;
   }
   .font-sans {
-    font-family: 'DM Sans', sans-serif;
+    font-family: var(--font-sans), sans-serif;
     font-optical-sizing: auto;
     font-style: normal;
     font-weight: 400;
   }
   
-  /* MD3 Surface styles with tonal elevation */
   .surface {
     @apply bg-card border border-border;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  }
-  .surface-elevated {
-    @apply bg-card border-0;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
-  }
-  .surface-container {
-    background: var(--md-surface-container);
-  }
-  .surface-container-high {
-    background: var(--md-surface-container-high);
-  }
-}
-
-/* MD3 State Layer Effects */
-@layer utilities {
-  .state-layer {
-    position: relative;
-    overflow: hidden;
-  }
-  .state-layer::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: currentColor;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    pointer-events: none;
-  }
-  .state-layer:hover::before {
-    opacity: 0.08;
-  }
-  .state-layer:focus-visible::before {
-    opacity: 0.12;
-  }
-  .state-layer:active::before {
-    opacity: 0.12;
   }
 }

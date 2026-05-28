@@ -21,6 +21,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { getCookie, setCookie } from "@/lib/cookies";
 import dynamic from "next/dynamic";
 
 const VenueMap = dynamic(() => import("@/components/VenueMap"), {
@@ -35,7 +36,7 @@ const VenueMap = dynamic(() => import("@/components/VenueMap"), {
 type RSVPStatus = "yes" | "no" | "maybe";
 
 type Rsvp = {
-  id: number;
+  id: string | number;
   name: string;
   phone: string;
   guests: number;
@@ -124,7 +125,8 @@ const wedding = {
     address: "375 Moores Pond Rd, Youngsville, NC 27596",
     phone: "(919) 746-3331",
     email: "Pinehillpavilion@gmail.com",
-    mapUrl: "https://maps.google.com/?q=375+Moores+Pond+Rd+Youngsville+NC+27596",
+    mapUrl:
+      "https://maps.google.com/?q=375+Moores+Pond+Rd+Youngsville+NC+27596",
   },
 };
 
@@ -175,28 +177,32 @@ const timelineItems: TimelineItem[] = [
     id: "meet",
     dateLabel: "2015",
     title: "A friendship begins",
-    description: "Their journey began as a simple friendship — but it was truly the answer to a whispered prayer from both Grace and Noelvie.",
+    description:
+      "Their journey began as a simple friendship — but it was truly the answer to a whispered prayer from both Grace and Noelvie.",
     image: "/images/story-1.jpg",
   },
   {
     id: "first-date",
     dateLabel: "First Date",
     title: "The Chinese buffet",
-    description: "At a Chinese Buffet restaurant, Grace gently used his own hands to wipe Noelvie's nose — a tender act that showed his true heart: caring, selfless, and real.",
+    description:
+      "At a Chinese Buffet restaurant, Grace gently used his own hands to wipe Noelvie's nose — a tender act that showed his true heart: caring, selfless, and real.",
     image: "/images/story-2.jpg",
   },
   {
     id: "proposal",
     dateLabel: "2017",
     title: "The engagement",
-    description: "After two beautiful years of growing together, Grace asked Noelvie to be his fiancee at a traditional engagement filled with family and friends.",
+    description:
+      "After two beautiful years of growing together, Grace asked Noelvie to be his fiancee at a traditional engagement filled with family and friends.",
     image: "/images/story-3.jpg",
   },
   {
     id: "wedding",
     dateLabel: "2026",
     title: "Wedding day",
-    description: "Now, after years of knowing, growing, laughing, praying, and loving deeply — they are ready to celebrate with family and friends.",
+    description:
+      "Now, after years of knowing, growing, laughing, praying, and loving deeply — they are ready to celebrate with family and friends.",
     image: "/images/story-4.jpg",
   },
 ];
@@ -211,25 +217,6 @@ function slugify(input: string) {
 
 function formatSeat(seat: Seat) {
   return `${seat.table} • Seat ${seat.seat}`;
-}
-
-// Cookie helpers
-function getCookie(name: string) {
-  const nameEQ = name + "=";
-  const ca = document.cookie.split(";");
-  for (let i = 0; i < ca.length; i++) {
-    let c = ca[i];
-    while (c.charAt(0) === " ") c = c.substring(1, c.length);
-    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-  }
-  return null;
-}
-
-function setCookie(name: string, value: string, days: number = 365) {
-  const date = new Date();
-  date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-  const expires = "; expires=" + date.toUTCString();
-  document.cookie = name + "=" + (value || "") + expires + "; path=/";
 }
 
 export default function SaveTheDate() {
@@ -266,25 +253,26 @@ export default function SaveTheDate() {
   useEffect(() => {
     const savedName = getCookie("wedding_rsvp_name");
     const savedPhone = getCookie("wedding_rsvp_phone");
-    
+
     if (!savedName) {
       router.push("/rsvp");
       return;
     }
-    
+
     setInviteePhone(savedPhone || "");
     fetch(`/api/guests`)
       .then((res) => (res.ok ? res.json() : []))
       .then((guests: any[]) => {
-        const rsvp = guests.find(g => 
-          g.names.trim().toLowerCase() === savedName.trim().toLowerCase()
+        const rsvp = guests.find(
+          (g) =>
+            g.names.trim().toLowerCase() === savedName.trim().toLowerCase(),
         );
         if (rsvp) {
           setMyRsvp({
             ...rsvp,
             name: rsvp.names,
             status: rsvp.attending,
-            guests: (rsvp.plusOnes || 0) + 1
+            guests: (rsvp.plusOnes || 0) + 1,
           });
           setInviteeName(rsvp.names);
         }
@@ -298,11 +286,11 @@ export default function SaveTheDate() {
       const res = await fetch("/api/guests");
       if (!res.ok) throw new Error("Failed to fetch RSVPs");
       const data = await res.json();
-      return data.map((r: any) => ({ 
-        ...r, 
+      return data.map((r: any) => ({
+        ...r,
         name: r.names,
         status: r.attending,
-        guests: (r.plusOnes || 0) + 1
+        guests: (r.plusOnes || 0) + 1,
       }));
     },
   });
@@ -338,15 +326,20 @@ export default function SaveTheDate() {
       if (!res.ok) throw new Error("Failed to submit RSVP");
       return res.json();
     },
-    onSuccess: (data: Rsvp) => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/guests"] });
-      setCookie("wedding_rsvp_name", data.name);
+      setCookie("wedding_rsvp_name", data.names);
       setCookie("wedding_rsvp_phone", data.phone);
-      setMyRsvp(data);
+      setMyRsvp({
+        ...data,
+        name: data.names,
+        status: data.attending,
+        guests: (data.plusOnes || 0) + 1,
+      });
       toast({
         title: "RSVP received",
         description: data.seatId
-          ? `You've been assigned to ${seats.find(s => s.id === data.seatId)?.table || "a table"}!`
+          ? `You've been assigned to ${seats.find((s) => s.id === data.seatId)?.table || "a table"}!`
           : "Thank you — we can't wait to celebrate with you.",
       });
     },
@@ -432,7 +425,7 @@ export default function SaveTheDate() {
           description: "Please copy the URL from the address bar.",
           variant: "destructive",
         });
-      }
+      },
     );
   }
 
@@ -602,7 +595,9 @@ export default function SaveTheDate() {
                     className="w-full h-64 sm:h-80 object-cover transition-transform duration-500 group-hover:scale-110 rounded-2xl"
                   />
                 </div>
-                <div className={`w-full sm:w-1/2 ${index % 2 === 1 ? "sm:text-right" : ""}`}>
+                <div
+                  className={`w-full sm:w-1/2 ${index % 2 === 1 ? "sm:text-right" : ""}`}
+                >
                   <span className="text-sm font-bold tracking-widest text-primary uppercase">
                     {item.dateLabel}
                   </span>
@@ -625,7 +620,7 @@ export default function SaveTheDate() {
 
           <div className="relative">
             <div className="hidden sm:block absolute top-4 left-[12.5%] right-[12.5%] h-px bg-border" />
-            
+
             <div className="flex flex-col sm:flex-row sm:justify-between gap-12 sm:gap-6">
               {incomingEvents.map((event, index) => (
                 <motion.div
@@ -637,8 +632,10 @@ export default function SaveTheDate() {
                   className="flex-1 text-center"
                 >
                   <div className="flex flex-col items-center">
-                    <div className={`w-8 h-8 ${event.color} rounded-full shadow-md ring-4 ring-background`} />
-                    
+                    <div
+                      className={`w-8 h-8 ${event.color} rounded-full shadow-md ring-4 ring-background`}
+                    />
+
                     <div className="mt-6">
                       <Badge
                         variant="outline"
@@ -646,7 +643,9 @@ export default function SaveTheDate() {
                       >
                         {event.date}
                       </Badge>
-                      <h3 className="text-base font-semibold text-foreground">{event.title}</h3>
+                      <h3 className="text-base font-semibold text-foreground">
+                        {event.title}
+                      </h3>
                       <p className="mt-2 text-sm text-muted-foreground leading-relaxed max-w-[200px] mx-auto">
                         {event.description}
                       </p>
@@ -658,7 +657,10 @@ export default function SaveTheDate() {
           </div>
         </section>
 
-        <section id="rsvp-section" className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
+        <section
+          id="rsvp-section"
+          className="mx-auto max-w-6xl px-4 py-24 sm:px-6"
+        >
           <div className="grid gap-12 lg:grid-cols-2">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -687,10 +689,22 @@ export default function SaveTheDate() {
                         {wedding.venue.address}
                       </p>
                       <p className="mt-2 text-muted-foreground">
-                        Call/Text: <a href={`tel:${wedding.venue.phone}`} className="hover:text-primary">{wedding.venue.phone}</a>
+                        Call/Text:{" "}
+                        <a
+                          href={`tel:${wedding.venue.phone}`}
+                          className="hover:text-primary"
+                        >
+                          {wedding.venue.phone}
+                        </a>
                       </p>
                       <p className="mt-1 text-muted-foreground">
-                        Email: <a href={`mailto:${wedding.venue.email}`} className="hover:text-primary">{wedding.venue.email}</a>
+                        Email:{" "}
+                        <a
+                          href={`mailto:${wedding.venue.email}`}
+                          className="hover:text-primary"
+                        >
+                          {wedding.venue.email}
+                        </a>
                       </p>
                       <Button
                         variant="outline"
@@ -713,7 +727,7 @@ export default function SaveTheDate() {
               <div className="mt-8">
                 <h3 className="text-xl font-bold mb-4">Explore the Area</h3>
                 <VenueMap />
-                              </div>
+              </div>
             </motion.div>
 
             <motion.div
@@ -735,88 +749,98 @@ export default function SaveTheDate() {
                   <div className="space-y-6 text-center">
                     <div className="rounded-2xl bg-primary/10 p-6">
                       <Heart className="h-10 w-10 mx-auto text-primary mb-4" />
-                      <h3 className="text-xl font-bold mb-2">You're all set, {myRsvp.name}!</h3>
+                      <h3 className="text-xl font-bold mb-2">
+                        You're all set, {myRsvp.name}!
+                      </h3>
                       <p className="text-muted-foreground">
-                        {myRsvp.status === "yes" 
-                          ? "We're excited to celebrate with you!" 
-                          : myRsvp.status === "maybe" 
-                            ? "We hope you can make it!" 
+                        {myRsvp.status === "yes"
+                          ? "We're excited to celebrate with you!"
+                          : myRsvp.status === "maybe"
+                            ? "We hope you can make it!"
                             : "We'll miss you at the celebration."}
                       </p>
                       {myRsvp.seatId && assignedSeatForName && (
                         <div className="mt-4 p-4 bg-background rounded-xl">
-                          <p className="text-sm text-muted-foreground">Your seat assignment</p>
-                          <p className="text-lg font-bold text-primary">{formatSeat(assignedSeatForName)}</p>
+                          <p className="text-sm text-muted-foreground">
+                            Your seat assignment
+                          </p>
+                          <p className="text-lg font-bold text-primary">
+                            {formatSeat(assignedSeatForName)}
+                          </p>
                         </div>
                       )}
                     </div>
                   </div>
                 ) : (
-                <div className="space-y-6">
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Your Name</label>
-                      <Input
-                        value={inviteeName}
-                        onChange={(e) => setInviteeName(e.target.value)}
-                        placeholder="Full name"
-                        className="rounded-xl"
-                        data-testid="input-name"
-                      />
+                  <div className="space-y-6">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Your Name</label>
+                        <Input
+                          value={inviteeName}
+                          onChange={(e) => setInviteeName(e.target.value)}
+                          placeholder="Full name"
+                          className="rounded-xl"
+                          data-testid="input-name"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">
+                          Phone Number
+                        </label>
+                        <Input
+                          value={inviteePhone}
+                          onChange={(e) => setInviteePhone(e.target.value)}
+                          placeholder="+1 (555) 123-4567"
+                          className="rounded-xl"
+                          data-testid="input-phone"
+                        />
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Phone Number</label>
-                      <Input
-                        value={inviteePhone}
-                        onChange={(e) => setInviteePhone(e.target.value)}
-                        placeholder="+1 (555) 123-4567"
-                        className="rounded-xl"
-                        data-testid="input-phone"
-                      />
-                    </div>
-                  </div>
 
-                  <div className="space-y-3">
-                    <label className="text-sm font-medium block">
-                      Will you attend?
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      {(["yes", "maybe", "no"] as RSVPStatus[]).map((status) => (
-                        <Button
-                          key={status}
-                          variant={
-                            inviteeStatus === status ? "default" : "outline"
-                          }
-                          className="rounded-full capitalize"
-                          onClick={() => setInviteeStatus(status)}
-                          data-testid={`button-rsvp-${status}`}
-                        >
-                          {status === "yes"
-                            ? "Yes, I'll be there"
-                            : status === "maybe"
-                              ? "Maybe"
-                              : "Regretfully, no"}
-                        </Button>
-                      ))}
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium block">
+                        Will you attend?
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        {(["yes", "maybe", "no"] as RSVPStatus[]).map(
+                          (status) => (
+                            <Button
+                              key={status}
+                              variant={
+                                inviteeStatus === status ? "default" : "outline"
+                              }
+                              className="rounded-full capitalize"
+                              onClick={() => setInviteeStatus(status)}
+                              data-testid={`button-rsvp-${status}`}
+                            >
+                              {status === "yes"
+                                ? "Yes, I'll be there"
+                                : status === "maybe"
+                                  ? "Maybe"
+                                  : "Regretfully, no"}
+                            </Button>
+                          ),
+                        )}
+                      </div>
                     </div>
-                  </div>
 
-                  <Button
-                    className="w-full rounded-xl py-6 text-lg font-bold"
-                    onClick={submitRSVP}
-                    disabled={rsvpMutation.isPending}
-                    data-testid="button-submit-rsvp"
-                  >
-                    {rsvpMutation.isPending ? "Saving..." : "Confirm RSVP"}
-                  </Button>
-                </div>
+                    <Button
+                      className="w-full rounded-xl py-6 text-lg font-bold"
+                      onClick={submitRSVP}
+                      disabled={rsvpMutation.isPending}
+                      data-testid="button-submit-rsvp"
+                    >
+                      {rsvpMutation.isPending ? "Saving..." : "Confirm RSVP"}
+                    </Button>
+                  </div>
                 )}
               </Card>
             </motion.div>
           </div>
         </section>
 
-        <section className="mx-auto max-w-4xl px-4 py-24 sm:px-6">
+        {/* <section className="mx-auto max-w-4xl px-4 py-24 sm:px-6 hidden">
           <div className="text-center mb-12">
             <h2 className="font-display text-4xl tracking-tight sm:text-5xl">
               Gift Registry
@@ -891,7 +915,7 @@ export default function SaveTheDate() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-4xl px-4 py-24 sm:px-6">
+        <section className="mx-auto max-w-4xl px-4 py-24 sm:px-6 hidden">
           <div className="text-center mb-12">
             <h2 className="font-display text-4xl tracking-tight sm:text-5xl">
               Find Your Seat
@@ -914,7 +938,7 @@ export default function SaveTheDate() {
               Point your camera at this code to open the seat finder
             </p>
           </Card>
-        </section>
+        </section> */}
 
         <footer className="py-12">
           <div className="mx-auto max-w-4xl px-4 text-center">
@@ -935,7 +959,7 @@ export default function SaveTheDate() {
                 Copy Invite Link
               </Button>
             </div>
-            
+
             <p className="mt-8 text-xs text-muted-foreground">
               Made with love for their day by Rajil Vembe
             </p>

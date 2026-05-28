@@ -17,7 +17,7 @@ export default function Loading() {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#c5e0da]">
+    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-mint">
       {/* Background Sound Placeholder */}
       <audio
         ref={audioRef}
@@ -27,19 +27,19 @@ export default function Loading() {
 
       <div className="relative mb-8">
         {/* Main Spinner */}
-        <div className="h-20 w-20 animate-spin rounded-full border-4 border-[#3d8b7a]/20 border-t-[#3d8b7a]"></div>
+        <div className="h-20 w-20 animate-spin rounded-full border-4 border-teal-accent/20 border-t-teal-accent"></div>
         
         {/* Inner Pulsing Heart */}
         <div className="absolute inset-0 flex items-center justify-center animate-pulse">
-          <span className="text-2xl text-[#3d8b7a]">💌</span>
+          <span className="text-2xl text-teal-accent">💌</span>
         </div>
       </div>
 
       <div className="text-center">
-        <h2 className="mb-2 font-wedding text-4xl text-[#1d3d37] animate-pulse">
+        <h2 className="mb-2 font-wedding text-4xl text-dark-teal animate-pulse">
           Grace & Noelvie
         </h2>
-        <p className="text-xs uppercase tracking-[0.3em] text-[#1d3d37]/60">
+        <p className="text-xs uppercase tracking-[0.3em] text-dark-teal/60">
           Opening Invitation...
         </p>
       </div>
@@ -49,7 +49,7 @@ export default function Loading() {
         {[1, 2, 3].map((i) => (
           <div
             key={i}
-            className="h-1.5 w-1.5 rounded-full bg-[#3d8b7a]/40 animate-bounce"
+            className="h-1.5 w-1.5 rounded-full bg-teal-accent/40 animate-bounce"
             style={{ animationDelay: `${i * 0.2}s` }}
           ></div>
         ))}

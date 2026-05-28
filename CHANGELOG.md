@@ -6,41 +6,29 @@ All notable changes to this project are documented here.
 
 ## [Unreleased] — 2026-05-27
 
+### Added
+- **Architectural Refactor**: Centralized cookie management in `lib/cookies.ts` for consistent session handling.
+- **RSVP-First Gateway**: Implemented a redirection system that forces identification via `/rsvp` before allowing access to the main website (`/`).
+- **Real-Time Guest Verification**: Added an `onBlur` background check on the RSVP name field to instantly recognize and welcome back registered guests.
+- **Global Loading Transition**: Added `app/loading.tsx` featuring a themed spinner, personalized greeting ("Opening Invitation..."), and background sound support.
+- **Personalized Persistence**: Switched from `localStorage` to 365-day browser cookies (`wedding_rsvp_name`, `wedding_rsvp_phone`).
+
 ### Changed
+- **Tailwind 4 Migration**: Refactored `styles/globals.css` to use Tailwind 4 `@theme` variables, replacing hardcoded hex values with a semantic design system (`bg-mint`, `text-dark-teal`, etc.).
+- **Updated Guest Schema**: Expanded Google Sheets integration to support a 12-column schema: `Id`, `Names`, `Phone`, `Email`, `Token`, `Sent`, `Clicked`, `Attending`, `PlusOnes`, `Table`, `Seats`, `OptOut`.
+- **Hero Section UI**: Removed the "SAVE THE DATE" badge and replaced the "Save to Calendar" primary button with a heart-themed "RSVP Now" button that smooth-scrolls to the personalized RSVP section.
+- **Footer Refinement**: Removed the top border from the footer for a more seamless, modern aesthetic.
+- **Metadata Update**: Updated browser titles and social sharing data to "Grace & Noelvie — Our Wedding".
 
-#### RSVP Form — Controlled Inputs & Per-Field Validation (`app/rsvp/page.tsx`)
-
-- Added `touched` state to track which fields the user has interacted with, so errors only appear after a field loses focus (not on initial render).
-- Added `errors` state with per-field error messages driven by a shared `validateFields()` function.
-- Added live re-validation on `onChange` — once a field is touched, its error clears immediately as the user types a valid value.
-- Added `onBlur` handlers on all text inputs to trigger field-level validation.
-- Submit now marks all fields as touched and runs full validation before posting — invalid forms are blocked with inline error feedback instead of silently failing.
-- Inputs display a red border when they are touched and invalid.
-- Error messages appear below each field in red.
-- Attending buttons turn red-bordered when submit is attempted without a selection.
-- Replaced single bottom-level `error` state with a dedicated `submitError` for API-level errors, keeping field errors and network errors separate.
-- Added `noValidate` to the `<form>` element to disable browser-native validation bubbles in favor of the custom error UI.
-
-#### Validation rules
-
-| Field | Rule |
-|---|---|
-| Full Name(s) | Required |
-| Phone | Required, minimum 10 digits |
-| Email | Optional — validated only if a value is entered |
-| Attending | One of yes / no must be selected |
-| Plus Ones | No validation — stepper clamped to 0–10 |
+### Fixed
+- **API Property Mapping**: Resolved data inconsistencies by ensuring all frontend components correctly map spreadsheet fields (e.g., `names`) to internal UI properties (e.g., `name`).
+- **Reference Errors**: Fixed missing style constants and type definitions in `app/rsvp/page.tsx`.
+- **Broken API Paths**: Corrected several invalid endpoint references in the main presentation page.
 
 ---
 
-### Previous Updates
-
-#### App Structure Alignment (`2026-05-27`)
+## App Structure Alignment (`2026-05-27`)
 - Replaced token-based `/rsvp/[token]` route with a single public `/rsvp` page.
-- Renamed `lib/googlesheet.ts` to `lib/google-sheets.ts` with the correct column schema (Id, Names, Phone, Email, Attending, PlusOnes, Table, Seats, OptOut) — removed Token, Sent, Clicked columns.
-- Removed `app/find-seat/`, `app/api/rsvps/`, `lib/tokens.ts`, `lib/phone.ts`, `lib/seating.ts`, and `script/sendInvites.ts`.
+- Renamed `lib/googlesheet.ts` to `lib/google-sheets.ts` with the correct column schema.
 - Simplified `/api/guests` to GET-only for admin use.
-- Updated `/api/updates` to remove the "new guests" target (which depended on the removed `Sent` column).
-- Fixed hydration mismatch in `app/page.tsx` — replaced `typeof window !== "undefined"` in JSX with a `useEffect`-initialized state value.
-- Removed token-specific UI from admin guests page (copy link, Sent/Clicked columns).
-- Plus Ones field made always visible on the RSVP form (no longer conditional on Attending = yes), using a stepper (−/+) instead of a dropdown.
+- Fixed hydration mismatch in `app/page.tsx` using `useEffect`.

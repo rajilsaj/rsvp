@@ -6,9 +6,9 @@
 # Wedding Planner Hub — Claude Instructions
 
 ## Project Overview
-This is a wedding planning web application built with Next.js (App Router),
-TypeScript, and Tailwind CSS. The guest list and all data is stored in
-Google Spreadsheets.
+This is a wedding planning web application built with Next.js 16 (App Router),
+TypeScript, and Tailwind CSS 4. The system uses a "gateway" workflow where
+guests must identify themselves via RSVP before accessing the full site.
 
 ---
 
@@ -17,22 +17,21 @@ Google Spreadsheets.
 1. **NEVER modify any existing UI, design, styling, or frontend code** unless
    explicitly asked. Preserve all existing components, colors, layouts,
    animations, and Tailwind classes.
-2. Always use TypeScript.
-3. Always use the App Router (`app/` directory), never Pages Router.
-4. Keep all sensitive credentials in `.env.local` at the project root.
-5. Never hardcode API keys, tokens, or credentials anywhere in the code.
-6. Always match existing code style and patterns in the project.
-7. Before writing any code, read this file in full.
+2. Always use TypeScript (Strict Mode).
+3. Always use the App Router (`app/` directory).
+4. Use centralized utilities in `lib/` (e.g., `lib/cookies.ts` for session management).
+5. Never hardcode API keys or credentials. Use `.env.local`.
+6. Maintain the "RSVP-first" gateway workflow.
 
 ---
 
 ## Tech Stack
-- **Framework**: Next.js (App Router)
+- **Framework**: Next.js 16+ (App Router)
 - **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **Database**: Google Spreadsheets (primary data store)
-- **Email**: Resend
-- **SMS**: Twilio (US-based guests)
+- **Styling**: Tailwind CSS 4.x (with semantic `@theme` variables)
+- **Database**: Google Spreadsheets (Primary Data Store)
+- **Persistence**: Browser Cookies (365-day expiry)
+- **Design**: Radix UI, Framer Motion, Lucide React
 
 ---
 
@@ -40,163 +39,71 @@ Google Spreadsheets.
 ```
 Wedding-Planner-Hub/
 ├── app/
+│   ├── loading.tsx             # Global themed loader
 │   ├── rsvp/
-│   │   └── page.tsx            # Public RSVP form (one general link for all guests)
+│   │   └── page.tsx            # Entry gateway form (Returning guests are recognized here)
 │   ├── admin/
-│   │   ├── guests/             # Guest list overview & management
+│   │   ├── guests/             # Guest list management
 │   │   ├── seating/            # Seating assignment dashboard
-│   │   └── updates/            # Broadcast messages & photo albums
+│   │   └── updates/            # Broadcast message center
 │   └── api/
-│       ├── rsvp/               # Save RSVP submission to Google Sheet
-│       ├── seating/            # Push seat assignments to Google Sheet
-│       └── updates/            # Send broadcast messages
+│       ├── rsvp/               # RSVP submission & real-time name lookup
+│       ├── guests/             # Admin guest list retrieval
+│       └── updates/            # Broadcast logic
 ├── lib/
-│   ├── google-sheets.ts        # Read/write Google Spreadsheet
-│   ├── sms.ts                  # Twilio SMS sending
-│   └── email.ts                # Resend email sending
-└── .env.local                  # All credentials (never commit)
+│   ├── google-sheets.ts        # Spreadsheet read/write logic (12-column schema)
+│   ├── cookies.ts              # Centralized cookie helpers
+│   └── utils.ts                # Tailwind class merging (cn)
+└── styles/
+    └── globals.css             # Tailwind 4 theme & base styles
 ```
 
 ---
 
-## User Flow
+## User Flow (Gateway Architecture)
 
 ### Guest Flow
-1. Guest receives a single shared link (e.g. `yoursite.com/rsvp`)
-2. Guest lands on the RSVP page and fills out the form
-3. On submit, a new row is added to the "Guests" sheet
-4. No tokens, no unique links, no "Save the Date" button
+1. **The Gateway**: Guest visits `/`. If no `wedding_rsvp_name` cookie exists, they are redirected to `/rsvp`.
+2. **Identification**: On `/rsvp`, guest enters their name. 
+   - **Returning Guest**: Recognition happens on `onBlur`. They see a personalized "Welcome back!" and are redirected to `/`.
+   - **New Guest**: They fill out Phone and PlusOnes, then are redirected to `/` upon submission.
+3. **Personalization**: Once at `/`, the page fetches their specific seating and attendance data from the spreadsheet.
 
 ### Admin Flow
-1. Admin logs into the dashboard
-2. Views all guest RSVPs in the Guests admin page
-3. Assigns seating to confirmed guests via the seating dashboard
-4. Sends broadcast updates (messages + Google Photos links) to guests
+1. Admin manages the "Guests" sheet to assign Tables and Seats.
+2. Admin uses the updates dashboard to send broadcast messages (SMS/Email).
 
 ---
 
-## RSVP Form Fields
-The public RSVP form at `/rsvp` contains ONLY these fields:
+## Google Spreadsheet Structure ("Guests" Sheet)
 
-| Field      | Type     | Required | Notes                        |
-|------------|----------|----------|------------------------------|
-| Full Names | Text     | Yes      | Full name of guest           |
-| Phone      | Tel      | Yes      | US phone number              |
-| Email      | Email    | No       | Optional                     |
-| Attending  | Select   | Yes      | "yes" or "no"                |
-| PlusOnes   | Number   | No       | Only shown if Attending = yes|
+| Id | Names | Phone | Email | Token | Sent | Clicked | Attending | PlusOnes | Table | Seats | OptOut |
+|----|-------|-------|-------|-------|------|---------|-----------|----------|-------|-------|--------|
 
-**Rules:**
-- No token field — tokens are removed from this flow entirely
-- No "Save the Date" button anywhere on the site
-- On submit: add a new row to the "Guests" sheet
-- `Id` is auto-generated (UUID or timestamp-based) by the API
-- Never ask for or store seat preferences on the RSVP form
-
----
-
-## Google Spreadsheet Structure
-
-### Sheet 1: "Guests"
-| Id | Names | Phone | Email | Attending | PlusOnes | Table | Seats | OptOut |
-
-**Column details:**
-- `Id` (A): Auto-generated unique ID assigned by the API on submission
-- `Names` (B): Full name of guest
-- `Phone` (C): Phone number
-- `Email` (D): Email address (optional)
-- `Attending` (E): `yes` or `no` (lowercase)
-- `PlusOnes` (F): Number of additional guests (default 0)
-- `Table` (G): Table assignment — managed via admin dashboard only
-- `Seats` (H): Seat assignments — managed via admin dashboard only
-- `OptOut` (I): Boolean — opted out of SMS? (`TRUE` / `FALSE`)
-
-**Rules:**
-- `Id` is always auto-generated by the API, never entered by the guest
-- `Table` and `Seats` are only set from the admin seating dashboard
-- `OptOut` defaults to `FALSE` on new submissions
-- Always read/write columns by header name, not by letter
-- Never add or reorder columns without being explicitly asked
-- Boolean fields store `TRUE` or `FALSE` (uppercase)
-- `Attending` stores `yes` or `no` (lowercase)
-- Data starts at row 2 (row 1 is headers)
-
-### Sheet 2: "Updates"
-| Id | Date | Message | PhotoAlbumLink | SentTo | SentAt |
-
-**Column details:**
-- `Id` (A): Auto-generated unique ID
-- `Date` (B): Date the update was sent
-- `Message` (C): The broadcast message content
-- `PhotoAlbumLink` (D): Google Photos album URL (optional)
-- `SentTo` (E): Who it was sent to (e.g. "All", "Confirmed")
-- `SentAt` (F): Timestamp when it was sent
-
-**Rules:**
-- Always read/write columns by header name, not by letter
-- Never add or reorder columns without being explicitly asked
-- Data starts at row 2 (row 1 is headers)
-- PhotoAlbumLink is optional — can be empty
-
----
-
-## Core Features
-
-### 1. Public RSVP Form (`/rsvp`)
-- One shared public link for all guests
-- Guest fills in: Full Names, Phone, Email, Attending, PlusOnes
-- API auto-generates an Id and writes a new row to the "Guests" sheet
-- No tokens, no unique links per guest
-
-### 2. Admin — Guest Management (`/admin/guests`)
-- View all guest RSVPs from the "Guests" sheet
-- Filter by attending / not attending
-- See plus one counts
-
-### 3. Admin — Seating Dashboard (`/admin/seating`)
-- View all confirmed guests with their plus one count
-- Assign guests to tables and seats
-- Push Table and Seats values back to the "Guests" sheet
-- Optionally notify guest of their seat via SMS/email
-
-### 4. Admin — Broadcast Updates (`/admin/updates`)
-- Compose a message + optional Google Photos album link
-- Target: all guests, confirmed only, or specific guests
-- Send via SMS (Twilio) and/or Email (Resend)
-- Log sent updates in the "Updates" sheet tab
+**Key Rules:**
+- `Id`: Auto-generated UUID.
+- `Names`: Mandatory (Primary identifier).
+- `Token`: Auto-generated 8-char unique string for private access.
+- `PlusOnes`: Mandatory numeric field (defaults to 0).
+- `Attending`: `yes` or `no` (lowercase).
+- `OptOut`: `TRUE` or `FALSE` (uppercase).
+- Data starts at row 2 (Row 1 is headers).
 
 ---
 
 ## US SMS Compliance (TCPA)
-- Always include opt-out instructions in every SMS ("Reply STOP to unsubscribe")
-- Twilio handles STOP replies automatically
-- Always check the `OptOut` column — never send to opted-out guests
+- Every SMS must include: "Reply STOP to unsubscribe".
+- Always check the `OptOut` column before sending.
 
 ---
 
 ## Environment Variables
 ```
-GOOGLE_SERVICE_ACCOUNT_KEY=
+GOOGLE_SERVICE_ACCOUNT_EMAIL=
+GOOGLE_PRIVATE_KEY=
 GOOGLE_SPREADSHEET_ID=
 TWILIO_ACCOUNT_SID=
 TWILIO_AUTH_TOKEN=
 TWILIO_PHONE_NUMBER=
 RESEND_API_KEY=
-NEXT_PUBLIC_BASE_URL=
 ```
-
----
-
-## What Was Removed
-- ❌ No more "Save the Date" button
-- ❌ No more unique token per guest
-- ❌ No more `/rsvp/[token]` dynamic route
-- ❌ No more Token, Sent, Clicked columns in the Guests sheet
-- ❌ Seating is admin-only — never on the RSVP form
-
-## When Adding New Features
-- Add new API routes under `app/api/`
-- Add new lib utilities under `lib/`
-- Add new admin pages under `app/admin/`
-- Never touch existing frontend design, components, or styles
-- Never remove or rename existing files unless explicitly asked
