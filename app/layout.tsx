@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { DM_Sans, Fraunces, Great_Vibes } from "next/font/google";
 import { Providers } from "./providers";
+import { OfflineBanner } from "@/components/OfflineBanner";
+import { MusicProvider } from "@/components/MusicProvider";
 import "@/styles/globals.css";
 
 const dmSans = DM_Sans({
@@ -48,7 +50,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${dmSans.variable} ${fraunces.variable} ${greatVibes.variable}`}>
       <body className="antialiased">
-        <Providers>{children}</Providers>
+        <Providers>
+          <MusicProvider>
+            {children}
+            <OfflineBanner />
+          </MusicProvider>
+        </Providers>
       </body>
     </html>
   );
