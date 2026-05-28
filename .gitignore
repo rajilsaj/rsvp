@@ -42,3 +42,6 @@ desktop.ini
 # Coverage / test artifacts
 coverage/
 .nyc_output/.
+
+#Script
+rewrite.py
