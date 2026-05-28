@@ -1,14 +1,14 @@
 "use client";
 
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Copy, Heart, MapPin, X } from "lucide-react";
 import confetti from "canvas-confetti";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { getCookie, setCookie } from "@/lib/cookies";
 
@@ -244,8 +244,13 @@ export default function SaveTheDate() {
 
   const [checking, setChecking] = useState(true);
   const [inviteeName, setInviteeName] = useState("");
-  const [inviteePhone, setInviteePhone] = useState("");
+  const [inviteePhoneDigits, setInviteePhoneDigits] = useState("");
+  const [inviteeEmail, setInviteeEmail] = useState("");
+  const [inviteePlusOnes, setInviteePlusOnes] = useState(0);
   const [inviteeStatus, setInviteeStatus] = useState<RSVPStatus>("yes");
+  const [homeTouched, setHomeTouched] = useState<Record<string, boolean>>({});
+  const [homeErrors, setHomeErrors] = useState<Record<string, string>>({});
+  const homePhoneRef = useRef<HTMLInputElement | null>(null);
   const [myRsvp, setMyRsvp] = useState<Rsvp | null>(null);
   const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0, ready: false });
   const [menuOpen, setMenuOpen] = useState(false);
@@ -273,7 +278,6 @@ export default function SaveTheDate() {
     const savedPhone = getCookie("wedding_rsvp_phone");
     if (!savedName) { router.push("/rsvp"); return; }
     setChecking(false);
-    setInviteePhone(savedPhone || "");
     fetch(`/api/guests`)
       .then((res) => (res.ok ? res.json() : []))
       .then((guests: any[]) => {
@@ -306,8 +310,8 @@ export default function SaveTheDate() {
   });
 
   const rsvpMutation = useMutation({
-    mutationFn: async (newRsvp: { name: string; phone: string; guests: number; status: string; seatId?: string }) => {
-      const res = await fetch("/api/rsvp", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ names: newRsvp.name, phone: newRsvp.phone, attending: newRsvp.status, plusOnes: newRsvp.guests - 1 }) });
+    mutationFn: async (newRsvp: { name: string; phone: string; email?: string; guests: number; status: string; seatId?: string }) => {
+      const res = await fetch("/api/rsvp", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ names: newRsvp.name, phone: newRsvp.phone, email: newRsvp.email, attending: newRsvp.status, plusOnes: newRsvp.guests - 1 }) });
       if (!res.ok) throw new Error("Failed to submit RSVP");
       return res.json();
     },
@@ -369,13 +373,75 @@ export default function SaveTheDate() {
     toast({ title: "Opening Calendar", description: "Redirecting to Google Calendar." });
   }
 
+  function buildHomePhoneDisplay(digits: string): string {
+    return (
+      "(" +
+      (digits[0] ?? "_") + (digits[1] ?? "_") + (digits[2] ?? "_") +
+      ") " +
+      (digits[3] ?? "_") + (digits[4] ?? "_") + (digits[5] ?? "_") +
+      "-" +
+      (digits[6] ?? "_") + (digits[7] ?? "_") + (digits[8] ?? "_") + (digits[9] ?? "_")
+    );
+  }
+
+  function homePhoneCursorPos(n: number): number {
+    if (n < 3) return 1 + n;
+    if (n === 3) return 6;
+    if (n < 6) return 6 + (n - 3);
+    if (n === 6) return 10;
+    return 10 + (n - 6);
+  }
+
+  function handleHomePhoneChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
+    setInviteePhoneDigits(digits);
+    const pos = homePhoneCursorPos(digits.length);
+    requestAnimationFrame(() => homePhoneRef.current?.setSelectionRange(pos, pos));
+  }
+
+  function handleHomePhoneKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key !== "Backspace" || inviteePhoneDigits.length === 0) return;
+    const cursorAt = homePhoneRef.current?.selectionStart ?? 0;
+    const charBefore = buildHomePhoneDisplay(inviteePhoneDigits)[cursorAt - 1];
+    if (charBefore && /[() \-_]/.test(charBefore)) {
+      e.preventDefault();
+      const newDigits = inviteePhoneDigits.slice(0, -1);
+      setInviteePhoneDigits(newDigits);
+      const pos = homePhoneCursorPos(newDigits.length);
+      requestAnimationFrame(() => homePhoneRef.current?.setSelectionRange(pos, pos));
+    }
+  }
+
+  function validateHome(): boolean {
+    const errs: Record<string, string> = {};
+    if (!inviteeName.trim()) errs.names = "Full name is required.";
+    if (!inviteePhoneDigits) {
+      errs.phone = "Phone number is required.";
+    } else if (inviteePhoneDigits.length < 10) {
+      errs.phone = "Enter a valid 10-digit US phone number.";
+    }
+    if (inviteeEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inviteeEmail.trim())) {
+      errs.email = "Enter a valid email address.";
+    }
+    setHomeErrors(errs);
+    return Object.keys(errs).length === 0;
+  }
+
   function submitRSVP() {
+    setHomeTouched({ names: true, phone: true, email: true });
+    if (!validateHome()) return;
     const name = inviteeName.trim();
-    if (!name) { toast({ title: "Add a name", description: "We need a name to save the RSVP.", variant: "destructive" }); return; }
     const key = slugify(name);
     let seatId: string | undefined;
     if (key && !seatAssignments[key] && availableSeatIds.length > 0) seatId = availableSeatIds[0];
-    rsvpMutation.mutate({ name, phone: inviteePhone.trim(), guests: 1, status: inviteeStatus, seatId });
+    rsvpMutation.mutate({
+      name,
+      phone: buildHomePhoneDisplay(inviteePhoneDigits),
+      email: inviteeEmail.trim(),
+      guests: inviteePlusOnes + 1,
+      status: inviteeStatus,
+      seatId,
+    });
   }
 
   if (checking) {
@@ -426,13 +492,13 @@ export default function SaveTheDate() {
                   >
                     {link.active ? (
                       link.href ? (
-                        <a
+                        <Link
                           href={link.href}
                           className="group flex items-center gap-4 py-3 border-b border-dark-teal/10 hover:border-teal-accent transition-colors"
                         >
                           <span className="text-[8px] text-dark-teal/30 font-mono w-5">{String(i + 1).padStart(2, "0")}</span>
                           <span className="font-display text-2xl sm:text-3xl text-dark-teal font-light group-hover:text-teal-accent transition-colors">{link.label}</span>
-                        </a>
+                        </Link>
                       ) : (
                         <button
                           onClick={() => link.id && scrollTo(link.id)}
@@ -593,7 +659,7 @@ export default function SaveTheDate() {
             <motion.div key={item.id} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-80px" }} transition={{ duration: 0.7 }}
               className={`flex flex-col ${index % 2 === 1 ? "sm:flex-row-reverse" : "sm:flex-row"} gap-8 sm:gap-12 items-center`}>
               <div className="w-full sm:w-1/2 overflow-hidden group rounded-2xl">
-                <img src={item.image} alt={item.title} className="w-full h-60 sm:h-80 object-cover grayscale hover:grayscale-0 transition-all duration-700 group-hover:scale-[1.03]" />
+                <img src={item.image} alt={item.title} className="w-full h-60 sm:h-80 object-cover grayscale hover:grayscale-0 active:grayscale-0 group-hover:scale-[1.03] group-active:scale-[1.03] transition-all duration-700" />
               </div>
               <div className={`w-full sm:w-1/2 ${index % 2 === 1 ? "sm:text-right" : ""}`}>
                 <span className="text-[9px] tracking-[0.4em] uppercase text-teal-accent font-medium">{item.dateLabel}</span>
@@ -742,33 +808,101 @@ export default function SaveTheDate() {
                   )}
                 </div>
               ) : (
-                <div className="space-y-5">
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-1.5">
-                      <label className="block text-[9px] tracking-[0.28em] uppercase text-dark-teal/45">Your Name</label>
-                      <Input value={inviteeName} onChange={(e) => setInviteeName(e.target.value)} placeholder="Full name" className="border-dark-teal/15 bg-[#faf9f6] text-dark-teal placeholder:text-dark-teal/30 focus:border-teal-accent rounded-xl" data-testid="input-name" />
+                <div className="space-y-4">
+
+                  {/* Name */}
+                  <div>
+                    <label className="block text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 text-dark-teal/60">Full Name(s) *</label>
+                    <input
+                      type="text"
+                      value={inviteeName}
+                      onChange={(e) => setInviteeName(e.target.value)}
+                      onBlur={() => setHomeTouched(prev => ({ ...prev, names: true }))}
+                      data-testid="input-name"
+                      placeholder="Your full name"
+                      className={`w-full rounded-xl px-4 py-3 text-base text-gray-700 bg-white border outline-none focus:border-teal-accent transition-colors ${homeTouched.names && homeErrors.names ? "border-red-400" : "border-gray-200"}`}
+                    />
+                    {homeTouched.names && homeErrors.names && <p className="text-xs mt-1 text-red-500">{homeErrors.names}</p>}
+                  </div>
+
+                  {/* Phone with ghost mask */}
+                  <div>
+                    <label className="block text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 text-dark-teal/60">Phone *</label>
+                    <div className={`relative w-full rounded-xl bg-white border transition-colors focus-within:border-teal-accent ${homeTouched.phone && homeErrors.phone ? "border-red-400" : "border-gray-200"}`}>
+                      <div aria-hidden="true" className="absolute inset-0 flex items-center px-4 text-base pointer-events-none select-none">
+                        {Array.from(buildHomePhoneDisplay(inviteePhoneDigits)).map((ch, i) => (
+                          <span key={i} className={/\d/.test(ch) ? "text-gray-700" : ch === "_" ? "text-gray-300" : "text-gray-400"}>{ch}</span>
+                        ))}
+                      </div>
+                      <input
+                        ref={homePhoneRef}
+                        type="tel"
+                        inputMode="numeric"
+                        data-testid="input-phone"
+                        value={buildHomePhoneDisplay(inviteePhoneDigits)}
+                        onChange={handleHomePhoneChange}
+                        onKeyDown={handleHomePhoneKeyDown}
+                        onBlur={() => setHomeTouched(prev => ({ ...prev, phone: true }))}
+                        onFocus={() => {
+                          const pos = homePhoneCursorPos(inviteePhoneDigits.length);
+                          requestAnimationFrame(() => homePhoneRef.current?.setSelectionRange(pos, pos));
+                        }}
+                        className="relative w-full rounded-xl px-4 py-3 text-base bg-transparent outline-none text-transparent caret-gray-700"
+                      />
                     </div>
-                    <div className="space-y-1.5">
-                      <label className="block text-[9px] tracking-[0.28em] uppercase text-dark-teal/45">Phone Number</label>
-                      <Input value={inviteePhone} onChange={(e) => setInviteePhone(e.target.value)} placeholder="+1 (555) 123-4567" className="border-dark-teal/15 bg-[#faf9f6] text-dark-teal placeholder:text-dark-teal/30 focus:border-teal-accent rounded-xl" data-testid="input-phone" />
+                    {homeTouched.phone && homeErrors.phone && <p className="text-xs mt-1 text-red-500">{homeErrors.phone}</p>}
+                  </div>
+
+                  {/* Email */}
+                  <div>
+                    <label className="block text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 text-dark-teal/60">Email (optional)</label>
+                    <input
+                      type="email"
+                      value={inviteeEmail}
+                      onChange={(e) => setInviteeEmail(e.target.value)}
+                      onBlur={() => setHomeTouched(prev => ({ ...prev, email: true }))}
+                      placeholder="you@email.com"
+                      className={`w-full rounded-xl px-4 py-3 text-base text-gray-700 bg-white border outline-none focus:border-teal-accent transition-colors ${homeTouched.email && homeErrors.email ? "border-red-400" : "border-gray-200"}`}
+                    />
+                    {homeTouched.email && homeErrors.email && <p className="text-xs mt-1 text-red-500">{homeErrors.email}</p>}
+                  </div>
+
+                  {/* Attending yes/no */}
+                  <div>
+                    <label className="block text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 text-dark-teal/60">Will you attend? *</label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setInviteeStatus("yes")}
+                        data-testid="button-rsvp-yes"
+                        className={`py-3.5 rounded-xl text-sm font-medium transition-all border-2 ${inviteeStatus === "yes" ? "bg-teal-accent/10 border-teal-accent text-teal-accent" : "border-gray-100 text-gray-500 hover:border-gray-200"}`}
+                      >
+                        ✓ Yes
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setInviteeStatus("no")}
+                        data-testid="button-rsvp-no"
+                        className={`py-3.5 rounded-xl text-sm font-medium transition-all border-2 ${inviteeStatus === "no" ? "bg-rose-50 border-rose-400 text-rose-600" : "border-gray-100 text-gray-500 hover:border-gray-200"}`}
+                      >
+                        ✗ No
+                      </button>
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="block text-[9px] tracking-[0.28em] uppercase text-dark-teal/45">Will you attend?</label>
-                    <div className="flex flex-wrap gap-2">
-                      {(["yes", "maybe", "no"] as RSVPStatus[]).map((status) => (
-                        <button key={status} onClick={() => setInviteeStatus(status)} data-testid={`button-rsvp-${status}`}
-                          className={`px-4 py-2 text-xs tracking-wide border transition-all rounded-xl ${inviteeStatus === status ? "bg-teal-accent text-white border-teal-accent" : "bg-transparent text-dark-teal/60 border-dark-teal/20 hover:border-dark-teal/40"}`}>
-                          {status === "yes" ? "Yes, I'll be there" : status === "maybe" ? "Maybe" : "Regretfully, no"}
-                        </button>
-                      ))}
+                  {/* Plus-ones counter */}
+                  <div>
+                    <label className="block text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 text-dark-teal/60">Additional guests you&apos;re bringing</label>
+                    <div className="flex items-center gap-3">
+                      <button type="button" onClick={() => setInviteePlusOnes(Math.max(0, inviteePlusOnes - 1))} className="w-12 h-12 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-xl hover:bg-gray-50">−</button>
+                      <span className="flex-1 text-center font-semibold text-base">{inviteePlusOnes === 0 ? "None" : `+${inviteePlusOnes}`}</span>
+                      <button type="button" onClick={() => setInviteePlusOnes(Math.min(10, inviteePlusOnes + 1))} className="w-12 h-12 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-xl hover:bg-gray-50">+</button>
                     </div>
                   </div>
 
                   <button onClick={submitRSVP} disabled={rsvpMutation.isPending} data-testid="button-submit-rsvp"
                     className="w-full py-3.5 bg-teal-accent text-white text-sm tracking-[0.15em] uppercase font-medium hover:brightness-105 active:scale-[0.99] transition-all disabled:opacity-50 shadow-sm rounded-xl">
-                    {rsvpMutation.isPending ? "Saving…" : "Confirm RSVP"}
+                    {rsvpMutation.isPending ? "Saving…" : "Submit RSVP"}
                   </button>
                 </div>
               )}

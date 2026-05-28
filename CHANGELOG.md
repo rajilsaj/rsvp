@@ -6,12 +6,20 @@ All notable changes to this project are documented here.
 
 ## [Unreleased] — 2026-05-28
 
+### Added
+- **Netlify Deployment Config**: Added `netlify.toml` specifying `npm run build` as the build command, `.next` as the publish directory, Node 20 as the runtime, and `@netlify/plugin-nextjs` for SSR support.
+
 ### Fixed
 - **Homepage Flash for Unregistered Users**: The full homepage was rendering before the cookie check `useEffect` fired, causing a visible flash of content before the redirect to `/rsvp`. Added a `checking` state to `app/page.tsx` that renders a minimal spinner while the cookie is verified — unregistered users now see nothing before being sent to the RSVP page.
-- **Music Autoplay Blocked by Browser**: The YouTube player's `onReady` callback called `playVideo()` asynchronously, which browsers silently block under their autoplay policy (audio started outside a user gesture is not allowed). Replaced this with document-level interaction listeners (`click`, `scroll`, `touchstart`, `keydown`) in `components/MusicProvider.tsx` — music now starts automatically on the first user interaction without requiring the dedicated play button.
+- **Music Replaced YouTube IFrame with Local MP3**: Ripped out the YouTube IFrame API singleton entirely from `components/MusicProvider.tsx`. YouTube's autoplay policy made reliable audio impossible regardless of interaction listeners. Replaced with a native `<Audio>` element pointing at `public/music.mp3`, which browsers allow to play synchronously inside a user gesture handler with no async gap — including iOS. First-interaction listeners (`click`, `touchstart`, `keydown`) call `audio.play()` directly; `canplaythrough`, `play`, `pause`, and `ended` events drive the React state.
+- **Music Stops on Photos Navigation**: The "Our Photos" nav link was a plain `<a href="/photos">`, causing a full browser reload that destroyed the `MusicProvider` audio object. Changed to Next.js `<Link href="/photos">` for client-side navigation so the layout — and audio — stays mounted across page transitions.
+- **Grayscale Hover Effect Not Triggering on Mobile**: Touch devices do not fire CSS `:hover`, so the `grayscale → color` reveal on photo cards never triggered on mobile. Added `active:grayscale-0` and `group-active:scale-[1.04]` (Photos page) / `group-active:scale-[1.03]` (homepage story images) alongside the existing `hover:` classes so tapping a photo triggers the color reveal while the finger is pressed.
 
 ### Changed
-- **MusicProvider autoplay strategy**: Changed `autoplay: 1` to `autoplay: 0` in the YouTube player config and shifted play responsibility to the first-interaction listener. `onReady` no longer unconditionally calls `playVideo()` — it only does so if the user has already interacted. `onStateChange` remains the source of truth for the playing/paused state.
+- **Next.js Downgraded to 15.5.18**: Reverted from the erroneous `^16.2.6` back to the stable `^15.5.18` in `package.json`.
+- **tsconfig.json `jsx` corrected to `"preserve"`**: Changed from `"react-jsx"` — Next.js requires `"preserve"` so it can apply its own JSX transform. Also removed the Turbopack `root` option from `next.config.js`.
+- **`.nvmrc` Node version fixed**: Updated `.nvmrc` to correctly pin the project's Node version (aligns with the Node 20 target specified in `netlify.toml`).
+- **Homepage RSVP Form Parity with `/rsvp` Page**: Replaced the simple name/phone/attendance form in the homepage RSVP section with the full form matching `app/rsvp/page.tsx`. Changes: phone field now uses the same ghost-mask `(XXX) XXX-XXXX` overlay with cursor management; email (optional) field added; attendance changed from a 3-option flex row ("Yes / Maybe / No") to a 2-column Yes ✓ / No ✗ grid; plus-ones `−/None/+` counter added; inline validation with touch-aware error messages added for name, phone, and email; submit button relabelled "Submit RSVP". The `Input` shadcn component was removed in favour of native `<input>` elements consistent with the `/rsvp` page.
 
 ---
 

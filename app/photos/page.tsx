@@ -54,7 +54,7 @@ export default function PhotosPage() {
               <img
                 src={photo.src}
                 alt={photo.alt}
-                className={`w-full object-cover grayscale hover:grayscale-0 transition-all duration-700 group-hover:scale-[1.04] ${i === 0 ? "h-[360px] sm:h-[500px]" : "h-44 sm:h-56"}`}
+                className={`w-full object-cover grayscale hover:grayscale-0 active:grayscale-0 group-hover:scale-[1.04] group-active:scale-[1.04] transition-all duration-700 ${i === 0 ? "h-[360px] sm:h-[500px]" : "h-44 sm:h-56"}`}
               />
             </motion.div>
           ))}
