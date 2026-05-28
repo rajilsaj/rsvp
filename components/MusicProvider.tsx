@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Music, VolumeX } from "lucide-react";
 
@@ -8,146 +8,51 @@ type MusicCtx = { playing: boolean; toggle: () => void; ready: boolean };
 const MusicContext = createContext<MusicCtx>({ playing: false, toggle: () => {}, ready: false });
 export const useMusic = () => useContext(MusicContext);
 
-/* ─────────────────────────────────────────────────────────────
-   Module-level singleton — lives outside React's component tree.
-   Navigation, re-renders, and StrictMode double-invocations
-   cannot touch this object once it's created.
-───────────────────────────────────────────────────────────────*/
-const VIDEO_ID = "2bOXtkFb9FY";
-let _player: any = null;
-let _ready = false;
-let _userHasInteracted = false;
-let _interactionListenerSet = false;
-const _listeners = new Set<(playing: boolean, ready: boolean) => void>();
-
-function notify(playing: boolean, ready: boolean) {
-  _listeners.forEach((fn) => fn(playing, ready));
-}
-
-function getOrCreateDiv() {
-  let el = document.getElementById("yt-bg-player");
-  if (!el) {
-    el = document.createElement("div");
-    el.id = "yt-bg-player";
-    el.setAttribute("aria-hidden", "true");
-    el.style.cssText = "position:fixed;width:0;height:0;overflow:hidden;pointer-events:none;";
-    document.body.appendChild(el);
-  }
-  return el;
-}
-
-function tryPlay() {
-  if (_player && _ready && _player.getPlayerState?.() !== 1) {
-    _player.playVideo();
-  }
-}
-
-function addInteractionListeners() {
-  if (_interactionListenerSet || typeof document === "undefined") return;
-  _interactionListenerSet = true;
-
-  function onInteract() {
-    if (_userHasInteracted) return;
-    _userHasInteracted = true;
-    tryPlay();
-    document.removeEventListener("click", onInteract);
-    document.removeEventListener("touchstart", onInteract);
-    document.removeEventListener("keydown", onInteract);
-    document.removeEventListener("scroll", onInteract);
-  }
-
-  document.addEventListener("click", onInteract, { passive: true });
-  document.addEventListener("touchstart", onInteract, { passive: true });
-  document.addEventListener("keydown", onInteract, { passive: true });
-  document.addEventListener("scroll", onInteract, { passive: true });
-}
-
-function createPlayer() {
-  if (_player) return;
-  getOrCreateDiv();
-
-  _player = new (window as any).YT.Player("yt-bg-player", {
-    videoId: VIDEO_ID,
-    playerVars: {
-      autoplay: 0,
-      controls: 0,
-      loop: 1,
-      playlist: VIDEO_ID,
-      rel: 0,
-      modestbranding: 1,
-    },
-    events: {
-      onReady: () => {
-        _ready = true;
-        if (_userHasInteracted) {
-          _player?.playVideo();
-        }
-        notify(false, true);
-      },
-      onStateChange: (e: any) => {
-        if (e.data === 1) notify(true, true);           // playing
-        if (e.data === 2 || e.data === -1) notify(false, true); // paused / buffering
-        if (e.data === 0) _player?.playVideo();          // ended → loop
-      },
-    },
-  });
-}
-
-function bootstrapYT() {
-  if (typeof window === "undefined") return;
-  addInteractionListeners();
-  if (_player) return; // already running
-
-  if ((window as any).YT?.Player) {
-    createPlayer();
-  } else {
-    // Queue up: called once the API script fires its global callback
-    const prev = (window as any).onYouTubeIframeAPIReady;
-    (window as any).onYouTubeIframeAPIReady = () => {
-      if (prev) prev();
-      createPlayer();
-    };
-    if (!document.getElementById("yt-api-script")) {
-      const s = document.createElement("script");
-      s.id = "yt-api-script";
-      s.src = "https://www.youtube.com/iframe_api";
-      document.head.appendChild(s);
-    }
-  }
-}
-/* ─────────────────────────────────────────────────────────────*/
-
 export function MusicProvider({ children }: { children: React.ReactNode }) {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // Sync React state with the singleton
-    const listener = (isPlaying: boolean, isReady: boolean) => {
-      setPlaying(isPlaying);
-      setReady(isReady);
-    };
-    _listeners.add(listener);
+    if (audioRef.current) return; // already created (StrictMode double-mount guard)
 
-    // If player already exists (e.g., navigated back to this page), sync immediately
-    if (_player && _ready) {
-      setReady(true);
-      setPlaying(_player.getPlayerState?.() === 1);
-      addInteractionListeners();
-    } else {
-      bootstrapYT();
+    const audio = new Audio("/music.mp3");
+    audio.loop = true;
+    audio.preload = "auto";
+    audioRef.current = audio;
+
+    audio.addEventListener("canplaythrough", () => setReady(true), { once: true });
+    audio.addEventListener("play", () => setPlaying(true));
+    audio.addEventListener("pause", () => setPlaying(false));
+    audio.addEventListener("ended", () => setPlaying(false));
+
+    // Play on first user interaction — works on iOS because play() is called
+    // synchronously inside the event handler with no async gap.
+    function onFirstInteraction() {
+      audio.play().catch(() => {});
+      document.removeEventListener("click", onFirstInteraction);
+      document.removeEventListener("touchstart", onFirstInteraction);
+      document.removeEventListener("keydown", onFirstInteraction);
     }
 
-    // On unmount (HMR / dev re-mount), remove the listener — but DO NOT destroy the player
-    return () => { _listeners.delete(listener); };
+    document.addEventListener("click", onFirstInteraction, { passive: true });
+    document.addEventListener("touchstart", onFirstInteraction, { passive: true });
+    document.addEventListener("keydown", onFirstInteraction, { passive: true });
+
+    return () => {
+      document.removeEventListener("click", onFirstInteraction);
+      document.removeEventListener("touchstart", onFirstInteraction);
+      document.removeEventListener("keydown", onFirstInteraction);
+    };
   }, []);
 
   function toggle() {
-    if (!_player || !_ready) return;
+    const audio = audioRef.current;
+    if (!audio || !ready) return;
     if (playing) {
-      _player.pauseVideo();
+      audio.pause();
     } else {
-      _player.playVideo();
+      audio.play().catch(() => {});
     }
   }
 
