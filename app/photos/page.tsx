@@ -71,7 +71,7 @@ export default function PhotosPage() {
         </div>
 
         <p className="mt-10 text-center text-[8px] tracking-[0.3em] uppercase text-dark-teal/25">
-          More photos will be added after the wedding · June 20, 2026
+          More photos will be added after the wedding · August 22, 2026
         </p>
       </div>
     </div>

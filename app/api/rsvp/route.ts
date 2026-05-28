@@ -7,7 +7,7 @@ const rsvpSchema = z.object({
   phone: z.string().min(1),
   email: z.string().email().optional().or(z.literal("")),
   attending: z.enum(["yes", "no"]),
-  plusOnes: z.number().int().min(0).default(0),
+  plusOnes: z.number().int().min(0).max(3).default(0),
 });
 
 export async function POST(request: NextRequest) {

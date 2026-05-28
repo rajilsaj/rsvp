@@ -58,7 +58,7 @@ export default function GlobalError({
         </button>
 
         <p style={{ marginTop: "64px", fontSize: "9px", letterSpacing: "0.3em", textTransform: "uppercase", color: "rgba(29,61,55,0.2)" }}>
-          Saturday · 20 June 2026 · Youngsville NC
+          Saturday · 22 August 2026 · Youngsville NC
         </p>
       </body>
     </html>

@@ -38,7 +38,7 @@ export default function NotFound() {
       </Link>
 
       <p className="mt-16 text-[8px] tracking-[0.3em] uppercase text-dark-teal/20">
-        Saturday · 20 June 2026 · Youngsville NC
+        Saturday · 22 August 2026 · Youngsville NC
       </p>
     </div>
   );

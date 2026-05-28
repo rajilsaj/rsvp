@@ -5,10 +5,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Copy, Heart, MapPin, X } from "lucide-react";
+import { Church, Copy, Heart, MapPin, Wine, X } from "lucide-react";
 import confetti from "canvas-confetti";
 
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { getCookie, setCookie } from "@/lib/cookies";
 
@@ -142,47 +141,43 @@ type EventItem = {
   title: string;
   date: string;
   dateISO: string;
+  time?: string;
+  venue?: string;
+  address?: string;
+  note?: string;
   description: string;
   accentBg: string;
   accentBorder: string;
+  Icon?: React.ComponentType<{ className?: string }>;
 };
 
 const incomingEvents: EventItem[] = [
   {
-    id: "parents",
-    title: "Meeting with Parents",
-    date: "May 15, 2026",
-    dateISO: "2026-05-15",
-    description: "Traditional introduction and family gathering.",
-    accentBg: "bg-emerald-500",
-    accentBorder: "border-emerald-500",
-  },
-  {
-    id: "dinner",
-    title: "Pre-Wedding Dinner",
-    date: "June 18, 2026",
-    dateISO: "2026-06-18",
-    description: "An intimate dinner with our closest friends and family.",
-    accentBg: "bg-amber-400",
-    accentBorder: "border-amber-400",
-  },
-  {
-    id: "rehearsal",
-    title: "Wedding Rehearsal",
-    date: "June 19, 2026",
-    dateISO: "2026-06-19",
-    description: "Final run-through at the venue.",
+    id: "ceremony",
+    title: "Ceremony",
+    date: "Saturday, August 22, 2026",
+    dateISO: "2026-08-22",
+    time: "1:00 PM – 3:00 PM",
+    venue: "Unity of the Triangle Church",
+    address: "5570 Munford Rd, Raleigh, NC 27612",
+    note: "Pictures will be taken at the reception venue immediately after.",
+    description: "1:00 PM – 3:00 PM · Unity of the Triangle Church · 5570 Munford Rd, Raleigh, NC 27612",
     accentBg: "bg-rose-400",
     accentBorder: "border-rose-400",
+    Icon: Church,
   },
   {
-    id: "wedding",
-    title: "Wedding Day",
-    date: "June 20, 2026",
-    dateISO: "2026-06-20",
-    description: "The big day! Join us to celebrate.",
+    id: "reception",
+    title: "Reception",
+    date: "Saturday, August 22, 2026",
+    dateISO: "2026-08-22",
+    time: "5:00 PM – 1:00 AM",
+    venue: "Pine Hill Pavilion",
+    address: "375 Moores Pond Rd, Youngsville, NC 27596",
+    description: "5:00 PM – 1:00 AM · Pine Hill Pavilion · 375 Moores Pond Rd, Youngsville, NC 27596",
     accentBg: "bg-teal-accent",
     accentBorder: "border-teal-accent",
+    Icon: Wine,
   },
 ];
 
@@ -190,7 +185,7 @@ type Seat = { id: string; table: string; seat: string };
 
 const wedding = {
   couple: { bride: "Grace", groom: "Noelvie" },
-  dateLabel: "Saturday • 20 June 2026",
+  dateLabel: "Saturday • 22 August 2026",
   timeLabel: "4:00 PM",
   cityLabel: "Youngsville, NC",
   venue: {
@@ -257,7 +252,7 @@ export default function SaveTheDate() {
 
   useEffect(() => {
     function tick() {
-      const target = new Date("2026-06-20T16:00:00");
+      const target = new Date("2026-08-22T13:00:00");
       const diff = target.getTime() - Date.now();
       if (diff <= 0) { setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0, ready: true }); return; }
       setCountdown({
@@ -275,9 +270,7 @@ export default function SaveTheDate() {
 
   useEffect(() => {
     const savedName = getCookie("wedding_rsvp_name");
-    const savedPhone = getCookie("wedding_rsvp_phone");
     if (!savedName) { router.push("/rsvp"); return; }
-    setChecking(false);
     fetch(`/api/guests`)
       .then((res) => (res.ok ? res.json() : []))
       .then((guests: any[]) => {
@@ -285,9 +278,16 @@ export default function SaveTheDate() {
         if (rsvp) {
           setMyRsvp({ ...rsvp, name: rsvp.names, status: rsvp.attending, guests: (rsvp.plusOnes || 0) + 1 });
           setInviteeName(rsvp.names);
+        } else {
+          setInviteeName(savedName);
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        setInviteeName(savedName);
+      })
+      .finally(() => {
+        setChecking(false);
+      });
   }, [router]);
 
   const { data: rsvps = [] } = useQuery<Rsvp[]>({
@@ -366,9 +366,26 @@ export default function SaveTheDate() {
     );
   }
 
+  function openDirections(address: string) {
+    const encoded = encodeURIComponent(address);
+    const ua = navigator.userAgent;
+    if (/iPad|iPhone|iPod/.test(ua)) {
+      window.location.href = `maps://maps.apple.com/?daddr=${encoded}`;
+    } else if (/Android/.test(ua)) {
+      window.location.href = `geo:0,0?q=${encoded}`;
+    } else {
+      window.open(`https://maps.google.com/?q=${encoded}`, "_blank");
+    }
+  }
+
+  function handleGetDirections(e: React.MouseEvent<HTMLAnchorElement>) {
+    e.preventDefault();
+    openDirections(wedding.venue.address);
+  }
+
   function handleSaveToCalendar() {
     const title = `Wedding: ${wedding.couple.bride} & ${wedding.couple.groom}`;
-    const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=20260620T160000/20260620T230000&details=${encodeURIComponent("Join us at " + wedding.venue.name)}&location=${encodeURIComponent(wedding.venue.address)}`;
+    const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=20260822T130000/20260822T010000&details=${encodeURIComponent("Join us at " + wedding.venue.name)}&location=${encodeURIComponent(wedding.venue.address)}`;
     window.open(url, "_blank");
     toast({ title: "Opening Calendar", description: "Redirecting to Google Calendar." });
   }
@@ -581,7 +598,7 @@ export default function SaveTheDate() {
               className="order-3 flex flex-col items-center lg:items-start text-center lg:text-left pl-0 lg:pl-10">
               <p className="text-[8px] tracking-[0.45em] uppercase text-dark-teal/35 mb-4">The Event</p>
               <p className="font-display text-3xl sm:text-4xl font-light text-dark-teal leading-tight tracking-tight">
-                JUN 20,<br />2026
+                AUG 22,<br />2026
               </p>
               <div className="my-4 h-px w-10 bg-dark-teal/15" />
               <div className="space-y-1">
@@ -591,7 +608,7 @@ export default function SaveTheDate() {
               </div>
               <div className="my-4 h-px w-10 bg-dark-teal/15" />
               <div className="flex flex-col sm:flex-row lg:flex-col gap-2 items-center lg:items-start">
-                <a href={wedding.venue.mapUrl} target="_blank" rel="noreferrer" className="text-[9px] tracking-[0.2em] uppercase text-teal-accent border-b border-teal-accent/40 pb-px hover:border-teal-accent transition-colors">
+                <a href={wedding.venue.mapUrl} onClick={handleGetDirections} rel="noreferrer" className="text-[9px] tracking-[0.2em] uppercase text-teal-accent border-b border-teal-accent/40 pb-px hover:border-teal-accent transition-colors">
                   Get Directions →
                 </a>
                 <button onClick={handleSaveToCalendar} className="text-[9px] tracking-[0.2em] uppercase text-dark-teal/50 border-b border-dark-teal/20 pb-px hover:text-teal-accent hover:border-teal-accent/40 transition-colors">
@@ -696,10 +713,10 @@ export default function SaveTheDate() {
                 {/* Top accent bar */}
                 <div className={`absolute top-0 left-0 right-0 h-[3px] ${event.accentBg} transition-all duration-500 group-hover:h-[5px]`} />
 
-                {/* Ghost number */}
-                <span className="absolute -bottom-4 -right-2 font-display text-[8rem] text-dark-teal/[0.06] font-bold leading-none select-none pointer-events-none">
-                  0{index + 1}
-                </span>
+                {/* Filigran icon */}
+                {event.Icon && (
+                  <event.Icon className="absolute bottom-5 right-5 w-28 h-28 text-dark-teal/[0.05] pointer-events-none select-none" />
+                )}
 
                 <div className="relative">
                   <div className="flex items-start justify-between mb-5">
@@ -718,10 +735,42 @@ export default function SaveTheDate() {
                   <h3 className={`font-display text-xl sm:text-2xl font-light leading-tight mb-3 ${isPast ? "text-dark-teal/40" : "text-dark-teal"}`}>
                     {event.title}
                   </h3>
-                  <div className={`h-px w-8 mb-3 ${isPast ? "bg-dark-teal/10" : "bg-dark-teal/20"}`} />
-                  <p className={`text-sm leading-relaxed ${isPast ? "text-dark-teal/25" : "text-dark-teal/55"}`}>
-                    {event.description}
-                  </p>
+                  <div className={`h-px w-8 mb-4 ${isPast ? "bg-dark-teal/10" : "bg-dark-teal/20"}`} />
+
+                  {event.time || event.venue ? (
+                    <div className="space-y-2">
+                      {event.time && (
+                        <p className={`text-base font-semibold tracking-wide ${isPast ? "text-dark-teal/30" : "text-dark-teal"}`}>
+                          {event.time}
+                        </p>
+                      )}
+                      {event.venue && (
+                        <p className={`text-sm font-medium ${isPast ? "text-dark-teal/25" : "text-dark-teal/70"}`}>
+                          {event.venue}
+                        </p>
+                      )}
+                      {event.address && (
+                        <a
+                          href={`https://maps.google.com/?q=${encodeURIComponent(event.address)}`}
+                          onClick={(e) => { e.preventDefault(); openDirections(event.address!); }}
+                          rel="noreferrer"
+                          className={`text-xs flex items-start gap-1 underline underline-offset-2 decoration-dotted transition-colors ${isPast ? "text-dark-teal/20 pointer-events-none" : "text-dark-teal/45 hover:text-teal-accent"}`}
+                        >
+                          <MapPin className="w-3 h-3 mt-0.5 shrink-0" />
+                          {event.address}
+                        </a>
+                      )}
+                      {event.note && (
+                        <p className={`text-xs italic pt-1 ${isPast ? "text-dark-teal/20" : "text-dark-teal/40"}`}>
+                          {event.note}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <p className={`text-sm leading-relaxed ${isPast ? "text-dark-teal/25" : "text-dark-teal/55"}`}>
+                      {event.description}
+                    </p>
+                  )}
                 </div>
               </motion.div>
             );
@@ -896,7 +945,7 @@ export default function SaveTheDate() {
                     <div className="flex items-center gap-3">
                       <button type="button" onClick={() => setInviteePlusOnes(Math.max(0, inviteePlusOnes - 1))} className="w-12 h-12 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-xl hover:bg-gray-50">−</button>
                       <span className="flex-1 text-center font-semibold text-base">{inviteePlusOnes === 0 ? "None" : `+${inviteePlusOnes}`}</span>
-                      <button type="button" onClick={() => setInviteePlusOnes(Math.min(10, inviteePlusOnes + 1))} className="w-12 h-12 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-xl hover:bg-gray-50">+</button>
+                      <button type="button" onClick={() => setInviteePlusOnes(Math.min(3, inviteePlusOnes + 1))} className="w-12 h-12 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-xl hover:bg-gray-50">+</button>
                     </div>
                   </div>
 

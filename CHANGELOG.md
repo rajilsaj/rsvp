@@ -4,9 +4,34 @@ All notable changes to this project are documented here.
 
 ---
 
-## [Unreleased] — 2026-05-28
+## [Unreleased] — 2026-05-28 (pass 4 — directions per event, hero date)
+
+### Changed
+- **Hero section date corrected**: Large display date in the main hero section updated from `JUN 20, 2026` to `AUG 22, 2026` to match the actual wedding date.
+- **"Get Directions" per event card**: Refactored `handleGetDirections` into a reusable `openDirections(address: string)` helper. Each event card now renders a `Get Directions →` link directly beneath its address, calling `openDirections(event.address)` — which routes to `maps://` on iOS, `geo:` on Android, or Google Maps on desktop. The link is hidden for past events.
+
+## [Unreleased] — 2026-05-28 (pass 3 — events, dates, directions)
+
+### Changed
+- **Wedding date updated to August 22, 2026**: All references to June 20, 2026 replaced across `app/page.tsx`, `app/layout.tsx`, `app/rsvp/page.tsx`, `app/photos/page.tsx`, `app/error.tsx`, `app/global-error.tsx`, `app/not-found.tsx`, and `app/api/updates/route.ts`. Countdown target updated to `2026-08-22T13:00:00` (ceremony start). "Save to Calendar" link updated to `20260822T130000/20260822T010000`.
+- **Upcoming Celebrations — events replaced**: Removed "Meeting with Parents", "Pre-Wedding Dinner", and "Wedding Rehearsal" from `incomingEvents`. Replaced with two structured events: **Ceremony** (1:00 PM – 3:00 PM, Unity of the Triangle Church) and **Reception** (5:00 PM – 1:00 AM, Pine Hill Pavilion), both on Saturday August 22, 2026.
+- **Event cards — structured layout with filigran icon**: `EventItem` type extended with optional `time`, `venue`, `address`, `note`, and `Icon` fields. Cards now render each field distinctly — time in bold, venue name, address with a `MapPin` icon, italic note — instead of a flat description string. A large semi-transparent background icon (`Church` for ceremony, `Wine` for reception) is rendered as a watermark in the bottom-right corner of each card.
+- **PlusOnes cap lowered from 10 to 3**: `Math.min` guard updated in both `app/page.tsx` and `app/rsvp/page.tsx`; `z.number().max(3)` added to the API schema in `app/api/rsvp/route.ts`.
+- **Get Directions opens native maps app on mobile**: Replaced static `<a href>` with an `onClick` handler (`handleGetDirections`) that routes to `maps://maps.apple.com/?daddr=…` on iOS, `geo:0,0?q=…` on Android, and `window.open(mapUrl)` on desktop. Applied to both direction links in the venue section.
+
+## [Unreleased] — 2026-05-28 (pass 2 — cookie audit)
+
+### Fixed (cookie & auth system audit)
+- **Race condition: spinner cleared before guest fetch resolved** (`app/page.tsx`): `setChecking(false)` was called immediately after the cookie was found, before the `/api/guests` fetch returned. This meant the homepage rendered with `myRsvp = null` and an empty RSVP form for the entire API round-trip. Moved `setChecking(false)` into the `.finally()` block so the spinner stays until the guest list resolves.
+- **RSVP form shown with empty name on fetch miss** (`app/page.tsx`): When the guest fetch returned an empty list (e.g., just registered — Google Sheets propagation lag, or API error), `inviteeName` stayed `""`. The RSVP form opened blank, forcing the user to retype their name. Added an `else`/`.catch()` branch that pre-fills `inviteeName` from the cookie value as a fallback.
+- **Cookie values not URL-encoded** (`lib/cookies.ts`): `setCookie` stored raw string values and `getCookie` returned raw string values. Guest names containing `&`, `+`, `%`, or other URI-special characters could silently corrupt or truncate the cookie on round-trip. `setCookie` now wraps values in `encodeURIComponent`; `getCookie` wraps the read value in `decodeURIComponent` with a try/catch fallback for pre-existing unencoded cookies (backwards-compatible).
+- **Unused `savedPhone` variable** (`app/page.tsx`): `getCookie("wedding_rsvp_phone")` was read into `savedPhone` but never consumed after the previous refactor removed the `setInviteePhone(savedPhone || "")` call. Removed the dead read.
+- **Unused `Button` import** (`app/page.tsx`): The shadcn `Button` component import was left behind after the RSVP form was rewritten to use native `<input>` and `<button>` elements. Removed.
 
 ### Added
+- **Cookie flow smoke-test suite** (`test-cookie-flow.mjs`): 10 Playwright test suites (19 assertions) covering: no-cookie redirect to `/rsvp`; cookie-present redirect away from `/rsvp`; spinner-then-content on homepage load; RSVP form pre-fill from cookie when guest not found in sheet; confirmation card shown when guest found; form validation error messages; phone mask placeholder; `/photos` page load; `/rsvp` page validation; and `encodeURIComponent`/`decodeURIComponent` round-trip with special characters. All 19 pass.
+
+### Added (earlier this session)
 - **Netlify Deployment Config**: Added `netlify.toml` specifying `npm run build` as the build command, `.next` as the publish directory, Node 20 as the runtime, and `@netlify/plugin-nextjs` for SSR support.
 
 ### Fixed

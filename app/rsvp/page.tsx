@@ -243,7 +243,7 @@ export default function RsvpPage() {
             <p className="text-[10px] tracking-[0.3em] uppercase mb-2 opacity-60">You are invited to</p>
             <h1 className="text-4xl sm:text-5xl mb-1 font-wedding">Grace &amp; Noelvie</h1>
             <h1 className="text-4xl sm:text-5xl mb-2 font-wedding">Wedding</h1>
-            <p className="text-xs opacity-60 tracking-wide">Saturday, June 20, 2026 · Youngsville NC</p>
+            <p className="text-xs opacity-60 tracking-wide">Saturday, August 22, 2026 · Youngsville NC</p>
           </div>
 
           <form onSubmit={handleSubmit} noValidate className="space-y-4">
@@ -348,7 +348,7 @@ export default function RsvpPage() {
             <div className="flex items-center gap-3">
               <button type="button" onClick={() => setPlusOnes(Math.max(0, plusOnes - 1))} className="w-12 h-12 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-xl hover:bg-gray-50">−</button>
               <span className="flex-1 text-center font-semibold text-base">{plusOnes === 0 ? "None" : `+${plusOnes}`}</span>
-              <button type="button" onClick={() => setPlusOnes(Math.min(10, plusOnes + 1))} className="w-12 h-12 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-xl hover:bg-gray-50">+</button>
+              <button type="button" onClick={() => setPlusOnes(Math.min(3, plusOnes + 1))} className="w-12 h-12 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-xl hover:bg-gray-50">+</button>
             </div>
           </div>
 

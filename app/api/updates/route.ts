@@ -90,7 +90,7 @@ function buildEmailHtml(message: string, photoAlbumLink?: string): string {
       }
       <hr style="border:none;border-top:1px solid #e5e7eb;margin:36px 0 20px;" />
       <p style="color:#9ca3af;font-size:12px;">
-        You received this message because you are an invited guest to the wedding of Grace &amp; Noelvie — June 20, 2026.
+        You received this message because you are an invited guest to the wedding of Grace &amp; Noelvie — August 22, 2026.
       </p>
     </div>
   `;

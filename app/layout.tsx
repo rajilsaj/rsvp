@@ -26,16 +26,16 @@ const greatVibes = Great_Vibes({
 
 export const metadata: Metadata = {
   title: "Grace & Noelvie — Our Wedding",
-  description: "Join us to celebrate the wedding of Grace & Noelvie on June 20, 2026. RSVP, find your seat, and explore our story.",
+  description: "Join us to celebrate the wedding of Grace & Noelvie on August 22, 2026. RSVP, find your seat, and explore our story.",
   openGraph: {
     title: "Grace & Noelvie — Our Wedding",
-    description: "Join us to celebrate the wedding of Grace & Noelvie on June 20, 2026.",
+    description: "Join us to celebrate the wedding of Grace & Noelvie on August 22, 2026.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "Grace & Noelvie — Our Wedding",
-    description: "Join us to celebrate the wedding of Grace & Noelvie on June 20, 2026.",
+    description: "Join us to celebrate the wedding of Grace & Noelvie on August 22, 2026.",
   },
   icons: {
     icon: "/favicon.png",
