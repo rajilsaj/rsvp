@@ -4,6 +4,41 @@ All notable changes to this project are documented here.
 
 ---
 
+## [Unreleased] — 2026-05-28 (pass 7 — events redesign, crimson token, story fix)
+
+### Changed
+- **Global text accent → `text-floral-crimson`**: Every `text-teal-accent` class across all `.tsx` files in `app/` and `components/` replaced with `text-floral-crimson` (`#8B1A2E`). Covers story date labels, section nav hover states, RSVP confirmation, seat assignment display, footer scripts, error/404/loading pages, and photo page links. The teal accent colour is now reserved for backgrounds and borders only.
+- **Hero title colour**: "We're getting married" changed from `text-teal-accent` to `text-floral-crimson`, tying the hero directly to the rose/floral palette.
+- **Upcoming Celebrations — full redesign ("Wedding Programme" style)**: Replaced the plain card grid with two portrait stationery cards counter-rotated (−1.5° / +1.5°), each styled as a printed wedding invitation — cream `#FDF8F5` background, gradient gold top & bottom strips, Roman numeral (I / II) as a watermark, script event name in `text-floral-crimson`, large display-font time as the hero element, venue name, address link, and a "d away" crimson pill. Cards are separated on desktop by a gold vertical ornament line and `✦` symbol. Section header uses "THE WEDDING PROGRAMME" label + script `Grace & Noelvie` with `textShadow` for readability on the rose background.
+- **Upcoming section vertical spacing reduced**: `py-20 sm:py-28` → `py-12 sm:py-16`; section header margin `mb-16 sm:mb-20` → `mb-10 sm:mb-12`; card internal padding `px-8 pt-8 pb-9` → `px-6 pt-6 pb-7`.
+- **Story section — first image no longer cuts faces on mobile**: Changed `h-60 object-cover` to `h-72 object-cover object-top` so the image anchors to the top of the frame, showing both faces instead of cropping to torso level.
+
+## [Unreleased] — 2026-05-28 (pass 6 — design & floral theme)
+
+### Added
+- **`--floral-crimson: #8B1A2E` design token** (`styles/globals.css`): the deep crimson from the rose clusters, registered as `--color-floral-crimson` in `@theme` so `text-floral-crimson` / `bg-floral-crimson` are available as Tailwind utilities everywhere.
+
+### Changed
+- **Hero "We're getting married" colour**: changed from `text-teal-accent` to `text-floral-crimson` (`#8B1A2E`), creating a visual thread between the hero script and the floral events section below.
+- **Upcoming Celebrations section — floral background**: replaced the flat `bg-mint` with the same `floralGradient` radial gradient used on `/rsvp`. `FloralBackground` (corner SVG clusters, parchment texture, gold border) extracted as a named export from `RsvpFloral.tsx` and applied to the section. `floralGradient` CSS string also exported so the homepage section matches exactly.
+- **Upcoming Celebrations section — card redesign**: replaced transparent `bg-white/15` grid cells with floating white invitation cards (`bg-white/90 backdrop-blur-sm`, warm crimson shadow). Each card has a coloured top band, an icon badge (Church/Wine), large time display, venue name, address link, and an italic note. Text uses `text-dark-teal` / `text-teal-muted` on the white panel — fully readable regardless of background.
+- **Section header text**: "Mark your calendar" and "Upcoming Celebrations" use `text-white` with `textShadow` for readability over the rose gradient. Gold divider line replaces the teal one.
+- **Section footer**: "Grace & Noelvie" script in white with shadow; date label in `text-white/70`.
+- **Homepage spinner eliminated**: `setChecking(false)` now fires immediately after cookie validation instead of waiting for the `/api/guests` response — page renders at once, guest data loads in the background.
+- **`whileInView` initial opacity**: changed from `0` to `0.15` across all animated sections in `app/page.tsx` and `app/photos/page.tsx` so content is faintly visible before scrolling in, preventing blank-section flashes.
+- **`opacity-60` form labels in `/rsvp`**: 5 remaining `opacity-60` labels replaced with `text-teal-muted`.
+
+## [Unreleased] — 2026-05-28 (pass 5 — accessibility audit)
+
+### Changed
+- **WCAG AA accessibility pass — all muted text** (`styles/globals.css`, `app/page.tsx`, `app/rsvp/page.tsx`, `app/photos/page.tsx`, `app/error.tsx`, `app/not-found.tsx`, `app/loading.tsx`, `app/global-error.tsx`):
+  Every opacity-based muted text value (`text-dark-teal/{n}` with n < 70) that conveys information was replaced with a new solid accessible token `text-teal-muted` (`#3d5c54`).
+  - **Contrast ratios verified**: 7.0:1 on the cream background (`#faf9f6`) and 5.3:1 on the mint background (`#c5e0da`) — WCAG AAA on the primary surface, WCAG AA on mint. Every replaced value previously failed WCAG AA (ranging from ~1.3:1 at `/20` to ~3.6:1 at `/60`).
+  - **Token added**: `--teal-muted: #3d5c54` registered in `:root` and `@theme` of `globals.css` as `--color-teal-muted`, making `text-teal-muted` / `bg-teal-muted` / `border-teal-muted` available throughout the Tailwind 4 theme.
+  - **Scope**: applies to labels, dates, descriptions, venue info, form field labels, RSVP confirmation text, section taglines, footer credits, countdown unit labels, nav item numbers, error messages, loading subtitle, and 404 body text.
+  - **Exemptions** (genuinely decorative — no informational purpose, WCAG SC 1.4.3 exception): nav separator dot `·`, countdown colon `:`, ghost "404" number, ghost "!" on error page, filigran card icon watermark. These remain at their existing low opacity.
+  - `global-error.tsx` uses inline styles (renders before the stylesheet loads); its `rgba(29,61,55,0.4/0.5/0.2)` values were replaced with the hex literal `#3d5c54`.
+
 ## [Unreleased] — 2026-05-28 (pass 4 — directions per event, hero date)
 
 ### Changed

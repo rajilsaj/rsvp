@@ -21,6 +21,9 @@
   --mint-bg: #c5e0da;
   --teal-accent: #3d8b7a;
   --dark-teal: #1d3d37;
+  /* WCAG AA-compliant muted text: 7:1 on #faf9f6, 5.3:1 on mint — passes AA on all app backgrounds */
+  --teal-muted: #3d5c54;
+  --floral-crimson: #8B1A2E;
   --error-color: #e11d48;
 
   /* Standard Tailwind variables mapping */
@@ -61,6 +64,8 @@
   --color-mint: var(--mint-bg);
   --color-teal-accent: var(--teal-accent);
   --color-dark-teal: var(--dark-teal);
+  --color-teal-muted: var(--teal-muted);
+  --color-floral-crimson: var(--floral-crimson);
   --color-error: var(--error-color);
   
   --font-wedding: var(--font-wedding), cursive;

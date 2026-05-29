@@ -7,7 +7,7 @@ export default function NotFound() {
       {/* Monogram */}
       <div className="mb-10">
         <p className="font-display text-xl tracking-[0.3em] text-dark-teal font-light">G · N</p>
-        <p className="text-[8px] tracking-[0.35em] uppercase text-dark-teal/40 mt-0.5">Grace &amp; Noelvie</p>
+        <p className="text-[8px] tracking-[0.35em] uppercase text-teal-muted mt-0.5">Grace &amp; Noelvie</p>
       </div>
 
       {/* Ghost number + script overlay */}
@@ -16,7 +16,7 @@ export default function NotFound() {
           404
         </span>
         <div className="absolute inset-0 flex items-center justify-center">
-          <p className="font-wedding text-5xl sm:text-7xl text-teal-accent">Lost…</p>
+          <p className="font-wedding text-5xl sm:text-7xl text-floral-crimson">Lost…</p>
         </div>
       </div>
 
@@ -25,7 +25,7 @@ export default function NotFound() {
       <h1 className="font-display text-2xl sm:text-3xl font-light text-dark-teal mb-3">
         Page not found
       </h1>
-      <p className="text-sm text-dark-teal/50 max-w-xs leading-relaxed mb-10">
+      <p className="text-sm text-teal-muted max-w-xs leading-relaxed mb-10">
         This page doesn&apos;t exist — but the celebration does.
         <br />Head back and join us.
       </p>
@@ -37,7 +37,7 @@ export default function NotFound() {
         Back to the celebration →
       </Link>
 
-      <p className="mt-16 text-[8px] tracking-[0.3em] uppercase text-dark-teal/20">
+      <p className="mt-16 text-[8px] tracking-[0.3em] uppercase text-teal-muted">
         Saturday · 22 August 2026 · Youngsville NC
       </p>
     </div>

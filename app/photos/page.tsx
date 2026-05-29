@@ -19,22 +19,22 @@ export default function PhotosPage() {
 
       {/* Header */}
       <header className="flex items-center justify-between px-5 sm:px-10 py-4 border-b border-dark-teal/10">
-        <Link href="/" className="text-[8px] tracking-[0.3em] uppercase text-dark-teal/45 hover:text-teal-accent transition-colors">
+        <Link href="/" className="text-[8px] tracking-[0.3em] uppercase text-teal-muted hover:text-floral-crimson transition-colors">
           ← Back
         </Link>
         <div className="text-center">
           <p className="font-display text-lg sm:text-xl tracking-[0.3em] text-dark-teal font-light leading-none">G · N</p>
-          <p className="text-[8px] tracking-[0.35em] uppercase text-dark-teal/40 mt-0.5">Grace &amp; Noelvie</p>
+          <p className="text-[8px] tracking-[0.35em] uppercase text-teal-muted mt-0.5">Grace &amp; Noelvie</p>
         </div>
         <div className="w-12" />
       </header>
 
       {/* Page title */}
       <div className="text-center px-5 pt-16 pb-12 sm:pt-20 sm:pb-16">
-        <p className="text-[8px] tracking-[0.4em] uppercase text-dark-teal/35 mb-3">Gallery</p>
+        <p className="text-[8px] tracking-[0.4em] uppercase text-teal-muted mb-3">Gallery</p>
         <h1 className="font-display text-4xl sm:text-6xl font-light text-dark-teal tracking-tight">Our Photos</h1>
         <div className="mt-4 h-px w-12 bg-dark-teal/15 mx-auto" />
-        <p className="mt-6 text-sm text-dark-teal/45 max-w-sm mx-auto leading-relaxed">
+        <p className="mt-6 text-sm text-teal-muted max-w-sm mx-auto leading-relaxed">
           A growing collection of our favorite moments together.
         </p>
       </div>
@@ -45,7 +45,7 @@ export default function PhotosPage() {
           {photos.map((photo, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0.15, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.06, duration: 0.5 }}
@@ -65,12 +65,12 @@ export default function PhotosPage() {
               key={`ph-${i}`}
               className="h-44 sm:h-56 bg-dark-teal/5 border border-dashed border-dark-teal/15 flex flex-col items-center justify-center gap-2"
             >
-              <p className="text-[8px] tracking-[0.3em] uppercase text-dark-teal/25">Coming soon</p>
+              <p className="text-[8px] tracking-[0.3em] uppercase text-teal-muted">Coming soon</p>
             </div>
           ))}
         </div>
 
-        <p className="mt-10 text-center text-[8px] tracking-[0.3em] uppercase text-dark-teal/25">
+        <p className="mt-10 text-center text-[8px] tracking-[0.3em] uppercase text-teal-muted">
           More photos will be added after the wedding · August 22, 2026
         </p>
       </div>

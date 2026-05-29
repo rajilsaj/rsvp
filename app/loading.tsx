@@ -31,7 +31,7 @@ export default function Loading() {
         
         {/* Inner Pulsing Heart */}
         <div className="absolute inset-0 flex items-center justify-center animate-pulse">
-          <span className="text-2xl text-teal-accent">💌</span>
+          <span className="text-2xl text-floral-crimson">💌</span>
         </div>
       </div>
 
@@ -39,7 +39,7 @@ export default function Loading() {
         <h2 className="mb-2 font-wedding text-4xl text-dark-teal animate-pulse">
           Grace & Noelvie
         </h2>
-        <p className="text-xs uppercase tracking-[0.3em] text-dark-teal/60">
+        <p className="text-xs uppercase tracking-[0.3em] text-teal-muted">
           Opening Invitation...
         </p>
       </div>

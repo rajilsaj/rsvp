@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { getCookie, setCookie } from "@/lib/cookies";
+import { RsvpFloral } from "@/components/RsvpFloral";
 import confetti from "canvas-confetti";
 
 function launchConfetti() {
@@ -194,32 +195,31 @@ export default function RsvpPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-[100dvh] flex items-center justify-center p-4 sm:p-6 bg-mint">
-        <div className="w-full max-w-md rounded-2xl p-8 sm:p-10 text-center shadow-sm bg-white/85">
+      <RsvpFloral>
+        <div className="w-full max-w-md rounded-2xl p-8 sm:p-10 text-center shadow-[0_24px_60px_-12px_rgba(139,28,62,0.35)] bg-white/90 backdrop-blur-sm">
           <div className="text-5xl mb-4">💌</div>
           <h2 className="text-xl sm:text-2xl font-semibold mb-2 text-dark-teal">
             {existingGuestName
               ? `Welcome back, ${existingGuestName}!`
               : attending === "yes" ? "See you there!" : "We'll miss you!"}
           </h2>
-          <p className="text-sm mb-6 text-dark-teal/65 leading-relaxed">
+          <p className="text-sm mb-6 text-teal-muted leading-relaxed">
             {existingGuestName
               ? "You're already registered. Redirecting you to the website..."
               : "Thank you for your RSVP. Redirecting you to the website..."}
           </p>
-          <div className="animate-pulse text-xs uppercase tracking-widest text-teal-accent">
+          <div className="animate-pulse text-xs uppercase tracking-widest text-floral-crimson">
             Loading...
           </div>
         </div>
-      </div>
+      </RsvpFloral>
     );
   }
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center px-4 py-10 bg-mint">
-
+    <RsvpFloral>
       {/* ── Single invitation card ── */}
-      <div className="w-full max-w-md rounded-3xl overflow-hidden shadow-2xl bg-white">
+      <div className="w-full max-w-md rounded-3xl overflow-hidden shadow-[0_24px_60px_-12px_rgba(139,28,62,0.35)] bg-white/90 backdrop-blur-sm">
 
         {/* Photo header — top of the card */}
         <div className="relative w-full aspect-[4/3]">
@@ -232,7 +232,7 @@ export default function RsvpPage() {
             sizes="448px"
           />
           {/* Fade photo into card body */}
-          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-white to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-white/92 to-transparent" />
         </div>
 
         {/* Card body */}
@@ -240,16 +240,16 @@ export default function RsvpPage() {
 
           {/* Title */}
           <div className="text-center mb-6 text-dark-teal">
-            <p className="text-[10px] tracking-[0.3em] uppercase mb-2 opacity-60">You are invited to</p>
+            <p className="text-[10px] tracking-[0.3em] uppercase mb-2 text-teal-muted">You are invited to</p>
             <h1 className="text-4xl sm:text-5xl mb-1 font-wedding">Grace &amp; Noelvie</h1>
             <h1 className="text-4xl sm:text-5xl mb-2 font-wedding">Wedding</h1>
-            <p className="text-xs opacity-60 tracking-wide">Saturday, August 22, 2026 · Youngsville NC</p>
+            <p className="text-xs text-teal-muted tracking-wide">Saturday, August 22, 2026 · Youngsville NC</p>
           </div>
 
           <form onSubmit={handleSubmit} noValidate className="space-y-4">
 
           <div>
-            <label className="block text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 opacity-60">Full Name(s) *</label>
+            <label className="block text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 text-teal-muted">Full Name(s) *</label>
             <div className="relative">
               <input
                 type="text"
@@ -269,7 +269,7 @@ export default function RsvpPage() {
           </div>
 
           <div>
-            <label className="block text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 opacity-60">Phone *</label>
+            <label className="block text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 text-teal-muted">Phone *</label>
             {/* Ghost overlay: mask stays visible as user types */}
             <div className={`relative w-full rounded-xl bg-white border transition-colors focus-within:border-teal-accent ${touched.phone && errors.phone ? "border-error" : "border-gray-200"}`}>
               {/* Ghost mask layer */}
@@ -312,7 +312,7 @@ export default function RsvpPage() {
           </div>
 
           <div>
-            <label className="block text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 opacity-60">Email (optional)</label>
+            <label className="block text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 text-teal-muted">Email (optional)</label>
             <input
               type="email"
               value={email}
@@ -323,12 +323,12 @@ export default function RsvpPage() {
           </div>
 
           <div>
-            <label className="block text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 opacity-60">Will you attend? *</label>
+            <label className="block text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 text-teal-muted">Will you attend? *</label>
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => setAttending("yes")}
-                className={`py-3.5 rounded-xl text-sm font-medium transition-all border-2 ${attending === "yes" ? "bg-teal-accent/10 border-teal-accent text-teal-accent" : "border-gray-100 text-gray-500 hover:border-gray-200"}`}
+                className={`py-3.5 rounded-xl text-sm font-medium transition-all border-2 ${attending === "yes" ? "bg-teal-accent/10 border-teal-accent text-floral-crimson" : "border-gray-100 text-gray-500 hover:border-gray-200"}`}
               >
                 ✓ Yes
               </button>
@@ -344,7 +344,7 @@ export default function RsvpPage() {
           </div>
 
           <div>
-            <label className="block text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 opacity-60">Additional guests you&apos;re bringing</label>
+            <label className="block text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 text-teal-muted">Additional guests you&apos;re bringing</label>
             <div className="flex items-center gap-3">
               <button type="button" onClick={() => setPlusOnes(Math.max(0, plusOnes - 1))} className="w-12 h-12 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-xl hover:bg-gray-50">−</button>
               <span className="flex-1 text-center font-semibold text-base">{plusOnes === 0 ? "None" : `+${plusOnes}`}</span>
@@ -364,6 +364,6 @@ export default function RsvpPage() {
         </form>
         </div> {/* card body */}
       </div> {/* invitation card */}
-    </div>
+    </RsvpFloral>
   );
 }

@@ -25,7 +25,7 @@ export default function GlobalError({
           color: "#1d3d37",
         }}
       >
-        <p style={{ letterSpacing: "0.3em", fontSize: "11px", color: "rgba(29,61,55,0.4)", marginBottom: "32px", textTransform: "uppercase" }}>
+        <p style={{ letterSpacing: "0.3em", fontSize: "11px", color: "#3d5c54", marginBottom: "32px", textTransform: "uppercase" }}>
           G · N — Grace &amp; Noelvie
         </p>
 
@@ -34,7 +34,7 @@ export default function GlobalError({
         <h1 style={{ fontSize: "1.75rem", fontWeight: 300, marginBottom: "12px" }}>
           Something went wrong
         </h1>
-        <p style={{ color: "rgba(29,61,55,0.5)", marginBottom: "32px", maxWidth: "380px", lineHeight: 1.6, fontSize: "14px" }}>
+        <p style={{ color: "#3d5c54", marginBottom: "32px", maxWidth: "380px", lineHeight: 1.6, fontSize: "14px" }}>
           A critical error occurred. This has been noted. Please refresh the page to continue.
         </p>
 
@@ -57,7 +57,7 @@ export default function GlobalError({
           ↺ Try again
         </button>
 
-        <p style={{ marginTop: "64px", fontSize: "9px", letterSpacing: "0.3em", textTransform: "uppercase", color: "rgba(29,61,55,0.2)" }}>
+        <p style={{ marginTop: "64px", fontSize: "9px", letterSpacing: "0.3em", textTransform: "uppercase", color: "#3d5c54" }}>
           Saturday · 22 August 2026 · Youngsville NC
         </p>
       </body>

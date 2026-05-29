@@ -10,6 +10,7 @@ import confetti from "canvas-confetti";
 
 import { useToast } from "@/hooks/use-toast";
 import { getCookie, setCookie } from "@/lib/cookies";
+import { FloralBackground, floralGradient } from "@/components/RsvpFloral";
 
 /* ─── Rose petal particle types ─── */
 type PetalConfig = {
@@ -271,6 +272,9 @@ export default function SaveTheDate() {
   useEffect(() => {
     const savedName = getCookie("wedding_rsvp_name");
     if (!savedName) { router.push("/rsvp"); return; }
+    // Show the page immediately — the guest data loads in the background
+    setInviteeName(savedName);
+    setChecking(false);
     fetch(`/api/guests`)
       .then((res) => (res.ok ? res.json() : []))
       .then((guests: any[]) => {
@@ -278,16 +282,9 @@ export default function SaveTheDate() {
         if (rsvp) {
           setMyRsvp({ ...rsvp, name: rsvp.names, status: rsvp.attending, guests: (rsvp.plusOnes || 0) + 1 });
           setInviteeName(rsvp.names);
-        } else {
-          setInviteeName(savedName);
         }
       })
-      .catch(() => {
-        setInviteeName(savedName);
-      })
-      .finally(() => {
-        setChecking(false);
-      });
+      .catch(() => {});
   }, [router]);
 
   const { data: rsvps = [] } = useQuery<Rsvp[]>({
@@ -480,7 +477,7 @@ export default function SaveTheDate() {
         {menuOpen && (
           <motion.div
             key="nav-overlay"
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0.15, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.35, ease: "easeInOut" }}
@@ -490,9 +487,9 @@ export default function SaveTheDate() {
             <div className="flex items-center justify-between px-5 sm:px-10 py-4 border-b border-dark-teal/10">
               <div className="text-center">
                 <p className="font-display text-lg tracking-[0.3em] text-dark-teal font-light">G · N</p>
-                <p className="text-[8px] tracking-[0.35em] uppercase text-dark-teal/40 mt-0.5">Grace &amp; Noelvie</p>
+                <p className="text-[8px] tracking-[0.35em] uppercase text-teal-muted mt-0.5">Grace &amp; Noelvie</p>
               </div>
-              <button onClick={() => setMenuOpen(false)} className="text-dark-teal/50 hover:text-dark-teal transition-colors" aria-label="Close menu">
+              <button onClick={() => setMenuOpen(false)} className="text-teal-muted hover:text-dark-teal transition-colors" aria-label="Close menu">
                 <X className="h-6 w-6" />
               </button>
             </div>
@@ -513,23 +510,23 @@ export default function SaveTheDate() {
                           href={link.href}
                           className="group flex items-center gap-4 py-3 border-b border-dark-teal/10 hover:border-teal-accent transition-colors"
                         >
-                          <span className="text-[8px] text-dark-teal/30 font-mono w-5">{String(i + 1).padStart(2, "0")}</span>
-                          <span className="font-display text-2xl sm:text-3xl text-dark-teal font-light group-hover:text-teal-accent transition-colors">{link.label}</span>
+                          <span className="text-[8px] text-teal-muted font-mono w-5">{String(i + 1).padStart(2, "0")}</span>
+                          <span className="font-display text-2xl sm:text-3xl text-dark-teal font-light group-hover:text-floral-crimson transition-colors">{link.label}</span>
                         </Link>
                       ) : (
                         <button
                           onClick={() => link.id && scrollTo(link.id)}
                           className="group w-full flex items-center gap-4 py-3 border-b border-dark-teal/10 hover:border-teal-accent transition-colors text-left"
                         >
-                          <span className="text-[8px] text-dark-teal/30 font-mono w-5">{String(i + 1).padStart(2, "0")}</span>
-                          <span className="font-display text-2xl sm:text-3xl text-dark-teal font-light group-hover:text-teal-accent transition-colors">{link.label}</span>
+                          <span className="text-[8px] text-teal-muted font-mono w-5">{String(i + 1).padStart(2, "0")}</span>
+                          <span className="font-display text-2xl sm:text-3xl text-dark-teal font-light group-hover:text-floral-crimson transition-colors">{link.label}</span>
                         </button>
                       )
                     ) : (
                       <div className="flex items-center gap-4 py-3 border-b border-dark-teal/5 opacity-30 cursor-not-allowed select-none">
-                        <span className="text-[8px] text-dark-teal/30 font-mono w-5">{String(i + 1).padStart(2, "0")}</span>
+                        <span className="text-[8px] text-teal-muted font-mono w-5">{String(i + 1).padStart(2, "0")}</span>
                         <span className="font-display text-2xl sm:text-3xl text-dark-teal font-light">{link.label}</span>
-                        <span className="ml-auto text-[8px] tracking-[0.25em] uppercase text-dark-teal/30">Soon</span>
+                        <span className="ml-auto text-[8px] tracking-[0.25em] uppercase text-teal-muted">Soon</span>
                       </div>
                     )}
                   </motion.div>
@@ -538,7 +535,7 @@ export default function SaveTheDate() {
             </nav>
 
             <div className="px-8 sm:px-16 py-8 border-t border-dark-teal/10">
-              <p className="text-[8px] tracking-[0.35em] uppercase text-dark-teal/30">{wedding.dateLabel} · {wedding.venue.name}</p>
+              <p className="text-[8px] tracking-[0.35em] uppercase text-teal-muted">{wedding.dateLabel} · {wedding.venue.name}</p>
             </div>
           </motion.div>
         )}
@@ -559,7 +556,7 @@ export default function SaveTheDate() {
           </button>
           <div className="text-center">
             <p className="font-display text-lg sm:text-xl tracking-[0.3em] text-dark-teal font-light leading-none">G · N</p>
-            <p className="text-[8px] tracking-[0.35em] uppercase text-dark-teal/40 mt-0.5">Grace &amp; Noelvie</p>
+            <p className="text-[8px] tracking-[0.35em] uppercase text-teal-muted mt-0.5">Grace &amp; Noelvie</p>
           </div>
           <button onClick={() => scrollTo("rsvp-section")} className="text-[9px] sm:text-[10px] tracking-[0.25em] uppercase text-dark-teal border border-dark-teal/25 px-3 sm:px-4 py-1.5 sm:py-2 hover:bg-dark-teal hover:text-[#faf9f6] transition-all">
             RSVP
@@ -573,18 +570,18 @@ export default function SaveTheDate() {
             {/* Left: Script headline */}
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.85, delay: 0.15 }}
               className="order-2 lg:order-1 flex flex-col items-center lg:items-end text-center lg:text-right pr-0 lg:pr-10">
-              <p className="text-[8px] tracking-[0.45em] uppercase text-dark-teal/35 mb-3">Join us to celebrate</p>
-              <h1 className="font-wedding text-[3.8rem] sm:text-[5rem] lg:text-[5.5rem] xl:text-[6rem] text-teal-accent leading-[1.05]">
+              <p className="text-[8px] tracking-[0.45em] uppercase text-teal-muted mb-3">Join us to celebrate</p>
+              <h1 className="font-wedding text-[3.8rem] sm:text-[5rem] lg:text-[5.5rem] xl:text-[6rem] text-floral-crimson leading-[1.05]">
                 We&apos;re<br />getting<br />married
               </h1>
-              <p className="mt-5 text-[9px] tracking-[0.3em] uppercase text-dark-teal/35 leading-relaxed max-w-[220px]">
+              <p className="mt-5 text-[9px] tracking-[0.3em] uppercase text-teal-muted leading-relaxed max-w-[220px]">
                 &ldquo;What God has joined together,<br />let no one separate.&rdquo;
-                <span className="block mt-1 text-dark-teal/25">— Mark 10:9</span>
+                <span className="block mt-1 text-teal-muted">— Mark 10:9</span>
               </p>
             </motion.div>
 
             {/* Center: Single hero photo */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.85 }}
+            <motion.div initial={{ opacity: 0.15, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.85 }}
               className="order-1 lg:order-2 flex justify-center">
               <div className="relative w-64 sm:w-80 lg:w-[22rem] xl:w-96 rotate-[1.5deg] shadow-[0_32px_64px_-12px_rgba(29,61,55,0.35)] overflow-hidden flex-shrink-0 rounded-2xl">
                 <img src="/images/couple-hero-2.jpg" alt="Grace &amp; Noelvie" className="w-full aspect-[3/4] object-cover object-top grayscale" />
@@ -596,22 +593,22 @@ export default function SaveTheDate() {
             {/* Right: Event details */}
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.85, delay: 0.15 }}
               className="order-3 flex flex-col items-center lg:items-start text-center lg:text-left pl-0 lg:pl-10">
-              <p className="text-[8px] tracking-[0.45em] uppercase text-dark-teal/35 mb-4">The Event</p>
+              <p className="text-[8px] tracking-[0.45em] uppercase text-teal-muted mb-4">The Event</p>
               <p className="font-display text-3xl sm:text-4xl font-light text-dark-teal leading-tight tracking-tight">
                 AUG 22,<br />2026
               </p>
               <div className="my-4 h-px w-10 bg-dark-teal/15" />
               <div className="space-y-1">
                 <p className="text-[9px] tracking-[0.28em] uppercase text-dark-teal/70 font-medium">{wedding.venue.name}</p>
-                <p className="text-[11px] text-dark-teal/45 leading-relaxed max-w-[180px]">{wedding.venue.address}</p>
-                <p className="text-[11px] text-dark-teal/45">{wedding.timeLabel}</p>
+                <p className="text-[11px] text-teal-muted leading-relaxed max-w-[180px]">{wedding.venue.address}</p>
+                <p className="text-[11px] text-teal-muted">{wedding.timeLabel}</p>
               </div>
               <div className="my-4 h-px w-10 bg-dark-teal/15" />
               <div className="flex flex-col sm:flex-row lg:flex-col gap-2 items-center lg:items-start">
-                <a href={wedding.venue.mapUrl} onClick={handleGetDirections} rel="noreferrer" className="text-[9px] tracking-[0.2em] uppercase text-teal-accent border-b border-teal-accent/40 pb-px hover:border-teal-accent transition-colors">
+                <a href={wedding.venue.mapUrl} onClick={handleGetDirections} rel="noreferrer" className="text-[9px] tracking-[0.2em] uppercase text-floral-crimson border-b border-teal-accent/40 pb-px hover:border-teal-accent transition-colors">
                   Get Directions →
                 </a>
-                <button onClick={handleSaveToCalendar} className="text-[9px] tracking-[0.2em] uppercase text-dark-teal/50 border-b border-dark-teal/20 pb-px hover:text-teal-accent hover:border-teal-accent/40 transition-colors">
+                <button onClick={handleSaveToCalendar} className="text-[9px] tracking-[0.2em] uppercase text-teal-muted border-b border-teal-muted/30 pb-px hover:text-floral-crimson hover:border-teal-accent/40 transition-colors">
                   Save to Calendar →
                 </button>
               </div>
@@ -629,7 +626,7 @@ export default function SaveTheDate() {
               { label: "RSVP", id: "rsvp-section" },
             ].map((link, i, arr) => (
               <Fragment key={link.id}>
-                <button onClick={() => scrollTo(link.id)} className="text-[8px] sm:text-[9px] tracking-[0.28em] uppercase text-dark-teal/45 hover:text-teal-accent transition-colors">
+                <button onClick={() => scrollTo(link.id)} className="text-[8px] sm:text-[9px] tracking-[0.28em] uppercase text-teal-muted hover:text-floral-crimson transition-colors">
                   {link.label}
                 </button>
                 {i < arr.length - 1 && <span className="text-dark-teal/20 text-[10px] leading-none select-none">·</span>}
@@ -649,7 +646,7 @@ export default function SaveTheDate() {
                     <span className="font-display text-3xl sm:text-4xl font-light text-dark-teal tabular-nums leading-none">
                       {String(unit.value).padStart(2, "0")}
                     </span>
-                    <p className="text-[7px] sm:text-[8px] tracking-[0.3em] uppercase text-dark-teal/35 mt-1">{unit.label}</p>
+                    <p className="text-[7px] sm:text-[8px] tracking-[0.3em] uppercase text-teal-muted mt-1">{unit.label}</p>
                   </div>
                   {i < arr.length - 1 && (
                     <span className="font-display text-2xl sm:text-3xl text-dark-teal/20 pb-4 select-none">:</span>
@@ -666,23 +663,23 @@ export default function SaveTheDate() {
       ══════════════════════════════════ */}
       <section id="story" className="mx-auto max-w-4xl px-5 sm:px-10 py-16 sm:py-24">
         <div className="text-center mb-12 sm:mb-16">
-          <p className="text-[8px] tracking-[0.4em] uppercase text-dark-teal/35 mb-3">About us</p>
+          <p className="text-[8px] tracking-[0.4em] uppercase text-teal-muted mb-3">About us</p>
           <h2 className="font-display text-3xl sm:text-5xl text-dark-teal font-light tracking-tight">Our Story</h2>
           <div className="mt-4 h-px w-12 bg-dark-teal/15 mx-auto" />
         </div>
 
         <div className="space-y-14 sm:space-y-20">
           {timelineItems.map((item, index) => (
-            <motion.div key={item.id} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-80px" }} transition={{ duration: 0.7 }}
+            <motion.div key={item.id} initial={{ opacity: 0.15, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-80px" }} transition={{ duration: 0.7 }}
               className={`flex flex-col ${index % 2 === 1 ? "sm:flex-row-reverse" : "sm:flex-row"} gap-8 sm:gap-12 items-center`}>
               <div className="w-full sm:w-1/2 overflow-hidden group rounded-2xl">
-                <img src={item.image} alt={item.title} className="w-full h-60 sm:h-80 object-cover grayscale hover:grayscale-0 active:grayscale-0 group-hover:scale-[1.03] group-active:scale-[1.03] transition-all duration-700" />
+                <img src={item.image} alt={item.title} className="w-full h-72 sm:h-80 object-cover object-top grayscale hover:grayscale-0 active:grayscale-0 group-hover:scale-[1.03] group-active:scale-[1.03] transition-all duration-700" />
               </div>
               <div className={`w-full sm:w-1/2 ${index % 2 === 1 ? "sm:text-right" : ""}`}>
-                <span className="text-[9px] tracking-[0.4em] uppercase text-teal-accent font-medium">{item.dateLabel}</span>
+                <span className="text-[9px] tracking-[0.4em] uppercase text-floral-crimson font-medium">{item.dateLabel}</span>
                 <h3 className="mt-2 text-2xl sm:text-3xl font-display font-light text-dark-teal">{item.title}</h3>
                 <div className={`mt-3 h-px w-8 bg-dark-teal/15 ${index % 2 === 1 ? "ml-auto" : ""}`} />
-                <p className="mt-4 text-dark-teal/55 leading-relaxed text-sm sm:text-base">{item.description}</p>
+                <p className="mt-4 text-teal-muted leading-relaxed text-sm sm:text-base">{item.description}</p>
               </div>
             </motion.div>
           ))}
@@ -692,97 +689,170 @@ export default function SaveTheDate() {
       {/* ══════════════════════════════════
           CELEBRATIONS — Creative 2×2 grid
       ══════════════════════════════════ */}
-      <section id="events" className="bg-mint">
-        <div className="max-w-5xl mx-auto px-5 sm:px-10 pt-16 sm:pt-24 pb-8">
-          <div className="text-center mb-12 sm:mb-16">
-            <p className="text-[8px] tracking-[0.4em] uppercase text-dark-teal/35 mb-3">Mark your calendar</p>
-            <h2 className="font-display text-3xl sm:text-5xl text-dark-teal font-light tracking-tight">Upcoming Celebrations</h2>
-            <div className="mt-4 h-px w-12 bg-dark-teal/15 mx-auto" />
+      <section id="events" className="relative overflow-hidden" style={{ background: floralGradient }}>
+        <FloralBackground />
+
+        <div className="relative z-10 px-5 sm:px-10 py-12 sm:py-16">
+
+          {/* ── Section header ── */}
+          <div className="text-center mb-10 sm:mb-12">
+            <div className="flex items-center justify-center gap-4 mb-5">
+              <div className="h-px w-12 sm:w-20" style={{ background: "rgba(200,160,40,0.75)" }} />
+              <span className="text-[8px] tracking-[0.55em] uppercase text-white/80" style={{ textShadow: "0 1px 6px rgba(90,15,30,0.6)" }}>
+                The Wedding Programme
+              </span>
+              <div className="h-px w-12 sm:w-20" style={{ background: "rgba(200,160,40,0.75)" }} />
+            </div>
+            <p className="font-wedding text-5xl sm:text-7xl text-white leading-none" style={{ textShadow: "0 3px 16px rgba(90,15,30,0.55)" }}>
+              Grace &amp; Noelvie
+            </p>
+            <p className="mt-3 text-[9px] tracking-[0.4em] uppercase text-white/70" style={{ textShadow: "0 1px 6px rgba(90,15,30,0.5)" }}>
+              Saturday · August 22, 2026 · Youngsville, NC
+            </p>
           </div>
-        </div>
 
-        {/* Cards grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 border-t border-dark-teal/10">
-          {incomingEvents.map((event, index) => {
-            const days = daysUntil(event.dateISO);
-            const isPast = days < 0;
-            const isToday = days === 0;
-            return (
-              <motion.div key={event.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.08, duration: 0.6 }}
-                className={`relative border-b border-r-0 sm:border-r border-dark-teal/10 p-8 sm:p-10 overflow-hidden group hover:bg-white/30 transition-colors ${index % 2 === 1 ? "sm:border-r-0" : ""}`}>
-                {/* Top accent bar */}
-                <div className={`absolute top-0 left-0 right-0 h-[3px] ${event.accentBg} transition-all duration-500 group-hover:h-[5px]`} />
+          {/* ── Two stationery cards ── */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-6 max-w-3xl mx-auto">
 
-                {/* Filigran icon */}
-                {event.Icon && (
-                  <event.Icon className="absolute bottom-5 right-5 w-28 h-28 text-dark-teal/[0.05] pointer-events-none select-none" />
-                )}
-
-                <div className="relative">
-                  <div className="flex items-start justify-between mb-5">
-                    <p className={`text-[8px] tracking-[0.35em] uppercase font-medium ${isPast ? "text-dark-teal/30" : "text-dark-teal/50"}`}>
-                      {event.date}
-                    </p>
-                    {isPast ? (
-                      <span className="text-[7px] tracking-[0.25em] uppercase text-dark-teal/25 border border-dark-teal/15 px-2 py-0.5">Completed</span>
-                    ) : isToday ? (
-                      <span className={`text-[7px] tracking-[0.25em] uppercase text-dark-teal border px-2 py-0.5 ${event.accentBorder}`}>Today</span>
-                    ) : (
-                      <span className="text-[7px] tracking-[0.25em] uppercase text-dark-teal/40">{days}d away</span>
-                    )}
-                  </div>
-
-                  <h3 className={`font-display text-xl sm:text-2xl font-light leading-tight mb-3 ${isPast ? "text-dark-teal/40" : "text-dark-teal"}`}>
-                    {event.title}
-                  </h3>
-                  <div className={`h-px w-8 mb-4 ${isPast ? "bg-dark-teal/10" : "bg-dark-teal/20"}`} />
-
-                  {event.time || event.venue ? (
-                    <div className="space-y-2">
+            {/* Ceremony — tilted left */}
+            {(() => {
+              const event = incomingEvents[0];
+              const days = daysUntil(event.dateISO);
+              const isPast = days < 0;
+              return (
+                <motion.div
+                  key={event.id}
+                  initial={{ opacity: 0.15, y: 30, rotate: -2 }}
+                  whileInView={{ opacity: 1, y: 0, rotate: -1.5 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.7, ease: "easeOut" }}
+                  className="w-full sm:w-[300px] flex-shrink-0"
+                >
+                  <div className="rounded-xl overflow-hidden bg-[#FDF8F5] shadow-[0_24px_64px_-12px_rgba(90,15,30,0.55)]"
+                    style={{ border: "1px solid rgba(200,160,40,0.35)" }}>
+                    {/* Gold top strip */}
+                    <div className="h-1" style={{ background: "linear-gradient(90deg, rgba(200,160,40,0.4), rgba(200,160,40,0.9), rgba(200,160,40,0.4))" }} />
+                    <div className="px-6 pt-6 pb-7 text-center">
+                      {/* Number */}
+                      <p className="font-display text-[5rem] leading-none text-floral-crimson/10 font-bold select-none -mb-4">I</p>
+                      {/* Event name */}
+                      <p className="font-wedding text-4xl text-floral-crimson mb-1">{event.title}</p>
+                      {/* Gold ornament */}
+                      <div className="flex items-center justify-center gap-2 my-4">
+                        <div className="h-px flex-1" style={{ background: "rgba(200,160,40,0.5)" }} />
+                        <span style={{ color: "rgba(200,160,40,0.9)", fontSize: "10px" }}>✦</span>
+                        <div className="h-px flex-1" style={{ background: "rgba(200,160,40,0.5)" }} />
+                      </div>
+                      {/* Time — hero element */}
                       {event.time && (
-                        <p className={`text-base font-semibold tracking-wide ${isPast ? "text-dark-teal/30" : "text-dark-teal"}`}>
-                          {event.time}
-                        </p>
+                        <p className="font-display text-2xl sm:text-3xl font-light text-dark-teal tracking-tight mb-5">{event.time}</p>
                       )}
-                      {event.venue && (
-                        <p className={`text-sm font-medium ${isPast ? "text-dark-teal/25" : "text-dark-teal/70"}`}>
-                          {event.venue}
-                        </p>
-                      )}
-                      {event.address && (
-                        <a
-                          href={`https://maps.google.com/?q=${encodeURIComponent(event.address)}`}
-                          onClick={(e) => { e.preventDefault(); openDirections(event.address!); }}
-                          rel="noreferrer"
-                          className={`text-xs flex items-start gap-1 underline underline-offset-2 decoration-dotted transition-colors ${isPast ? "text-dark-teal/20 pointer-events-none" : "text-dark-teal/45 hover:text-teal-accent"}`}
-                        >
-                          <MapPin className="w-3 h-3 mt-0.5 shrink-0" />
-                          {event.address}
-                        </a>
-                      )}
+                      {/* Venue */}
+                      <div className="space-y-1 mb-5">
+                        {event.venue && <p className="text-sm font-medium text-dark-teal">{event.venue}</p>}
+                        {event.address && (
+                          <a
+                            href={`https://maps.google.com/?q=${encodeURIComponent(event.address)}`}
+                            onClick={(e) => { e.preventDefault(); openDirections(event.address!); }}
+                            rel="noreferrer"
+                            className="text-[10px] text-teal-muted hover:text-floral-crimson transition-colors flex items-center justify-center gap-1"
+                          >
+                            <MapPin className="w-2.5 h-2.5 shrink-0" />
+                            {event.address}
+                          </a>
+                        )}
+                      </div>
+                      {/* Note */}
                       {event.note && (
-                        <p className={`text-xs italic pt-1 ${isPast ? "text-dark-teal/20" : "text-dark-teal/40"}`}>
+                        <p className="text-[10px] italic text-teal-muted border-t pt-4" style={{ borderColor: "rgba(200,160,40,0.25)" }}>
                           {event.note}
                         </p>
                       )}
+                      {/* Status pill */}
+                      {!isPast && (
+                        <div className="mt-5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[8px] tracking-[0.3em] uppercase"
+                          style={{ background: "rgba(139,26,46,0.08)", color: "#8B1A2E", border: "1px solid rgba(139,26,46,0.2)" }}>
+                          {daysUntil(event.dateISO)}d away
+                        </div>
+                      )}
                     </div>
-                  ) : (
-                    <p className={`text-sm leading-relaxed ${isPast ? "text-dark-teal/25" : "text-dark-teal/55"}`}>
-                      {event.description}
-                    </p>
-                  )}
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
+                    {/* Gold bottom strip */}
+                    <div className="h-1" style={{ background: "linear-gradient(90deg, rgba(200,160,40,0.4), rgba(200,160,40,0.9), rgba(200,160,40,0.4))" }} />
+                  </div>
+                </motion.div>
+              );
+            })()}
 
-        {/* Bottom quote */}
-        <div className="max-w-5xl mx-auto px-5 sm:px-10 py-10 sm:py-12 text-center border-t border-dark-teal/10">
-          <p className="font-wedding text-3xl sm:text-4xl text-teal-accent">
-            Grace &amp; Noelvie
-          </p>
-          <p className="mt-2 text-[8px] tracking-[0.35em] uppercase text-dark-teal/30">{wedding.dateLabel}</p>
+            {/* Centre ornament — hidden on mobile */}
+            <div className="hidden sm:flex flex-col items-center gap-3 flex-shrink-0">
+              <div className="w-px h-16" style={{ background: "rgba(200,160,40,0.5)" }} />
+              <span style={{ color: "rgba(200,160,40,0.9)", fontSize: "18px" }}>✦</span>
+              <div className="w-px h-16" style={{ background: "rgba(200,160,40,0.5)" }} />
+            </div>
+
+            {/* Reception — tilted right */}
+            {(() => {
+              const event = incomingEvents[1];
+              const days = daysUntil(event.dateISO);
+              const isPast = days < 0;
+              return (
+                <motion.div
+                  key={event.id}
+                  initial={{ opacity: 0.15, y: 30, rotate: 2 }}
+                  whileInView={{ opacity: 1, y: 0, rotate: 1.5 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.7, delay: 0.12, ease: "easeOut" }}
+                  className="w-full sm:w-[300px] flex-shrink-0"
+                >
+                  <div className="rounded-xl overflow-hidden bg-[#FDF8F5] shadow-[0_24px_64px_-12px_rgba(90,15,30,0.55)]"
+                    style={{ border: "1px solid rgba(200,160,40,0.35)" }}>
+                    <div className="h-1" style={{ background: "linear-gradient(90deg, rgba(200,160,40,0.4), rgba(200,160,40,0.9), rgba(200,160,40,0.4))" }} />
+                    <div className="px-6 pt-6 pb-7 text-center">
+                      <p className="font-display text-[5rem] leading-none text-floral-crimson/10 font-bold select-none -mb-4">II</p>
+                      <p className="font-wedding text-4xl text-floral-crimson mb-1">{event.title}</p>
+                      <div className="flex items-center justify-center gap-2 my-4">
+                        <div className="h-px flex-1" style={{ background: "rgba(200,160,40,0.5)" }} />
+                        <span style={{ color: "rgba(200,160,40,0.9)", fontSize: "10px" }}>✦</span>
+                        <div className="h-px flex-1" style={{ background: "rgba(200,160,40,0.5)" }} />
+                      </div>
+                      {event.time && (
+                        <p className="font-display text-2xl sm:text-3xl font-light text-dark-teal tracking-tight mb-5">{event.time}</p>
+                      )}
+                      <div className="space-y-1 mb-5">
+                        {event.venue && <p className="text-sm font-medium text-dark-teal">{event.venue}</p>}
+                        {event.address && (
+                          <a
+                            href={`https://maps.google.com/?q=${encodeURIComponent(event.address)}`}
+                            onClick={(e) => { e.preventDefault(); openDirections(event.address!); }}
+                            rel="noreferrer"
+                            className="text-[10px] text-teal-muted hover:text-floral-crimson transition-colors flex items-center justify-center gap-1"
+                          >
+                            <MapPin className="w-2.5 h-2.5 shrink-0" />
+                            {event.address}
+                          </a>
+                        )}
+                      </div>
+                      {!isPast && (
+                        <div className="mt-5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[8px] tracking-[0.3em] uppercase"
+                          style={{ background: "rgba(139,26,46,0.08)", color: "#8B1A2E", border: "1px solid rgba(139,26,46,0.2)" }}>
+                          {daysUntil(event.dateISO)}d away
+                        </div>
+                      )}
+                    </div>
+                    <div className="h-1" style={{ background: "linear-gradient(90deg, rgba(200,160,40,0.4), rgba(200,160,40,0.9), rgba(200,160,40,0.4))" }} />
+                  </div>
+                </motion.div>
+              );
+            })()}
+          </div>
+
+          {/* ── Bottom ornament ── */}
+          <div className="mt-16 flex items-center justify-center gap-4">
+            <div className="h-px w-16" style={{ background: "rgba(200,160,40,0.55)" }} />
+            <span style={{ color: "rgba(200,160,40,0.85)", fontSize: "14px" }}>✦</span>
+            <div className="h-px w-16" style={{ background: "rgba(200,160,40,0.55)" }} />
+          </div>
+
         </div>
       </section>
 
@@ -793,32 +863,32 @@ export default function SaveTheDate() {
         <div className="max-w-5xl mx-auto grid gap-12 lg:grid-cols-2">
 
           {/* Venue */}
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}>
-            <p className="text-[8px] tracking-[0.4em] uppercase text-dark-teal/35 mb-3">Where we tie the knot</p>
+          <motion.div initial={{ opacity: 0.15, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}>
+            <p className="text-[8px] tracking-[0.4em] uppercase text-teal-muted mb-3">Where we tie the knot</p>
             <h2 className="font-display text-3xl sm:text-4xl font-light text-dark-teal tracking-tight mb-2">The Venue</h2>
             <div className="mb-6 h-px w-10 bg-dark-teal/15" />
-            <p className="text-dark-teal/50 mb-8 text-sm sm:text-base leading-relaxed">
+            <p className="text-teal-muted mb-8 text-sm sm:text-base leading-relaxed">
               We&apos;ve chosen a place that feels like home. Join us at{" "}
-              <span className="text-dark-teal/70">{wedding.venue.name}</span> for an unforgettable evening.
+              <span className="text-dark-teal">{wedding.venue.name}</span> for an unforgettable evening.
             </p>
 
             <div className="bg-white border border-dark-teal/10 rounded-2xl p-6 sm:p-8 mb-4">
               <div className="flex items-start gap-4">
-                <div className="bg-teal-accent/10 p-2.5 text-teal-accent flex-shrink-0 rounded-xl">
+                <div className="bg-teal-accent/10 p-2.5 text-floral-crimson flex-shrink-0 rounded-xl">
                   <MapPin className="h-5 w-5" />
                 </div>
                 <div>
                   <h4 className="text-base font-medium text-dark-teal">{wedding.venue.name}</h4>
-                  <p className="mt-2 text-sm text-dark-teal/50 leading-relaxed">{wedding.venue.address}</p>
-                  <p className="mt-1.5 text-sm text-dark-teal/50">
+                  <p className="mt-2 text-sm text-teal-muted leading-relaxed">{wedding.venue.address}</p>
+                  <p className="mt-1.5 text-sm text-teal-muted">
                     Call/Text:{" "}
-                    <a href={`tel:${wedding.venue.phone}`} className="hover:text-teal-accent transition-colors">{wedding.venue.phone}</a>
+                    <a href={`tel:${wedding.venue.phone}`} className="hover:text-floral-crimson transition-colors">{wedding.venue.phone}</a>
                   </p>
-                  <p className="mt-0.5 text-sm text-dark-teal/50">
+                  <p className="mt-0.5 text-sm text-teal-muted">
                     Email:{" "}
-                    <a href={`mailto:${wedding.venue.email}`} className="hover:text-teal-accent transition-colors">{wedding.venue.email}</a>
+                    <a href={`mailto:${wedding.venue.email}`} className="hover:text-floral-crimson transition-colors">{wedding.venue.email}</a>
                   </p>
-                  <a href={wedding.venue.mapUrl} target="_blank" rel="noreferrer" className="mt-5 inline-block text-[9px] tracking-[0.2em] uppercase text-teal-accent border-b border-teal-accent/40 pb-px hover:border-teal-accent transition-colors">
+                  <a href={wedding.venue.mapUrl} target="_blank" rel="noreferrer" className="mt-5 inline-block text-[9px] tracking-[0.2em] uppercase text-floral-crimson border-b border-teal-accent/40 pb-px hover:border-teal-accent transition-colors">
                     Get Directions →
                   </a>
                 </div>
@@ -827,14 +897,14 @@ export default function SaveTheDate() {
           </motion.div>
 
           {/* RSVP */}
-          <motion.div id="rsvp-section" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, delay: 0.15 }} className="flex items-start lg:items-center">
+          <motion.div id="rsvp-section" initial={{ opacity: 0.15, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, delay: 0.15 }} className="flex items-start lg:items-center">
             <div className="bg-white border border-dark-teal/10 rounded-2xl p-6 sm:p-8 w-full">
               <div className="flex items-center justify-between mb-2">
                 <div>
-                  <p className="text-[8px] tracking-[0.4em] uppercase text-dark-teal/35 mb-1">Confirm attendance</p>
+                  <p className="text-[8px] tracking-[0.4em] uppercase text-teal-muted mb-1">Confirm attendance</p>
                   <h2 className="font-display text-3xl font-light text-dark-teal tracking-tight">RSVP</h2>
                 </div>
-                <span className="text-[9px] tracking-[0.2em] uppercase text-teal-accent border border-teal-accent/30 px-3 py-1.5">
+                <span className="text-[9px] tracking-[0.2em] uppercase text-floral-crimson border border-teal-accent/30 px-3 py-1.5">
                   {rsvps.filter((r) => r.status === "yes").length} Attending
                 </span>
               </div>
@@ -843,16 +913,16 @@ export default function SaveTheDate() {
               {myRsvp ? (
                 <div className="text-center py-6">
                   <div className="w-14 h-14 bg-teal-accent/10 flex items-center justify-center mx-auto mb-4 rounded-2xl">
-                    <Heart className="h-7 w-7 text-teal-accent" />
+                    <Heart className="h-7 w-7 text-floral-crimson" />
                   </div>
                   <h3 className="text-lg font-medium text-dark-teal mb-2">You&apos;re all set, {myRsvp.name}!</h3>
-                  <p className="text-sm text-dark-teal/50 leading-relaxed">
+                  <p className="text-sm text-teal-muted leading-relaxed">
                     {myRsvp.status === "yes" ? "We're excited to celebrate with you!" : myRsvp.status === "maybe" ? "We hope you can make it!" : "We'll miss you at the celebration."}
                   </p>
                   {myRsvp.seatId && assignedSeatForName && (
                     <div className="mt-5 p-4 bg-teal-accent/5 border border-teal-accent/15 rounded-xl">
-                      <p className="text-xs text-dark-teal/45 mb-1">Your seat assignment</p>
-                      <p className="text-base font-medium text-teal-accent">{formatSeat(assignedSeatForName)}</p>
+                      <p className="text-xs text-teal-muted mb-1">Your seat assignment</p>
+                      <p className="text-base font-medium text-floral-crimson">{formatSeat(assignedSeatForName)}</p>
                     </div>
                   )}
                 </div>
@@ -861,7 +931,7 @@ export default function SaveTheDate() {
 
                   {/* Name */}
                   <div>
-                    <label className="block text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 text-dark-teal/60">Full Name(s) *</label>
+                    <label className="block text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 text-teal-muted">Full Name(s) *</label>
                     <input
                       type="text"
                       value={inviteeName}
@@ -876,7 +946,7 @@ export default function SaveTheDate() {
 
                   {/* Phone with ghost mask */}
                   <div>
-                    <label className="block text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 text-dark-teal/60">Phone *</label>
+                    <label className="block text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 text-teal-muted">Phone *</label>
                     <div className={`relative w-full rounded-xl bg-white border transition-colors focus-within:border-teal-accent ${homeTouched.phone && homeErrors.phone ? "border-red-400" : "border-gray-200"}`}>
                       <div aria-hidden="true" className="absolute inset-0 flex items-center px-4 text-base pointer-events-none select-none">
                         {Array.from(buildHomePhoneDisplay(inviteePhoneDigits)).map((ch, i) => (
@@ -904,7 +974,7 @@ export default function SaveTheDate() {
 
                   {/* Email */}
                   <div>
-                    <label className="block text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 text-dark-teal/60">Email (optional)</label>
+                    <label className="block text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 text-teal-muted">Email (optional)</label>
                     <input
                       type="email"
                       value={inviteeEmail}
@@ -918,13 +988,13 @@ export default function SaveTheDate() {
 
                   {/* Attending yes/no */}
                   <div>
-                    <label className="block text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 text-dark-teal/60">Will you attend? *</label>
+                    <label className="block text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 text-teal-muted">Will you attend? *</label>
                     <div className="grid grid-cols-2 gap-3">
                       <button
                         type="button"
                         onClick={() => setInviteeStatus("yes")}
                         data-testid="button-rsvp-yes"
-                        className={`py-3.5 rounded-xl text-sm font-medium transition-all border-2 ${inviteeStatus === "yes" ? "bg-teal-accent/10 border-teal-accent text-teal-accent" : "border-gray-100 text-gray-500 hover:border-gray-200"}`}
+                        className={`py-3.5 rounded-xl text-sm font-medium transition-all border-2 ${inviteeStatus === "yes" ? "bg-teal-accent/10 border-teal-accent text-floral-crimson" : "border-gray-100 text-gray-500 hover:border-gray-200"}`}
                       >
                         ✓ Yes
                       </button>
@@ -941,7 +1011,7 @@ export default function SaveTheDate() {
 
                   {/* Plus-ones counter */}
                   <div>
-                    <label className="block text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 text-dark-teal/60">Additional guests you&apos;re bringing</label>
+                    <label className="block text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 text-teal-muted">Additional guests you&apos;re bringing</label>
                     <div className="flex items-center gap-3">
                       <button type="button" onClick={() => setInviteePlusOnes(Math.max(0, inviteePlusOnes - 1))} className="w-12 h-12 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-xl hover:bg-gray-50">−</button>
                       <span className="flex-1 text-center font-semibold text-base">{inviteePlusOnes === 0 ? "None" : `+${inviteePlusOnes}`}</span>
@@ -965,18 +1035,18 @@ export default function SaveTheDate() {
       ══════════════════════════════════ */}
       <footer className="border-t border-dark-teal/10 py-12 px-5 sm:px-10">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="font-wedding text-4xl sm:text-5xl text-teal-accent">{wedding.couple.bride} &amp; {wedding.couple.groom}</p>
-          <p className="mt-2 text-[9px] tracking-[0.35em] uppercase text-dark-teal/40">{wedding.dateLabel}</p>
+          <p className="font-wedding text-4xl sm:text-5xl text-floral-crimson">{wedding.couple.bride} &amp; {wedding.couple.groom}</p>
+          <p className="mt-2 text-[9px] tracking-[0.35em] uppercase text-teal-muted">{wedding.dateLabel}</p>
           <div className="mt-6 h-px w-12 bg-dark-teal/10 mx-auto" />
           <div className="mt-6 flex justify-center gap-4">
-            <button onClick={handleCopyLink} data-testid="button-copy-link" className="flex items-center gap-2 text-[9px] tracking-[0.22em] uppercase text-dark-teal/45 border border-dark-teal/15 px-4 py-2 hover:border-teal-accent hover:text-teal-accent transition-colors">
+            <button onClick={handleCopyLink} data-testid="button-copy-link" className="flex items-center gap-2 text-[9px] tracking-[0.22em] uppercase text-teal-muted border border-teal-muted/20 px-4 py-2 hover:border-teal-accent hover:text-floral-crimson transition-colors">
               <Copy className="h-3.5 w-3.5" />
               Copy Invite Link
             </button>
           </div>
-          <p className="mt-8 text-[9px] tracking-[0.2em] uppercase text-dark-teal/25 flex items-center justify-center gap-1.5">
+          <p className="mt-8 text-[9px] tracking-[0.2em] uppercase text-teal-muted flex items-center justify-center gap-1.5">
             Made with <Heart className="h-3 w-3 text-rose-400 fill-rose-400" /> for their day ·{" "}
-            <a href="https://rajil.me" target="_blank" rel="noreferrer" className="hover:text-teal-accent transition-colors underline underline-offset-2">Rajil Vembe</a>
+            <a href="https://rajil.me" target="_blank" rel="noreferrer" className="hover:text-floral-crimson transition-colors underline underline-offset-2">Rajil Vembe</a>
           </p>
         </div>
       </footer>

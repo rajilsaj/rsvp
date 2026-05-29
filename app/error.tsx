@@ -29,7 +29,7 @@ export default function Error({
       {/* Monogram */}
       <div className="mb-10">
         <p className="font-display text-xl tracking-[0.3em] text-dark-teal font-light">G · N</p>
-        <p className="text-[8px] tracking-[0.35em] uppercase text-dark-teal/40 mt-0.5">Grace &amp; Noelvie</p>
+        <p className="text-[8px] tracking-[0.35em] uppercase text-teal-muted mt-0.5">Grace &amp; Noelvie</p>
       </div>
 
       {/* Icon */}
@@ -39,9 +39,9 @@ export default function Error({
         </span>
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
           {isNetwork
-            ? <WifiOff className="h-10 w-10 text-teal-accent/60" strokeWidth={1.5} />
+            ? <WifiOff className="h-10 w-10 text-floral-crimson/60" strokeWidth={1.5} />
             : <AlertTriangle className="h-10 w-10 text-amber-400/70" strokeWidth={1.5} />}
-          <p className="font-wedding text-4xl sm:text-5xl text-teal-accent">
+          <p className="font-wedding text-4xl sm:text-5xl text-floral-crimson">
             {isNetwork ? "Offline" : "Oops!"}
           </p>
         </div>
@@ -53,7 +53,7 @@ export default function Error({
         {isNetwork ? "Connection lost" : "Something went wrong"}
       </h1>
 
-      <p className="text-sm text-dark-teal/50 max-w-sm leading-relaxed mb-4">
+      <p className="text-sm text-teal-muted max-w-sm leading-relaxed mb-4">
         {isNetwork
           ? "It looks like you're offline or the server is unreachable. Check your internet connection and try again."
           : "An unexpected error occurred. You can try reloading the page or head back home."}
@@ -62,8 +62,8 @@ export default function Error({
       {/* Readable error pill */}
       {msg && (
         <div className="flex items-center gap-2 bg-dark-teal/5 border border-dark-teal/10 px-4 py-2 mb-8 max-w-sm">
-          <span className="text-[8px] tracking-[0.2em] uppercase text-dark-teal/30 flex-shrink-0">Error</span>
-          <span className="text-[10px] font-mono text-dark-teal/40 truncate">{msg}</span>
+          <span className="text-[8px] tracking-[0.2em] uppercase text-teal-muted flex-shrink-0">Error</span>
+          <span className="text-[10px] font-mono text-teal-muted truncate">{msg}</span>
         </div>
       )}
 
@@ -83,7 +83,7 @@ export default function Error({
         </Link>
       </div>
 
-      <p className="mt-16 text-[8px] tracking-[0.3em] uppercase text-dark-teal/20">
+      <p className="mt-16 text-[8px] tracking-[0.3em] uppercase text-teal-muted">
         Saturday · 22 August 2026 · Youngsville NC
       </p>
     </div>
