@@ -104,6 +104,22 @@
   color: transparent;
 }
 
+/* ── Burgundy headline ───────────────────────────────────────────────────── */
+.burgundy-gold-headline {
+  background: linear-gradient(
+    160deg,
+    #6B2030 0%,
+    #8E2E3E 28%,
+    #B04560 52%,
+    #8E2E3E 76%,
+    #6B2030 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
 /* ── Confetti piece float ─────────────────────────────────────────────────── */
 @keyframes confetti-float {
   0%, 100% { opacity: 0;    transform: translateY(3px)  rotate(var(--r, 0deg)); }

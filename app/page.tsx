@@ -40,7 +40,7 @@ const CONFETTI_SCATTER = [
 ];
 
 /* ── Image with gold-bordered placeholder shown while loading ────────────── */
-function CoupleImg({ src, alt, className }: { src: string; alt: string; className?: string }) {
+function CoupleImg({ src, alt, className, imgStyle }: { src: string; alt: string; className?: string; imgStyle?: React.CSSProperties }) {
   const [loaded, setLoaded] = useState(false);
   return (
     <>
@@ -68,6 +68,7 @@ function CoupleImg({ src, alt, className }: { src: string; alt: string; classNam
         src={src}
         alt={alt}
         className={`transition-opacity duration-700 ${loaded ? "opacity-100" : "opacity-0"} ${className ?? ""}`}
+        style={imgStyle}
         onLoad={() => setLoaded(true)}
       />
     </>
@@ -342,6 +343,15 @@ type WishlistClaim = {
   createdAt: string | null;
 };
 
+type TimelineItem = {
+  id: string;
+  dateLabel: string;
+  title: string;
+  description: string;
+  image: string;
+  objectPosition?: string;
+};
+
 type EventItem = {
   id: string;
   title: string;
@@ -412,11 +422,11 @@ const seats: Seat[] = [
   { id: "t3s3", table: "Table 3", seat: "3" }, { id: "t3s4", table: "Table 3", seat: "4" },
 ];
 
-const timelineItems = [
-  { id: "meet", dateLabel: "2015", title: "A friendship begins", description: "Their journey began as a simple friendship — but it was truly the answer to a whispered prayer from both Grace and Noelvie.", image: "/images/story-1.jpg" },
-  { id: "first-date", dateLabel: "First Date", title: "The Chinese buffet", description: "At a Chinese Buffet restaurant, Grace gently used his own hands to wipe Noelvie's nose — a tender act that showed his true heart: caring, selfless, and real.", image: "/images/story-2.jpg" },
+const timelineItems: TimelineItem[] = [
+  { id: "meet", dateLabel: "2015", title: "A friendship begins", description: "Their journey began as a simple friendship — but it was truly the answer to a whispered prayer from both Grace and Noelvie.", image: "/images/story-1.jpg", objectPosition: "50% 70%" },
+  { id: "first-date", dateLabel: "First Date", title: "The Chinese buffet", description: "On their first date, while driving to the restaurant, Grace gently wiped Noelvie's nose with his bare hands when he realized there were no tissues in the car. That simple yet caring gesture instantly melted Noelvie's heart and revealed the warmth and kindness that defined Grace's character.", image: "/images/story-2.jpg" },
   { id: "proposal", dateLabel: "2017", title: "The engagement", description: "After two beautiful years of growing together, Grace asked Noelvie to be his fiancée at a traditional engagement filled with family and friends.", image: "/images/story-3.jpg" },
-  { id: "wedding", dateLabel: "2026", title: "Wedding day", description: "Now, after years of knowing, growing, laughing, praying, and loving deeply — they are ready to celebrate with family and friends.", image: "/images/story-4.jpg" },
+  { id: "wedding", dateLabel: "2026", title: "Wedding day", description: "Now, after years of knowing, growing, laughing, praying, and loving deeply — they are ready to celebrate with family and friends.", image: "/images/couple-hero-3.jpg" },
 ];
 
 const navMenuLinks = [
@@ -781,9 +791,9 @@ export default function SaveTheDate() {
               {/* Left — headline */}
               <motion.div initial={{ opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.9, delay: 0.1 }}
                 className="flex flex-col items-end text-right">
-                <p className="text-[8px] tracking-[0.55em] uppercase text-teal-muted mb-5">Join us to celebrate</p>
+                <p className="text-[10px] tracking-[0.55em] uppercase text-teal-muted mb-5">Join us to celebrate</p>
                 <div className="relative w-full">
-                  <h1 className="font-wedding text-[4.5rem] xl:text-[5.5rem] leading-[1.45] gold-headline">
+                  <h1 className="font-wedding text-[5rem] xl:text-[6rem] leading-[1.45] burgundy-gold-headline">
                     We&apos;re<br />getting<br />married
                   </h1>
                   {CONFETTI_SCATTER.map((p, i) => (
@@ -796,7 +806,7 @@ export default function SaveTheDate() {
                   <div className="h-px flex-1 bg-dark-teal/10" />
                   <span style={{ color: "rgba(184,146,10,0.6)", fontSize: "9px" }}>✦</span>
                 </div>
-                <p className="mt-4 text-[9px] tracking-[0.28em] uppercase text-teal-muted leading-[2] max-w-[210px]">
+                <p className="mt-4 text-[11px] tracking-[0.28em] uppercase text-teal-muted leading-[2] max-w-[230px]">
                   &ldquo;What God has joined together,<br />let no one separate.&rdquo;
                   <span className="block mt-1.5 text-teal-muted/60 not-uppercase">— Mark 10:9</span>
                 </p>
@@ -805,7 +815,7 @@ export default function SaveTheDate() {
               {/* Center — photo */}
               <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9 }}
                 className="flex justify-center">
-                <div className="relative w-[19rem] xl:w-[22rem] rotate-[1.5deg]
+                <div className="relative w-[23rem] xl:w-[27rem] rotate-[1.5deg]
                                 shadow-[0_40px_80px_-12px_rgba(0,0,0,0.45)]
                                 overflow-hidden rounded-2xl
                                 ring-1 ring-dark-teal/10">
@@ -818,24 +828,24 @@ export default function SaveTheDate() {
               {/* Right — event details */}
               <motion.div initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.9, delay: 0.1 }}
                 className="flex flex-col items-start text-left pl-4">
-                <p className="text-[8px] tracking-[0.55em] uppercase text-teal-muted mb-5">The Event</p>
-                <p className="font-display text-4xl xl:text-5xl font-light text-dark-teal leading-[1.1] tracking-tight">
+                <p className="text-[10px] tracking-[0.55em] uppercase text-teal-muted mb-5">The Event</p>
+                <p className="font-display text-5xl xl:text-6xl font-light text-dark-teal leading-[1.1] tracking-tight">
                   AUG 22,<br />2026
                 </p>
                 <div className="my-6 h-px w-12 bg-dark-teal/12" />
                 <div className="space-y-2.5">
-                  <p className="text-[9px] tracking-[0.3em] uppercase text-dark-teal/70 font-semibold">{wedding.venue.name}</p>
-                  <p className="text-[11px] text-teal-muted leading-relaxed max-w-[170px]">{wedding.venue.address}</p>
-                  <p className="text-[11px] text-teal-muted">{wedding.timeLabel}</p>
+                  <p className="text-[11px] tracking-[0.3em] uppercase text-dark-teal/70 font-semibold">{wedding.venue.name}</p>
+                  <p className="text-sm text-teal-muted leading-relaxed max-w-[190px]">{wedding.venue.address}</p>
+                  <p className="text-sm text-teal-muted">{wedding.timeLabel}</p>
                 </div>
                 <div className="my-6 h-px w-12 bg-dark-teal/12" />
                 <div className="flex flex-col gap-3.5">
                   <a href={wedding.venue.mapUrl} onClick={handleGetDirections} rel="noreferrer"
-                    className="text-[9px] tracking-[0.22em] uppercase text-floral-crimson border-b border-floral-crimson/30 pb-px hover:border-floral-crimson transition-colors inline-block">
+                    className="text-[11px] tracking-[0.22em] uppercase text-floral-crimson border-b border-floral-crimson/30 pb-px hover:border-floral-crimson transition-colors inline-block">
                     Get Directions →
                   </a>
                   <button onClick={handleSaveToCalendar}
-                    className="text-[9px] tracking-[0.22em] uppercase text-teal-muted border-b border-teal-muted/25 pb-px hover:text-floral-crimson transition-colors text-left">
+                    className="text-[11px] tracking-[0.22em] uppercase text-teal-muted border-b border-teal-muted/25 pb-px hover:text-floral-crimson transition-colors text-left">
                     Save to Calendar →
                   </button>
                 </div>
@@ -848,9 +858,9 @@ export default function SaveTheDate() {
               {/* 1. Tagline + headline */}
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}
                 className="text-center pb-8 border-b border-dark-teal/8">
-                <p className="text-[8px] tracking-[0.55em] uppercase text-teal-muted mb-5">Join us to celebrate</p>
+                <p className="text-[10px] tracking-[0.55em] uppercase text-teal-muted mb-5">Join us to celebrate</p>
                 <div className="relative w-full">
-                  <h1 className="font-wedding text-[3.8rem] sm:text-[5rem] leading-[1.45] gold-headline">
+                  <h1 className="font-wedding text-[4.4rem] sm:text-[5.5rem] leading-[1.45] burgundy-gold-headline">
                     We&apos;re<br />getting<br />married
                   </h1>
                   {CONFETTI_SCATTER.map((p, i) => (
@@ -859,7 +869,7 @@ export default function SaveTheDate() {
                         background: p.color, ["--r" as string]: `${p.r}deg`, animationDelay: `${p.delay}s` }} />
                   ))}
                 </div>
-                <p className="mt-6 text-[9px] tracking-[0.28em] uppercase text-teal-muted leading-[2] max-w-[240px] mx-auto">
+                <p className="mt-6 text-[11px] tracking-[0.28em] uppercase text-teal-muted leading-[2] max-w-[260px] mx-auto">
                   &ldquo;What God has joined together, let no one separate.&rdquo;
                   <span className="block mt-1.5 text-teal-muted/60">— Mark 10:9</span>
                 </p>
@@ -868,7 +878,7 @@ export default function SaveTheDate() {
               {/* 2. Photo */}
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.15 }}
                 className="flex justify-center py-8 border-b border-dark-teal/8">
-                <div className="relative w-[200px] sm:w-[240px] overflow-hidden rounded-2xl
+                <div className="relative w-[270px] sm:w-[320px] overflow-hidden rounded-2xl
                                 shadow-[0_24px_56px_-12px_rgba(0,0,0,0.3)]
                                 ring-1 ring-dark-teal/10">
                   <CoupleImg src="/images/couple-hero-2.jpg" alt="Grace &amp; Noelvie"
@@ -880,20 +890,20 @@ export default function SaveTheDate() {
               {/* 3. Event summary — compact horizontal */}
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.25 }}
                 className="py-8 text-center">
-                <p className="text-[8px] tracking-[0.55em] uppercase text-teal-muted mb-5">The Event</p>
-                <p className="font-display text-3xl sm:text-4xl font-light text-dark-teal tracking-tight mb-4">
+                <p className="text-[11px] tracking-[0.55em] uppercase text-teal-muted mb-5">The Event</p>
+                <p className="font-display text-4xl sm:text-5xl font-light text-dark-teal tracking-tight mb-4">
                   Saturday · August 22, 2026
                 </p>
-                <p className="text-[10px] tracking-[0.28em] uppercase text-dark-teal/60 mb-1">{wedding.venue.name}</p>
-                <p className="text-[11px] text-teal-muted mb-5">{wedding.venue.address}</p>
+                <p className="text-sm tracking-[0.28em] uppercase text-dark-teal/60 mb-1">{wedding.venue.name}</p>
+                <p className="text-sm text-teal-muted mb-5">{wedding.venue.address}</p>
                 <div className="flex items-center justify-center gap-5">
                   <a href={wedding.venue.mapUrl} onClick={handleGetDirections} rel="noreferrer"
-                    className="text-[9px] tracking-[0.22em] uppercase text-floral-crimson border-b border-floral-crimson/30 pb-px hover:border-floral-crimson transition-colors">
+                    className="text-[11px] tracking-[0.22em] uppercase text-floral-crimson border-b border-floral-crimson/30 pb-px hover:border-floral-crimson transition-colors">
                     Get Directions →
                   </a>
                   <span className="text-dark-teal/15 text-xs">|</span>
                   <button onClick={handleSaveToCalendar}
-                    className="text-[9px] tracking-[0.22em] uppercase text-teal-muted border-b border-teal-muted/25 pb-px hover:text-floral-crimson transition-colors">
+                    className="text-[11px] tracking-[0.22em] uppercase text-teal-muted border-b border-teal-muted/25 pb-px hover:text-floral-crimson transition-colors">
                     Save to Calendar →
                   </button>
                 </div>
@@ -917,7 +927,7 @@ export default function SaveTheDate() {
               ].map((link, i, arr) => (
                 <Fragment key={link.id}>
                   <button onClick={() => scrollTo(link.id)}
-                    className="text-[8px] tracking-[0.3em] uppercase text-teal-muted hover:text-floral-crimson transition-colors whitespace-nowrap">
+                    className="text-[10px] tracking-[0.3em] uppercase text-teal-muted hover:text-floral-crimson transition-colors whitespace-nowrap">
                     {link.label}
                   </button>
                   {i < arr.length - 1 && <span className="text-dark-teal/15 text-[8px] select-none hidden sm:inline">·</span>}
@@ -939,7 +949,7 @@ export default function SaveTheDate() {
                       <span className="font-display text-2xl sm:text-3xl font-light text-dark-teal tabular-nums leading-none block">
                         {String(unit.value).padStart(2, "0")}
                       </span>
-                      <p className="text-[6px] sm:text-[7px] tracking-[0.35em] uppercase text-teal-muted mt-1">{unit.label}</p>
+                      <p className="text-[8px] sm:text-[9px] tracking-[0.35em] uppercase text-teal-muted mt-1">{unit.label}</p>
                     </div>
                     {i < arr.length - 1 && (
                       <span className="font-display text-xl sm:text-2xl text-dark-teal/20 mb-4 leading-none select-none">:</span>
@@ -967,11 +977,11 @@ export default function SaveTheDate() {
             <motion.div key={item.id} initial={{ opacity: 0.15, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-80px" }} transition={{ duration: 0.7 }}
               className={`flex flex-col ${index % 2 === 1 ? "sm:flex-row-reverse" : "sm:flex-row"} gap-8 sm:gap-12 items-center`}>
               <div className="relative w-full sm:w-1/2 overflow-hidden group rounded-2xl shadow-[0_8px_32px_-8px_rgba(0,0,0,0.18)] transition-shadow duration-500 hover:shadow-[0_16px_48px_-8px_rgba(114,47,55,0.28)]">
-                <CoupleImg src={item.image} alt={item.title} className="w-full h-72 sm:h-80 object-cover object-top group-hover:scale-[1.03] group-active:scale-[1.03] transition-transform duration-700" />
+                <CoupleImg src={item.image} alt={item.title} className="w-full h-72 sm:h-80 object-cover object-center group-hover:scale-[1.03] group-active:scale-[1.03] transition-transform duration-700"
+                  imgStyle={item.objectPosition ? { objectPosition: item.objectPosition } : undefined} />
               </div>
               <div className={`w-full sm:w-1/2 ${index % 2 === 1 ? "sm:text-right" : ""}`}>
-                <span className="text-[9px] tracking-[0.4em] uppercase text-floral-crimson font-medium">{item.dateLabel}</span>
-                <h3 className="mt-2 text-2xl sm:text-3xl font-display font-light text-dark-teal">{item.title}</h3>
+                <h3 className="text-2xl sm:text-3xl font-display font-light text-dark-teal">{item.title}</h3>
                 <div className={`mt-3 h-px w-8 bg-dark-teal/15 ${index % 2 === 1 ? "ml-auto" : ""}`} />
                 <p className="mt-4 text-teal-muted leading-relaxed text-sm sm:text-base">{item.description}</p>
               </div>
@@ -1001,7 +1011,8 @@ export default function SaveTheDate() {
               </span>
               <div className="h-px w-10 sm:w-24" style={{ background: "linear-gradient(90deg, rgba(212,175,55,0.85), transparent)" }} />
             </div>
-            <p className="font-wedding text-5xl sm:text-7xl text-white leading-none drop-shadow-lg">
+            <p className="font-wedding text-5xl sm:text-7xl leading-none"
+              style={{ color: "#C84060", textShadow: "0 0 40px rgba(200,64,96,0.35)" }}>
               Grace &amp; Noelvie
             </p>
             <p className="mt-3 text-[9px] tracking-[0.42em] uppercase text-white/60">

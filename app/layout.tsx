@@ -31,15 +31,20 @@ export const metadata: Metadata = {
     title: "Grace & Noelvie — Our Wedding",
     description: "Join us to celebrate the wedding of Grace & Noelvie on August 22, 2026.",
     type: "website",
+    images: [{ url: "/images/couple-rsvp.jpg", width: 1200, height: 630, alt: "Grace & Noelvie" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Grace & Noelvie — Our Wedding",
     description: "Join us to celebrate the wedding of Grace & Noelvie on August 22, 2026.",
+    images: ["/images/couple-rsvp.jpg"],
   },
   icons: {
-    icon: "/favicon.png",
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
   },
+  themeColor: "#722F37",
 };
 
 export default function RootLayout({

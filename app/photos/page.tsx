@@ -59,20 +59,19 @@ export default function PhotosPage() {
             </motion.div>
           ))}
 
-          {/* Placeholder tiles */}
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div
-              key={`ph-${i}`}
-              className="h-44 sm:h-56 bg-dark-teal/5 border border-dashed border-dark-teal/15 flex flex-col items-center justify-center gap-2"
-            >
-              <p className="text-[8px] tracking-[0.3em] uppercase text-teal-muted">Coming soon</p>
-            </div>
-          ))}
         </div>
 
-        <p className="mt-10 text-center text-[8px] tracking-[0.3em] uppercase text-teal-muted">
-          More photos will be added after the wedding · August 22, 2026
-        </p>
+        {/* Bottom ornament */}
+        <div className="mt-16 flex flex-col items-center gap-4">
+          <div className="flex items-center gap-4 w-full max-w-xs">
+            <div className="h-px flex-1" style={{ background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.6))" }} />
+            <span style={{ color: "rgba(212,175,55,0.8)", fontSize: "13px" }}>✦</span>
+            <div className="h-px flex-1" style={{ background: "linear-gradient(90deg, rgba(212,175,55,0.6), transparent)" }} />
+          </div>
+          <p className="text-[9px] tracking-[0.38em] uppercase text-teal-muted text-center">
+            More memories after August 22, 2026
+          </p>
+        </div>
       </div>
     </div>
   );
