@@ -423,7 +423,7 @@ const seats: Seat[] = [
 ];
 
 const timelineItems: TimelineItem[] = [
-  { id: "meet", dateLabel: "2015", title: "A friendship begins", description: "Their journey began as a simple friendship — but it was truly the answer to a whispered prayer from both Grace and Noelvie.", image: "/images/story-1.jpg", objectPosition: "50% 70%" },
+  { id: "meet", dateLabel: "2015", title: "A friendship begins", description: "Their journey began as a simple friendship — but it was truly the answer to a whispered prayer from both Grace and Noelvie.", image: "/images/story-1.jpg", objectPosition: "50% 20%" },
   { id: "first-date", dateLabel: "First Date", title: "The Chinese buffet", description: "On their first date, while driving to the restaurant, Grace gently wiped Noelvie's nose with his bare hands when he realized there were no tissues in the car. That simple yet caring gesture instantly melted Noelvie's heart and revealed the warmth and kindness that defined Grace's character.", image: "/images/story-2.jpg" },
   { id: "proposal", dateLabel: "2017", title: "The engagement", description: "After two beautiful years of growing together, Grace asked Noelvie to be his fiancée at a traditional engagement filled with family and friends.", image: "/images/story-3.jpg" },
   { id: "wedding", dateLabel: "2026", title: "Wedding day", description: "Now, after years of knowing, growing, laughing, praying, and loving deeply — they are ready to celebrate with family and friends.", image: "/images/couple-hero-3.jpg" },
