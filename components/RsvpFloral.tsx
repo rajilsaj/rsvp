@@ -1,20 +1,20 @@
 "use client";
 
-// Colour palette derived from the dusty-rose floral invitation image
+// Colour palette — Black · White · Burgundy · Gold
 const C = {
-  crimsondark:  "#5C0F1E",
-  crimson:      "#8B1A2E",
-  crimsonmid:   "#A83050",
-  blushdark:    "#9A7078",
-  blush:        "#C49098",
-  blushlight:   "#E0B8BC",
-  leafdark:     "#4A3520",
-  leafmid:      "#7A5830",
-  leaflight:    "#A08050",
-  white:        "#FFF0F4",
-  whiteShade:   "#F0D8DC",
-  gold:         "#C8A028",
-  goldLight:    "#E0C050",
+  burgundydark: "#4A1520",
+  burgundy:     "#722F37",
+  burgundymid:  "#8E3D47",
+  mauvedark:    "#7A5060",
+  mauve:        "#A07080",
+  mauvelight:   "#C09098",
+  leafdark:     "#2A2015",
+  leafmid:      "#5A4020",
+  leaflight:    "#8A6838",
+  white:        "#FFF8F0",
+  whiteShade:   "#F0DED0",
+  gold:         "#B8920A",
+  goldLight:    "#D4AF37",
 };
 
 // ── Petal: ellipse whose "stem" sits at origin, tip points up ──────────────
@@ -60,7 +60,7 @@ function Rose({ scale = 1, colors }: {
       {/* center */}
       <circle cx={0} cy={0} r={7}  fill={colors.center} />
       <circle cx={0} cy={0} r={4}  fill={colors.center} opacity={0.85} />
-      <circle cx={0} cy={0} r={2}  fill={C.crimsondark} opacity={0.9} />
+      <circle cx={0} cy={0} r={2}  fill={C.burgundydark} opacity={0.9} />
     </g>
   );
 }
@@ -93,9 +93,9 @@ function Blossom({ scale = 1 }: { scale?: number }) {
 function Sparkle({ x, y, r = 2 }: { x: number; y: number; r?: number }) {
   return (
     <>
-      <circle cx={x} cy={y} r={r} fill={C.goldLight} opacity={0.6} />
-      <line x1={x - r * 2} y1={y} x2={x + r * 2} y2={y} stroke={C.gold} strokeWidth={0.6} opacity={0.5} />
-      <line x1={x} y1={y - r * 2} x2={x} y2={y + r * 2} stroke={C.gold} strokeWidth={0.6} opacity={0.5} />
+      <circle cx={x} cy={y} r={r} fill={C.goldLight} opacity={0.7} />
+      <line x1={x - r * 2} y1={y} x2={x + r * 2} y2={y} stroke={C.gold} strokeWidth={0.6} opacity={0.6} />
+      <line x1={x} y1={y - r * 2} x2={x} y2={y + r * 2} stroke={C.gold} strokeWidth={0.6} opacity={0.6} />
     </>
   );
 }
@@ -112,8 +112,8 @@ function LeafCluster({ cx, cy, baseRot }: { cx: number; cy: number; baseRot: num
   );
 }
 
-const crimsonRose = { outer: C.crimsonmid, mid: C.crimson, inner: C.crimsondark, center: C.crimsondark };
-const blushRose   = { outer: C.blushlight, mid: C.blush, inner: C.blushdark, center: C.blushdark };
+const burgundyRose = { outer: C.burgundymid, mid: C.burgundy, inner: C.burgundydark, center: C.burgundydark };
+const mauveRose    = { outer: C.mauvelight,  mid: C.mauve,    inner: C.mauvedark,    center: C.mauvedark    };
 
 // ── TOP-LEFT cluster ──────────────────────────────────────────────────────
 function TopLeft() {
@@ -129,12 +129,12 @@ function TopLeft() {
       <g transform="translate(38,90)"><Blossom scale={0.7} /></g>
       <g transform="translate(110,70)"><Blossom scale={0.65}/></g>
 
-      {/* blush rose */}
-      <g transform="translate(95,90)"><Rose scale={1.0} colors={blushRose} /></g>
+      {/* mauve rose */}
+      <g transform="translate(95,90)"><Rose scale={1.0} colors={mauveRose} /></g>
 
-      {/* crimson roses */}
-      <g transform="translate(40,50)"><Rose scale={1.2} colors={crimsonRose} /></g>
-      <g transform="translate(120,40)"><Rose scale={1.0} colors={crimsonRose} /></g>
+      {/* burgundy roses */}
+      <g transform="translate(40,50)"><Rose scale={1.2} colors={burgundyRose} /></g>
+      <g transform="translate(120,40)"><Rose scale={1.0} colors={burgundyRose} /></g>
 
       {/* sparkles */}
       <Sparkle x={70}  y={30} r={1.5} />
@@ -156,9 +156,9 @@ function TopRight() {
       <g transform="translate(75,35)"><Blossom scale={0.75}/></g>
       <g transform="translate(145,75)"><Blossom scale={0.65}/></g>
 
-      <g transform="translate(85,80)"><Rose scale={0.95} colors={blushRose} /></g>
-      <g transform="translate(140,40)"><Rose scale={1.1} colors={crimsonRose} /></g>
-      <g transform="translate(50,48)"><Rose scale={0.9} colors={crimsonRose} /></g>
+      <g transform="translate(85,80)"><Rose scale={0.95} colors={mauveRose} /></g>
+      <g transform="translate(140,40)"><Rose scale={1.1} colors={burgundyRose} /></g>
+      <g transform="translate(50,48)"><Rose scale={0.9} colors={burgundyRose} /></g>
 
       <Sparkle x={60}  y={28} r={1.4} />
       <Sparkle x={115} y={110} r={1.1} />
@@ -181,14 +181,14 @@ function BottomRight() {
       <g transform="translate(185,160)"><Blossom scale={0.7} /></g>
       <g transform="translate(50,145)"><Blossom scale={0.65}/></g>
 
-      {/* blush roses */}
-      <g transform="translate(90,165)"><Rose scale={1.15} colors={blushRose} /></g>
-      <g transform="translate(170,110)"><Rose scale={1.0} colors={blushRose} /></g>
+      {/* mauve roses */}
+      <g transform="translate(90,165)"><Rose scale={1.15} colors={mauveRose} /></g>
+      <g transform="translate(170,110)"><Rose scale={1.0} colors={mauveRose} /></g>
 
-      {/* crimson roses */}
-      <g transform="translate(145,175)"><Rose scale={1.35} colors={crimsonRose} /></g>
-      <g transform="translate(75,110)"><Rose scale={1.2} colors={crimsonRose} /></g>
-      <g transform="translate(195,170)"><Rose scale={1.0} colors={crimsonRose} /></g>
+      {/* burgundy roses */}
+      <g transform="translate(145,175)"><Rose scale={1.35} colors={burgundyRose} /></g>
+      <g transform="translate(75,110)"><Rose scale={1.2} colors={burgundyRose} /></g>
+      <g transform="translate(195,170)"><Rose scale={1.0} colors={burgundyRose} /></g>
 
       <Sparkle x={50}  y={80}  r={1.5} />
       <Sparkle x={130} y={90}  r={1.2} />
@@ -207,7 +207,7 @@ function BackgroundSparkles() {
     { x: 90, y: 70 }, { x: 35, y: 85 }, { x: 70, y: 55 },
   ];
   return (
-    <svg className="absolute inset-0 w-full h-full pointer-events-none select-none opacity-40" preserveAspectRatio="xMidYMid slice">
+    <svg className="absolute inset-0 w-full h-full pointer-events-none select-none opacity-50" preserveAspectRatio="xMidYMid slice">
       <defs>
         <radialGradient id="sparkleGrad" cx="50%" cy="50%" r="50%">
           <stop offset="0%" stopColor={C.goldLight} />
@@ -221,9 +221,9 @@ function BackgroundSparkles() {
   );
 }
 
-// ── Shared gradient ────────────────────────────────────────────────────────
+// ── Shared gradient — deep dark burgundy ──────────────────────────────────
 export const floralGradient = `radial-gradient(ellipse at 50% 40%,
-  #FAF0F2 0%, #F0D5DA 28%, #DEB8BF 52%, #C8909A 72%, #9A5060 88%, #7A2838 100%)`;
+  #1A0810 0%, #2B1018 28%, #3F1522 52%, #531A2C 72%, #672035 88%, #7A2940 100%)`;
 
 const parchmentTexture = `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`;
 
@@ -232,11 +232,11 @@ export function FloralBackground() {
   return (
     <>
       {/* Parchment texture */}
-      <div className="absolute inset-0 opacity-[0.06] pointer-events-none"
+      <div className="absolute inset-0 opacity-[0.05] pointer-events-none"
         style={{ backgroundImage: parchmentTexture, backgroundSize: "200px 200px" }} />
       {/* Gold border frame */}
       <div className="absolute pointer-events-none z-[1]"
-        style={{ inset: "14px", border: "1px solid rgba(200,160,40,0.45)", boxShadow: "inset 0 0 0 1px rgba(200,160,40,0.15)" }} />
+        style={{ inset: "14px", border: "1px solid rgba(212,175,55,0.5)", boxShadow: "inset 0 0 0 1px rgba(212,175,55,0.18)" }} />
       {/* Corner floral clusters + sparkles */}
       <div className="absolute inset-0 z-[2] pointer-events-none">
         <TopLeft />
@@ -248,12 +248,21 @@ export function FloralBackground() {
   );
 }
 
-// ── Full-page wrapper for /rsvp ────────────────────────────────────────────
+// ── Full-page wrapper for /rsvp — softened burgundy, no floral SVGs ────────
 export function RsvpFloral({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative min-h-[100dvh] overflow-hidden" style={{ background: floralGradient }}>
-      <FloralBackground />
-      <div className="relative z-10 flex items-center justify-center min-h-[100dvh] px-4 py-6">
+    <div className="relative min-h-[100dvh] overflow-hidden"
+      style={{ background: "radial-gradient(ellipse at 50% 40%, #8E3D4E 0%, #722F37 35%, #571E2C 65%, #380F1A 100%)" }}>
+      {/* Very subtle parchment texture for warmth */}
+      <div className="absolute inset-0 opacity-[0.04] pointer-events-none"
+        style={{ backgroundImage: parchmentTexture, backgroundSize: "180px 180px" }} />
+      {/* Thin gold frame inset */}
+      <div className="absolute pointer-events-none hidden sm:block"
+        style={{ inset: "18px", border: "1px solid rgba(212,175,55,0.28)", borderRadius: "4px" }} />
+      {/* Soft vignette at corners */}
+      <div className="absolute inset-0 pointer-events-none"
+        style={{ background: "radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(30,8,14,0.55) 100%)" }} />
+      <div className="relative z-10 flex items-center justify-center min-h-[100dvh] px-4 py-8">
         {children}
       </div>
     </div>

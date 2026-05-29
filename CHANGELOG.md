@@ -4,6 +4,104 @@ All notable changes to this project are documented here.
 
 ---
 
+## [Unreleased] — 2026-05-28 (pass 13 — Wax-seal loading screen)
+
+### Added
+- **`WeddingLoader` component** (`app/page.tsx`): Two-phase animated loading screen displayed during the cookie/guest-data check on the homepage.
+  - **Phase 1 — Wax seal (0–2.4 s)**: A burgundy SVG circle (`#5C1E2A`) with a gold-dashed outer ring, inner decorative ring, `G · N` monogram in Display serif, and four cardinal corner dots scales in with a spring ease, pulses with a warm `drop-shadow` glow, then breaks open (`scale: 1 → 1.6, opacity: 1 → 0`).
+  - **Phase 2 — Invitation card (1.9 s →)**: A dark card (`rgba(10,8,8,0.6)`) with a 1.5 px gold border, double inset frame, and glowing gold corner dots materialises behind the seal. Sequential reveals: top ornament line draws from center → tagline "You are cordially invited to" → "Grace & Noelvie" sweeps up in the gold gradient → "Wedding" and "August 22 · 2026" fade in → bottom ornament line → `✦` sparkles in via spring → three pulsing gold dots.
+  - **Background**: 8 gold confetti pieces (`#D4AF37`, `#F5E080`, `#C8A028`, `#B8920A`) at varied rotations drift up/down via `loader-drift` CSS keyframe. Warm radial `rgba(114,47,55,0.10)` glow behind everything.
+- **`seal-pulse` and `loader-drift` keyframes** (`styles/globals.css`): `seal-pulse` animates `drop-shadow` intensity for the wax seal glow; `loader-drift` creates a gentle vertical float with `translateY` keyed to `--r` CSS custom property for per-piece rotation.
+- **`app/loading.tsx` redesigned** (Next.js route-level Suspense boundary): Shows the wax seal SVG (identical markup) with CSS-only `seal-in` (scale-from-0.5) and `seal-pulse` animations — no Framer Motion required. Below the seal, "Grace & Noelvie" in the gold gradient script and "Opening Invitation…" tracking text fade up via `fade-up` keyframe defined inline in a `<style>` tag.
+
+### Changed
+- **Homepage spinner removed**: `checking` state previously returned a plain white page with a 6 px spinning ring. Now returns `<WeddingLoader />`.
+
+---
+
+## [Unreleased] — 2026-05-28 (pass 12 — Hero section beautification)
+
+### Changed
+- **Hero section fully split into separate mobile and desktop layouts** (`app/page.tsx`): Eliminated the shared `grid-cols-1 lg:grid-cols-3` that forced three tall blocks to stack on mobile, causing visual compression and overlap.
+  - **Desktop (`hidden lg:grid`)**: 3-column grid with `lg:gap-10 xl:gap-12`, items side-by-side. Left: headline right-aligned with ornament `✦` + flex divider. Center: photo `w-[19rem] xl:w-[22rem]` rotated 1.5°, deep shadow. Right: event details left-aligned with `space-y-2.5` and `my-6` dividers.
+  - **Mobile (`lg:hidden`)**: Three visually separated blocks divided by `border-b border-dark-teal/8` hairlines: (1) tagline + headline + scripture, (2) photo centered at `w-[200px] sm:w-[240px]` flat (no rotation), (3) compact event summary with full date on one line, venue, and inline Get Directions / Save to Calendar links.
+- **Photo no longer overlaps text on mobile**: Photo moved to `order-2` (after headline) and rotation removed on mobile — `lg:rotate-[1.5deg]` only.
+- **Navbar RSVP button**: Changed from outlined text to a solid burgundy gradient pill (`linear-gradient(135deg, #722F37, #8E3D47)`). Hamburger lines animate width on hover.
+- **Countdown strip**: Changed from centered-only to `flex-row` on sm+, nav links left / countdown right. Countdown digit size reduced to `text-2xl sm:text-3xl`.
+- **`justify-center` scoped to `lg:justify-center`**: Removed forced vertical centering on mobile so content flows naturally without compression.
+
+---
+
+## [Unreleased] — 2026-05-28 (pass 11 — Gold text & image placeholder)
+
+### Added
+- **`CoupleImg` component** (`app/page.tsx`): Wraps every homepage `<img>` with a gold-bordered placeholder shown while the image loads.
+  - Placeholder: cream `#FAF8F5` background, `2px solid #D4AF37` outer border, `1px rgba(212,175,55,0.35)` inner inset frame, `G · N` monogram in antique gold `#B8920A`, "Grace & Noelvie" in the wedding script font `#C8A028`, date `August 22 · 2026` in faded gold.
+  - Image starts at `opacity-0` and transitions to `opacity-100` on `onLoad`; placeholder fades out simultaneously over 500 ms.
+  - Applied to: hero portrait and all four Our Story timeline images. Story image containers updated with `relative` class to anchor the placeholder.
+
+### Changed
+- **`.gold-word` → `.gold-headline`** (`styles/globals.css`, `app/page.tsx`): Replaced the `display: inline-block` gradient-text approach (which clipped Great Vibes glyphs at the box edge) with `.gold-headline` applied directly to the block-level `<h1>`. The `h1` fills the full column width so glyph ink that overflows the character's logical advance stays within the block — never touching the page's `overflow-x: hidden` clip boundary. Removed `SparkleWord` wrapper spans and `CONFETTI` per-word data.
+- **Confetti repositioned to block container**: `CONFETTI_SCATTER` array of 12 pieces now uses `%` positions relative to a `relative w-full` div wrapping the `h1`. All `left` values ≤ 90 % to prevent horizontal overflow.
+- **`seal-pulse` and `loader-drift` keyframes added to `globals.css`** (see pass 13).
+
+---
+
+## [Unreleased] — 2026-05-28 (pass 10 — Gold confetti text effect)
+
+### Added
+- **Gold static gradient on "We're getting married"** (`styles/globals.css`): `.gold-word` (later renamed `.gold-headline`) applies a `160deg` diagonal gradient (`#9A7808 → #D4AF37 → #F5E080 → #C8A028 → #9A7808`) via `background-clip: text` — no animation, static elegant gold.
+- **Confetti texture** (`styles/globals.css`, `app/page.tsx`): `.confetti-piece` class renders small rectangular gold pieces (`border-radius: 1px`) with a `confetti-float` keyframe that translates `Y` ±4 px using a `--r` CSS custom property for per-piece rotation. 12 pieces scattered across the headline block in four gold tones, each with a unique animation delay creating a living confetti effect.
+
+---
+
+## [Unreleased] — 2026-05-28 (pass 9 — Homepage images & Celebrations section)
+
+### Changed
+- **Homepage images — full color** (`app/page.tsx`): Removed `grayscale` from the hero portrait and `grayscale hover:grayscale-0 active:grayscale-0` from all four Our Story timeline images. Images now always display in full color. Photos page retains the grayscale-to-color hover interaction.
+- **Celebrations section — FloralBackground removed** (`app/page.tsx`): Replaced `floralGradient` (near-black floral gradient) and `<FloralBackground />` (SVG rose clusters + parchment texture) with a clean `linear-gradient(160deg, #4A1520 → #722F37 → #8E3D4E → #7A2D3E → #4A1520)` — a velvety softened burgundy with a subtle lighter centre. A very-low-opacity (`0.04`) parchment noise texture adds warmth without visual weight.
+- **Event cards beautified** (`app/page.tsx`): `rounded-xl` → `rounded-2xl`, gold top/bottom strips `h-1` → `h-[3px]` with improved gradient opacity, card shadow deepened to `0_28px_72px_-8px_rgba(30,8,14,0.65)`, venue name `font-medium` → `font-semibold`, `space-y-1` → `space-y-1.5`, gold ornament divider lines use fade-to-transparent gradients.
+- **`FloralBackground` and `floralGradient` import removed** from `app/page.tsx` — no longer used on the homepage. Both exports remain in `components/RsvpFloral.tsx` for future use.
+- **RSVP page — FloralBackground removed** (`components/RsvpFloral.tsx`): `RsvpFloral` wrapper updated to use a center-lit radial burgundy gradient (`#8E3D4E → #722F37 → #380F1A`) with corner vignette overlay, minimal parchment texture, and a thin gold frame visible on desktop. No SVG rose clusters.
+- **RSVP card beautified** (`app/rsvp/page.tsx`): `bg-white/90 backdrop-blur-sm` → `bg-white`, deeper shadow `0_32px_80px_-8px_rgba(30,8,14,0.7)`, gold border `rgba(212,175,55,0.4)`, photo fade extended to `h-28` with `via-white/80`.
+- **Story image hover shadow** (`app/page.tsx`): Added `shadow-[0_8px_32px_-8px_rgba(0,0,0,0.18)]` at rest and `hover:shadow-[0_16px_48px_-8px_rgba(114,47,55,0.28)]` (burgundy-tinted) on hover. Hero portrait shadow updated to neutral `rgba(0,0,0,0.5)`.
+- **`global-error.tsx` inline hex values updated**: `#1d3d37` → `#141212`, `#3d5c54` → `#4A4040`, `#3d8b7a` → `#722F37` (button background).
+
+---
+
+## [Unreleased] — 2026-05-28 (pass 8 — Black · White · Burgundy · Gold redesign)
+
+### Changed
+- **Global color palette replaced — Black · White · Burgundy · Gold** (`styles/globals.css`):
+  All teal/mint/crimson tokens replaced with a monochromatic black-and-white base plus burgundy and gold accents.
+  - `--teal-accent` `#3d8b7a` → `#722F37` (burgundy — buttons, borders, focus rings, `bg-teal-accent`, `border-teal-accent`)
+  - `--dark-teal` `#1d3d37` → `#141212` (near-black charcoal — all primary text)
+  - `--teal-muted` `#3d5c54` → `#4A4040` (charcoal-warm — secondary/muted text; ≈10:1 contrast on white, WCAG AAA)
+  - `--floral-crimson` `#8B1A2E` → `#722F37` (burgundy — accent text, headings, interactive hover states)
+  - `--mint-bg` `#c5e0da` → `#0D0B0B` (near-black — full-screen nav overlay dark background)
+  - Added `--gold: #B8920A` and `--gold-light: #D4AF37` tokens registered in `@theme` as `--color-gold` / `--color-gold-light`
+- **Full-screen nav overlay redesigned for dark background** (`app/page.tsx`):
+  Overlay background changed from mint-green to near-black `#0D0B0B`. All text updated for readability: `text-dark-teal` → `text-white/90`, `text-teal-muted` → `text-white/50`, dividers → `border-white/15` and `border-white/12`, hover states → `hover:text-[#D4AF37]` and `hover:border-[#D4AF37]` (gold). Close button `text-white/50 hover:text-white/90`. Footer label `text-white/50`.
+- **FloralBackground SVG color palette** (`components/RsvpFloral.tsx`):
+  Removed all crimson/blush/rose colors. New palette: `burgundyRose` (outer `#8E3D47` · mid `#722F37` · inner `#4A1520`), `mauveRose` (outer `#C09098` · mid `#A07080` · inner `#7A5060`), leaves stay in earthy dark-olive. Blossom petals remain ivory-cream (`#FFF8F0`) with gold center (`#B8920A`/`#D4AF37`). Sparkle opacity raised to 0.7 for better visibility on dark background.
+- **`floralGradient` updated** (`components/RsvpFloral.tsx`):
+  Replaced rose/dusty-pink radial gradient with a deep dark-burgundy gradient: `#1A0810 → #2B1018 → #3F1522 → #531A2C → #672035 → #7A2940`. Creates an elegant near-black center radiating to deep wine at edges. Applied to `/rsvp` page background and the Celebrations section on homepage.
+- **FloralBackground gold frame** (`components/RsvpFloral.tsx`):
+  Gold border opacity increased (`rgba(212,175,55,0.5)`) and inner shadow updated (`rgba(212,175,55,0.18)`) for better contrast against the dark gradient.
+- **Confetti colors updated** (`app/page.tsx`, `app/rsvp/page.tsx`):
+  Changed from teal/pink palette to `["#722F37", "#D4AF37", "#FAF8F5", "#8E3D47", "#B8920A", "#ffffff"]` — burgundy, gold, ivory, and white.
+- **FloatingPetals hue** (`app/page.tsx`):
+  Changed from soft pink `hsl(340+, 85%, 82%)` to deep burgundy `hsl(345+, 60%, 44%)` — petals now match the burgundy/wine wedding palette.
+- **Event status pills inline styles** (`app/page.tsx`):
+  Changed inline `rgba(139,26,46,…)` crimson hex values to `rgba(114,47,55,…)` burgundy and `#8B1A2E` → `#722F37`.
+- **Footer heart icon** (`app/page.tsx`):
+  Changed from `text-rose-400 fill-rose-400` to `text-floral-crimson fill-current` (burgundy).
+- **Admin layout** (`app/admin/layout.tsx`):
+  Uses semantic tokens (`text-primary`, `bg-background`, `surface`) — automatically inherits burgundy as primary accent from the updated globals. No file changes required.
+- **`FloralBackground` removed from red/crimson**: All previously crimson-red elements (roses, inner petals, highlights) are now deep burgundy/wine — the warm red that was "not good looking" has been eliminated entirely.
+
+---
+
 ## [Unreleased] — 2026-05-28 (pass 7 — events redesign, crimson token, story fix)
 
 ### Changed

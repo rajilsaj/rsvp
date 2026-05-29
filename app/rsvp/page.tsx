@@ -8,7 +8,7 @@ import { RsvpFloral } from "@/components/RsvpFloral";
 import confetti from "canvas-confetti";
 
 function launchConfetti() {
-  const colors = ["#3d8b7a", "#c5e0da", "#fda4af", "#f9a8d4", "#fef9c3", "#ffffff"];
+  const colors = ["#722F37", "#D4AF37", "#FAF8F5", "#8E3D47", "#B8920A", "#ffffff"];
   confetti({ particleCount: 70, angle: 60, spread: 65, origin: { x: 0, y: 0.75 }, colors, gravity: 1.1 });
   confetti({ particleCount: 70, angle: 120, spread: 65, origin: { x: 1, y: 0.75 }, colors, gravity: 1.1 });
   setTimeout(() => confetti({ particleCount: 40, spread: 80, origin: { x: 0.5, y: 0.6 }, colors, shapes: ["circle"], scalar: 0.8 }), 250);
@@ -196,7 +196,7 @@ export default function RsvpPage() {
   if (submitted) {
     return (
       <RsvpFloral>
-        <div className="w-full max-w-md rounded-2xl p-8 sm:p-10 text-center shadow-[0_24px_60px_-12px_rgba(139,28,62,0.35)] bg-white/90 backdrop-blur-sm">
+        <div className="w-full max-w-md rounded-2xl p-8 sm:p-10 text-center bg-white shadow-[0_32px_80px_-8px_rgba(30,8,14,0.7),0_4px_20px_-4px_rgba(0,0,0,0.3)]" style={{ border: "1px solid rgba(212,175,55,0.35)" }}>
           <div className="text-5xl mb-4">💌</div>
           <h2 className="text-xl sm:text-2xl font-semibold mb-2 text-dark-teal">
             {existingGuestName
@@ -219,7 +219,7 @@ export default function RsvpPage() {
   return (
     <RsvpFloral>
       {/* ── Single invitation card ── */}
-      <div className="w-full max-w-md rounded-3xl overflow-hidden shadow-[0_24px_60px_-12px_rgba(139,28,62,0.35)] bg-white/90 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-3xl overflow-hidden bg-white shadow-[0_32px_80px_-8px_rgba(30,8,14,0.7),0_4px_20px_-4px_rgba(0,0,0,0.3)]" style={{ border: "1px solid rgba(212,175,55,0.4)" }}>
 
         {/* Photo header — top of the card */}
         <div className="relative w-full aspect-[4/3]">
@@ -231,8 +231,8 @@ export default function RsvpPage() {
             className="object-cover object-top"
             sizes="448px"
           />
-          {/* Fade photo into card body */}
-          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-white/92 to-transparent" />
+          {/* Smooth photo fade into card body */}
+          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-white via-white/80 to-transparent" />
         </div>
 
         {/* Card body */}

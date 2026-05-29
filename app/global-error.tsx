@@ -22,19 +22,19 @@ export default function GlobalError({
           padding: "20px",
           textAlign: "center",
           fontFamily: "sans-serif",
-          color: "#1d3d37",
+          color: "#141212",
         }}
       >
-        <p style={{ letterSpacing: "0.3em", fontSize: "11px", color: "#3d5c54", marginBottom: "32px", textTransform: "uppercase" }}>
+        <p style={{ letterSpacing: "0.3em", fontSize: "11px", color: "#4A4040", marginBottom: "32px", textTransform: "uppercase" }}>
           G · N — Grace &amp; Noelvie
         </p>
 
-        <p style={{ fontSize: "5rem", fontWeight: 300, color: "rgba(29,61,55,0.05)", marginBottom: "-2rem", lineHeight: 1 }}>!</p>
+        <p style={{ fontSize: "5rem", fontWeight: 300, color: "rgba(20,18,18,0.05)", marginBottom: "-2rem", lineHeight: 1 }}>!</p>
 
         <h1 style={{ fontSize: "1.75rem", fontWeight: 300, marginBottom: "12px" }}>
           Something went wrong
         </h1>
-        <p style={{ color: "#3d5c54", marginBottom: "32px", maxWidth: "380px", lineHeight: 1.6, fontSize: "14px" }}>
+        <p style={{ color: "#4A4040", marginBottom: "32px", maxWidth: "380px", lineHeight: 1.6, fontSize: "14px" }}>
           A critical error occurred. This has been noted. Please refresh the page to continue.
         </p>
 
@@ -45,7 +45,7 @@ export default function GlobalError({
             alignItems: "center",
             gap: "8px",
             padding: "12px 28px",
-            background: "#3d8b7a",
+            background: "#722F37",
             color: "white",
             border: "none",
             cursor: "pointer",
@@ -57,7 +57,7 @@ export default function GlobalError({
           ↺ Try again
         </button>
 
-        <p style={{ marginTop: "64px", fontSize: "9px", letterSpacing: "0.3em", textTransform: "uppercase", color: "#3d5c54" }}>
+        <p style={{ marginTop: "64px", fontSize: "9px", letterSpacing: "0.3em", textTransform: "uppercase", color: "#4A4040" }}>
           Saturday · 22 August 2026 · Youngsville NC
         </p>
       </body>

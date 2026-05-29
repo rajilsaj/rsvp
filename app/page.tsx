@@ -10,7 +10,6 @@ import confetti from "canvas-confetti";
 
 import { useToast } from "@/hooks/use-toast";
 import { getCookie, setCookie } from "@/lib/cookies";
-import { FloralBackground, floralGradient } from "@/components/RsvpFloral";
 
 /* ─── Rose petal particle types ─── */
 type PetalConfig = {
@@ -23,6 +22,212 @@ type PetalConfig = {
   initRotate: number; // starting rotation
   hue: number;        // slight hue variation
 };
+
+/* ── Confetti scattered around the headline block ────────────────────────── */
+const CONFETTI_SCATTER = [
+  { top: "4%",  left: "72%", w: "6px",  h: "2.5px", color: "#D4AF37", r:  18, delay: 0.0 },
+  { top: "12%", left: "88%", w: "3px",  h: "3px",   color: "#F5E080", r: -35, delay: 0.7 },
+  { top: "22%", left: "5%",  w: "7px",  h: "2px",   color: "#C8A028", r:  50, delay: 1.1 },
+  { top: "30%", left: "80%", w: "4px",  h: "4px",   color: "#FFF0A0", r: -12, delay: 1.8 },
+  { top: "40%", left: "65%", w: "5px",  h: "2px",   color: "#B8920A", r:  70, delay: 2.3 },
+  { top: "50%", left: "2%",  w: "5px",  h: "2px",   color: "#C8A028", r: -22, delay: 0.4 },
+  { top: "58%", left: "78%", w: "4px",  h: "4px",   color: "#D4AF37", r:  42, delay: 1.0 },
+  { top: "68%", left: "15%", w: "6px",  h: "2.5px", color: "#F5E080", r: -55, delay: 1.6 },
+  { top: "77%", left: "60%", w: "3px",  h: "3px",   color: "#FFF0A0", r:  16, delay: 2.2 },
+  { top: "86%", left: "90%", w: "5px",  h: "2px",   color: "#B8920A", r: -30, delay: 0.9 },
+  { top: "18%", left: "50%", w: "4px",  h: "2px",   color: "#D4AF37", r:  60, delay: 1.4 },
+  { top: "62%", left: "42%", w: "6px",  h: "2px",   color: "#C8A028", r: -40, delay: 2.0 },
+];
+
+/* ── Image with gold-bordered placeholder shown while loading ────────────── */
+function CoupleImg({ src, alt, className }: { src: string; alt: string; className?: string }) {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <>
+      {/* Placeholder */}
+      <div
+        className={`absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-500 ${loaded ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+        style={{ background: "#FAF8F5", border: "2px solid #D4AF37" }}
+        aria-hidden="true"
+      >
+        {/* Inner gold frame */}
+        <div className="absolute inset-[8px] pointer-events-none"
+          style={{ border: "1px solid rgba(212,175,55,0.35)" }} />
+        {/* Monogram */}
+        <p className="font-display text-2xl tracking-[0.4em] font-light select-none"
+          style={{ color: "#B8920A" }}>G · N</p>
+        {/* Script names */}
+        <p className="font-wedding text-3xl select-none mt-1"
+          style={{ color: "#C8A028" }}>Grace &amp; Noelvie</p>
+        {/* Date */}
+        <p className="text-[8px] tracking-[0.35em] uppercase select-none mt-2"
+          style={{ color: "rgba(184,146,10,0.55)" }}>August 22 · 2026</p>
+      </div>
+
+      <img
+        src={src}
+        alt={alt}
+        className={`transition-opacity duration-700 ${loaded ? "opacity-100" : "opacity-0"} ${className ?? ""}`}
+        onLoad={() => setLoaded(true)}
+      />
+    </>
+  );
+}
+
+/* ── Wax-seal invitation loader ──────────────────────────────────────────── */
+function WeddingLoader() {
+  const BG = "#080606";
+  const GOLD = "rgba(212,175,55,";
+  const drifters = [
+    { top:"14%", left:"9%",  w:6, h:2.5, r: 22, d:0.3, c:"#D4AF37" },
+    { top:"18%", left:"82%", w:4, h:4,   r:-18, d:0.9, c:"#F5E080" },
+    { top:"60%", left:"6%",  w:5, h:2,   r: 55, d:0.6, c:"#C8A028" },
+    { top:"72%", left:"87%", w:6, h:2.5, r:-35, d:1.2, c:"#D4AF37" },
+    { top:"40%", left:"4%",  w:3, h:3,   r: 10, d:1.6, c:"#F5E080" },
+    { top:"28%", left:"91%", w:5, h:2,   r: 70, d:2.0, c:"#B8920A" },
+    { top:"82%", left:"20%", w:4, h:2,   r:-50, d:0.4, c:"#D4AF37" },
+    { top:"85%", left:"75%", w:6, h:2,   r: 30, d:1.1, c:"#C8A028" },
+  ];
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden"
+      style={{ background: BG }}
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.35 }}
+    >
+      {/* Warm ambient glow */}
+      <div className="absolute inset-0 pointer-events-none"
+        style={{ background: "radial-gradient(ellipse at 50% 50%, rgba(114,47,55,0.10) 0%, transparent 68%)" }} />
+
+      {/* Floating confetti in background */}
+      {drifters.map((p, i) => (
+        <div key={i} className="absolute rounded-sm"
+          style={{
+            top: p.top, left: p.left, width: p.w, height: p.h,
+            background: p.c, ["--r" as string]: `${p.r}deg`,
+            animation: `loader-drift ${2.8 + i * 0.3}s ease-in-out ${p.d}s infinite`,
+          }} />
+      ))}
+
+      {/* ── PHASE 1: Wax seal ── */}
+      <motion.div className="absolute"
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: [0, 1.08, 1, 1, 1.6], opacity: [0, 1, 1, 1, 0] }}
+        transition={{ times: [0, 0.25, 0.38, 0.72, 1], duration: 2.4, ease: "easeOut" }}
+      >
+        <div className="seal-glow">
+          <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
+            {/* Dashed outer ring */}
+            <circle cx="60" cy="60" r="57" stroke={`${GOLD}0.5)`} strokeWidth="1" strokeDasharray="4 3" />
+            {/* Seal body */}
+            <circle cx="60" cy="60" r="50" fill="#5C1E2A" />
+            {/* Gold border */}
+            <circle cx="60" cy="60" r="50" stroke={`${GOLD}0.85)`} strokeWidth="1.5" />
+            {/* Inner decorative ring */}
+            <circle cx="60" cy="60" r="43" stroke={`${GOLD}0.35)`} strokeWidth="0.7" strokeDasharray="3 2" />
+            {/* Monogram G */}
+            <text x="60" y="52" textAnchor="middle" fill="#D4AF37"
+              fontSize="20" fontFamily="Georgia,serif" fontWeight="300">G</text>
+            {/* Divider line */}
+            <line x1="42" y1="62" x2="78" y2="62" stroke={`${GOLD}0.55)`} strokeWidth="0.8" />
+            {/* Monogram N */}
+            <text x="60" y="78" textAnchor="middle" fill="#D4AF37"
+              fontSize="20" fontFamily="Georgia,serif" fontWeight="300">N</text>
+            {/* 4 corner ornament dots */}
+            {[[60,12],[108,60],[60,108],[12,60]].map(([cx,cy],i) => (
+              <circle key={i} cx={cx} cy={cy} r="2.5" fill={`${GOLD}0.6)`} />
+            ))}
+          </svg>
+        </div>
+      </motion.div>
+
+      {/* ── PHASE 2: Invitation card ── */}
+      <motion.div className="relative text-center w-[88vw] max-w-[340px]"
+        initial={{ opacity: 0, scale: 0.92, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.9, delay: 1.9, ease: [0.16, 1, 0.3, 1] }}
+        style={{ border: `1.5px solid ${GOLD}0.45)`, padding: "36px 32px", background: "rgba(10,8,8,0.6)" }}
+      >
+        {/* Double inset frame */}
+        <div className="absolute inset-[9px] pointer-events-none"
+          style={{ border: `1px solid ${GOLD}0.18)` }} />
+        {/* Corner dots */}
+        {["-top-[3px] -left-[3px]","-top-[3px] -right-[3px]","-bottom-[3px] -left-[3px]","-bottom-[3px] -right-[3px]"].map((cls,i)=>(
+          <div key={i} className={`absolute ${cls} w-[5px] h-[5px] rounded-full`}
+            style={{ background: "#D4AF37", boxShadow: `0 0 4px ${GOLD}0.6)` }} />
+        ))}
+
+        {/* Top ornament line */}
+        <motion.div initial={{ scaleX: 0 }} animate={{ scaleX: 1 }}
+          transition={{ duration: 1, delay: 2.2 }}
+          style={{ height:1, width:72, margin:"0 auto 22px",
+            background:`linear-gradient(90deg,transparent,${GOLD}0.9),transparent)` }} />
+
+        {/* Tagline */}
+        <motion.p initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }}
+          transition={{ duration:0.6, delay:2.45 }}
+          style={{ fontSize:8, letterSpacing:"0.58em", textTransform:"uppercase",
+            color:"rgba(255,255,255,0.38)", marginBottom:16 }}>
+          You are cordially invited to
+        </motion.p>
+
+        {/* Names — gold gradient */}
+        <motion.p initial={{ opacity:0, y:28 }} animate={{ opacity:1, y:0 }}
+          transition={{ duration:1, delay:2.75, ease:[0.16,1,0.3,1] }}
+          className="font-wedding"
+          style={{
+            fontSize:"clamp(2.1rem,8vw,2.9rem)", lineHeight:1.25, marginBottom:4,
+            background:"linear-gradient(160deg,#9A7808 0%,#D4AF37 35%,#F5E080 55%,#C8A028 78%,#9A7808 100%)",
+            WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text",
+          }}>
+          Grace &amp; Noelvie
+        </motion.p>
+
+        {/* "Wedding" */}
+        <motion.p initial={{ opacity:0 }} animate={{ opacity:1 }}
+          transition={{ duration:0.5, delay:3.3 }}
+          style={{ fontSize:9, letterSpacing:"0.52em", textTransform:"uppercase",
+            color:"rgba(255,255,255,0.42)", marginBottom:5 }}>
+          Wedding
+        </motion.p>
+
+        {/* Date */}
+        <motion.p initial={{ opacity:0 }} animate={{ opacity:1 }}
+          transition={{ duration:0.5, delay:3.5 }}
+          style={{ fontSize:8, letterSpacing:"0.32em", textTransform:"uppercase",
+            color:"rgba(255,255,255,0.25)" }}>
+          August 22 · 2026
+        </motion.p>
+
+        {/* Bottom ornament */}
+        <motion.div initial={{ scaleX:0 }} animate={{ scaleX:1 }}
+          transition={{ duration:1, delay:3.65 }}
+          style={{ height:1, width:72, margin:"22px auto 18px",
+            background:`linear-gradient(90deg,transparent,${GOLD}0.9),transparent)` }} />
+
+        {/* ✦ ornament */}
+        <motion.div initial={{ opacity:0, scale:0.4 }} animate={{ opacity:1, scale:1 }}
+          transition={{ duration:0.4, delay:3.8, type:"spring", stiffness:260 }}
+          style={{ color:`${GOLD}0.65)`, fontSize:11, marginBottom:16 }}>
+          ✦
+        </motion.div>
+
+        {/* Pulsing gold dots */}
+        <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }}
+          transition={{ delay:3.9 }}
+          style={{ display:"flex", justifyContent:"center", gap:8 }}>
+          {[0, 0.22, 0.44].map((d,i) => (
+            <motion.span key={i}
+              animate={{ opacity:[0.18, 1, 0.18] }}
+              transition={{ repeat:Infinity, duration:1.4, delay:d, ease:"easeInOut" }}
+              style={{ display:"block", width:4, height:4, borderRadius:"50%",
+                background:`${GOLD}0.55)` }} />
+          ))}
+        </motion.div>
+      </motion.div>
+    </motion.div>
+  );
+}
 
 function FloatingPetals() {
   const [petals, setPetals] = useState<PetalConfig[]>([]);
@@ -68,9 +273,9 @@ function FloatingPetals() {
             style={{
               width: p.size,
               height: p.size * 1.7,
-              background: `linear-gradient(160deg, hsl(${340 + p.hue}, 85%, 82%), hsl(${345 + p.hue}, 75%, 70%))`,
+              background: `linear-gradient(160deg, hsl(${345 + p.hue}, 60%, ${44 + p.hue * 0.3}%), hsl(${348 + p.hue}, 55%, 34%))`,
               borderRadius: "60% 40% 55% 45% / 70% 45% 55% 30%",
-              boxShadow: `inset 0 1px 2px rgba(255,255,255,0.4)`,
+              boxShadow: `inset 0 1px 2px rgba(255,255,255,0.25)`,
             }}
           />
         </motion.div>
@@ -80,7 +285,7 @@ function FloatingPetals() {
 }
 
 function launchConfetti() {
-  const colors = ["#3d8b7a", "#c5e0da", "#fda4af", "#f9a8d4", "#fef9c3", "#ffffff"];
+  const colors = ["#722F37", "#D4AF37", "#FAF8F5", "#8E3D47", "#B8920A", "#ffffff"];
 
   // Left cannon
   confetti({
@@ -459,11 +664,7 @@ export default function SaveTheDate() {
   }
 
   if (checking) {
-    return (
-      <div className="min-h-[100dvh] bg-[#faf9f6] flex items-center justify-center">
-        <div className="w-6 h-6 rounded-full border-2 border-teal-accent border-t-transparent animate-spin" />
-      </div>
-    );
+    return <WeddingLoader />;
   }
 
   return (
@@ -484,12 +685,12 @@ export default function SaveTheDate() {
             className="fixed inset-0 z-[200] bg-mint flex flex-col"
           >
             {/* Close button */}
-            <div className="flex items-center justify-between px-5 sm:px-10 py-4 border-b border-dark-teal/10">
+            <div className="flex items-center justify-between px-5 sm:px-10 py-4 border-b border-white/15">
               <div className="text-center">
-                <p className="font-display text-lg tracking-[0.3em] text-dark-teal font-light">G · N</p>
-                <p className="text-[8px] tracking-[0.35em] uppercase text-teal-muted mt-0.5">Grace &amp; Noelvie</p>
+                <p className="font-display text-lg tracking-[0.3em] text-white/90 font-light">G · N</p>
+                <p className="text-[8px] tracking-[0.35em] uppercase text-white/50 mt-0.5">Grace &amp; Noelvie</p>
               </div>
-              <button onClick={() => setMenuOpen(false)} className="text-teal-muted hover:text-dark-teal transition-colors" aria-label="Close menu">
+              <button onClick={() => setMenuOpen(false)} className="text-white/50 hover:text-white/90 transition-colors" aria-label="Close menu">
                 <X className="h-6 w-6" />
               </button>
             </div>
@@ -508,25 +709,25 @@ export default function SaveTheDate() {
                       link.href ? (
                         <Link
                           href={link.href}
-                          className="group flex items-center gap-4 py-3 border-b border-dark-teal/10 hover:border-teal-accent transition-colors"
+                          className="group flex items-center gap-4 py-3 border-b border-white/12 hover:border-[#D4AF37] transition-colors"
                         >
-                          <span className="text-[8px] text-teal-muted font-mono w-5">{String(i + 1).padStart(2, "0")}</span>
-                          <span className="font-display text-2xl sm:text-3xl text-dark-teal font-light group-hover:text-floral-crimson transition-colors">{link.label}</span>
+                          <span className="text-[8px] text-white/40 font-mono w-5">{String(i + 1).padStart(2, "0")}</span>
+                          <span className="font-display text-2xl sm:text-3xl text-white/90 font-light group-hover:text-[#D4AF37] transition-colors">{link.label}</span>
                         </Link>
                       ) : (
                         <button
                           onClick={() => link.id && scrollTo(link.id)}
-                          className="group w-full flex items-center gap-4 py-3 border-b border-dark-teal/10 hover:border-teal-accent transition-colors text-left"
+                          className="group w-full flex items-center gap-4 py-3 border-b border-white/12 hover:border-[#D4AF37] transition-colors text-left"
                         >
-                          <span className="text-[8px] text-teal-muted font-mono w-5">{String(i + 1).padStart(2, "0")}</span>
-                          <span className="font-display text-2xl sm:text-3xl text-dark-teal font-light group-hover:text-floral-crimson transition-colors">{link.label}</span>
+                          <span className="text-[8px] text-white/40 font-mono w-5">{String(i + 1).padStart(2, "0")}</span>
+                          <span className="font-display text-2xl sm:text-3xl text-white/90 font-light group-hover:text-[#D4AF37] transition-colors">{link.label}</span>
                         </button>
                       )
                     ) : (
-                      <div className="flex items-center gap-4 py-3 border-b border-dark-teal/5 opacity-30 cursor-not-allowed select-none">
-                        <span className="text-[8px] text-teal-muted font-mono w-5">{String(i + 1).padStart(2, "0")}</span>
-                        <span className="font-display text-2xl sm:text-3xl text-dark-teal font-light">{link.label}</span>
-                        <span className="ml-auto text-[8px] tracking-[0.25em] uppercase text-teal-muted">Soon</span>
+                      <div className="flex items-center gap-4 py-3 border-b border-white/8 opacity-30 cursor-not-allowed select-none">
+                        <span className="text-[8px] text-white/40 font-mono w-5">{String(i + 1).padStart(2, "0")}</span>
+                        <span className="font-display text-2xl sm:text-3xl text-white/90 font-light">{link.label}</span>
+                        <span className="ml-auto text-[8px] tracking-[0.25em] uppercase text-white/40">Soon</span>
                       </div>
                     )}
                   </motion.div>
@@ -534,8 +735,8 @@ export default function SaveTheDate() {
               </div>
             </nav>
 
-            <div className="px-8 sm:px-16 py-8 border-t border-dark-teal/10">
-              <p className="text-[8px] tracking-[0.35em] uppercase text-teal-muted">{wedding.dateLabel} · {wedding.venue.name}</p>
+            <div className="px-8 sm:px-16 py-8 border-t border-white/15">
+              <p className="text-[8px] tracking-[0.35em] uppercase text-white/50">{wedding.dateLabel} · {wedding.venue.name}</p>
             </div>
           </motion.div>
         )}
@@ -547,114 +748,207 @@ export default function SaveTheDate() {
       <section className="relative flex flex-col min-h-[100dvh] border-b border-dark-teal/10">
         <FloatingPetals />
 
-        {/* Top navbar */}
-        <header className="relative z-[2] flex items-center justify-between px-5 sm:px-10 py-4 border-b border-dark-teal/10">
-          <button onClick={() => setMenuOpen(true)} className="flex flex-col gap-[5px] group" aria-label="Open menu">
-            <span className="block h-px w-7 bg-dark-teal/50 group-hover:bg-teal-accent transition-colors" />
-            <span className="block h-px w-4 bg-dark-teal/50 group-hover:bg-teal-accent transition-colors" />
-            <span className="block h-px w-7 bg-dark-teal/50 group-hover:bg-teal-accent transition-colors" />
+        {/* ── Navbar ── */}
+        <header className="relative z-[2] flex items-center justify-between px-6 sm:px-10 py-5 border-b border-dark-teal/8">
+          {/* Hamburger */}
+          <button onClick={() => setMenuOpen(true)} className="flex flex-col gap-[5px] group p-1" aria-label="Open menu">
+            <span className="block h-px w-6 bg-dark-teal/40 group-hover:bg-teal-accent group-hover:w-7 transition-all duration-300" />
+            <span className="block h-px w-4 bg-dark-teal/40 group-hover:bg-teal-accent group-hover:w-7 transition-all duration-300" />
+            <span className="block h-px w-6 bg-dark-teal/40 group-hover:bg-teal-accent group-hover:w-7 transition-all duration-300" />
           </button>
+
+          {/* Monogram */}
           <div className="text-center">
-            <p className="font-display text-lg sm:text-xl tracking-[0.3em] text-dark-teal font-light leading-none">G · N</p>
-            <p className="text-[8px] tracking-[0.35em] uppercase text-teal-muted mt-0.5">Grace &amp; Noelvie</p>
+            <p className="font-display text-base sm:text-lg tracking-[0.35em] text-dark-teal font-light leading-none">G · N</p>
+            <p className="text-[7px] tracking-[0.4em] uppercase text-teal-muted mt-1">Grace &amp; Noelvie</p>
           </div>
-          <button onClick={() => scrollTo("rsvp-section")} className="text-[9px] sm:text-[10px] tracking-[0.25em] uppercase text-dark-teal border border-dark-teal/25 px-3 sm:px-4 py-1.5 sm:py-2 hover:bg-dark-teal hover:text-[#faf9f6] transition-all">
+
+          {/* RSVP pill */}
+          <button onClick={() => scrollTo("rsvp-section")}
+            className="text-[8px] sm:text-[9px] tracking-[0.28em] uppercase text-white px-4 sm:px-5 py-2 sm:py-2.5 transition-all hover:opacity-90 active:scale-[0.98]"
+            style={{ background: "linear-gradient(135deg, #722F37, #8E3D47)" }}>
             RSVP
           </button>
         </header>
 
-        {/* Hero grid */}
-        <div className="relative z-[2] flex-1 flex flex-col justify-center py-10 sm:py-14 px-5 sm:px-10">
-          <div className="grid grid-cols-1 lg:grid-cols-3 items-center gap-10 lg:gap-6 max-w-5xl mx-auto w-full">
+        {/* ── Hero content ── */}
+        <div className="relative z-[2] flex-1 flex flex-col justify-center px-6 sm:px-10 py-10 sm:py-12">
+          <div className="max-w-5xl mx-auto w-full">
 
-            {/* Left: Script headline */}
-            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.85, delay: 0.15 }}
-              className="order-2 lg:order-1 flex flex-col items-center lg:items-end text-center lg:text-right pr-0 lg:pr-10">
-              <p className="text-[8px] tracking-[0.45em] uppercase text-teal-muted mb-3">Join us to celebrate</p>
-              <h1 className="font-wedding text-[3.8rem] sm:text-[5rem] lg:text-[5.5rem] xl:text-[6rem] text-floral-crimson leading-[1.05]">
-                We&apos;re<br />getting<br />married
-              </h1>
-              <p className="mt-5 text-[9px] tracking-[0.3em] uppercase text-teal-muted leading-relaxed max-w-[220px]">
-                &ldquo;What God has joined together,<br />let no one separate.&rdquo;
-                <span className="block mt-1 text-teal-muted">— Mark 10:9</span>
-              </p>
-            </motion.div>
+            {/* ─── DESKTOP: 3-column grid ─────────────────────────────── */}
+            <div className="hidden lg:grid lg:grid-cols-3 lg:items-center lg:gap-10 xl:gap-12">
 
-            {/* Center: Single hero photo */}
-            <motion.div initial={{ opacity: 0.15, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.85 }}
-              className="order-1 lg:order-2 flex justify-center">
-              <div className="relative w-64 sm:w-80 lg:w-[22rem] xl:w-96 rotate-[1.5deg] shadow-[0_32px_64px_-12px_rgba(29,61,55,0.35)] overflow-hidden flex-shrink-0 rounded-2xl">
-                <img src="/images/couple-hero-2.jpg" alt="Grace &amp; Noelvie" className="w-full aspect-[3/4] object-cover object-top grayscale" />
-                {/* Subtle vignette overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-dark-teal/20 via-transparent to-transparent pointer-events-none" />
-              </div>
-            </motion.div>
+              {/* Left — headline */}
+              <motion.div initial={{ opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.9, delay: 0.1 }}
+                className="flex flex-col items-end text-right">
+                <p className="text-[8px] tracking-[0.55em] uppercase text-teal-muted mb-5">Join us to celebrate</p>
+                <div className="relative w-full">
+                  <h1 className="font-wedding text-[4.5rem] xl:text-[5.5rem] leading-[1.45] gold-headline">
+                    We&apos;re<br />getting<br />married
+                  </h1>
+                  {CONFETTI_SCATTER.map((p, i) => (
+                    <span key={i} aria-hidden="true" className="confetti-piece"
+                      style={{ top: p.top, left: p.left, width: p.w, height: p.h,
+                        background: p.color, ["--r" as string]: `${p.r}deg`, animationDelay: `${p.delay}s` }} />
+                  ))}
+                </div>
+                <div className="mt-7 flex items-center gap-3 justify-end w-full">
+                  <div className="h-px flex-1 bg-dark-teal/10" />
+                  <span style={{ color: "rgba(184,146,10,0.6)", fontSize: "9px" }}>✦</span>
+                </div>
+                <p className="mt-4 text-[9px] tracking-[0.28em] uppercase text-teal-muted leading-[2] max-w-[210px]">
+                  &ldquo;What God has joined together,<br />let no one separate.&rdquo;
+                  <span className="block mt-1.5 text-teal-muted/60 not-uppercase">— Mark 10:9</span>
+                </p>
+              </motion.div>
 
-            {/* Right: Event details */}
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.85, delay: 0.15 }}
-              className="order-3 flex flex-col items-center lg:items-start text-center lg:text-left pl-0 lg:pl-10">
-              <p className="text-[8px] tracking-[0.45em] uppercase text-teal-muted mb-4">The Event</p>
-              <p className="font-display text-3xl sm:text-4xl font-light text-dark-teal leading-tight tracking-tight">
-                AUG 22,<br />2026
-              </p>
-              <div className="my-4 h-px w-10 bg-dark-teal/15" />
-              <div className="space-y-1">
-                <p className="text-[9px] tracking-[0.28em] uppercase text-dark-teal/70 font-medium">{wedding.venue.name}</p>
-                <p className="text-[11px] text-teal-muted leading-relaxed max-w-[180px]">{wedding.venue.address}</p>
-                <p className="text-[11px] text-teal-muted">{wedding.timeLabel}</p>
-              </div>
-              <div className="my-4 h-px w-10 bg-dark-teal/15" />
-              <div className="flex flex-col sm:flex-row lg:flex-col gap-2 items-center lg:items-start">
-                <a href={wedding.venue.mapUrl} onClick={handleGetDirections} rel="noreferrer" className="text-[9px] tracking-[0.2em] uppercase text-floral-crimson border-b border-teal-accent/40 pb-px hover:border-teal-accent transition-colors">
-                  Get Directions →
-                </a>
-                <button onClick={handleSaveToCalendar} className="text-[9px] tracking-[0.2em] uppercase text-teal-muted border-b border-teal-muted/30 pb-px hover:text-floral-crimson hover:border-teal-accent/40 transition-colors">
-                  Save to Calendar →
-                </button>
-              </div>
-            </motion.div>
+              {/* Center — photo */}
+              <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9 }}
+                className="flex justify-center">
+                <div className="relative w-[19rem] xl:w-[22rem] rotate-[1.5deg]
+                                shadow-[0_40px_80px_-12px_rgba(0,0,0,0.45)]
+                                overflow-hidden rounded-2xl
+                                ring-1 ring-dark-teal/10">
+                  <CoupleImg src="/images/couple-hero-2.jpg" alt="Grace &amp; Noelvie"
+                    className="w-full aspect-[3/4] object-cover object-top" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
+                </div>
+              </motion.div>
+
+              {/* Right — event details */}
+              <motion.div initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.9, delay: 0.1 }}
+                className="flex flex-col items-start text-left pl-4">
+                <p className="text-[8px] tracking-[0.55em] uppercase text-teal-muted mb-5">The Event</p>
+                <p className="font-display text-4xl xl:text-5xl font-light text-dark-teal leading-[1.1] tracking-tight">
+                  AUG 22,<br />2026
+                </p>
+                <div className="my-6 h-px w-12 bg-dark-teal/12" />
+                <div className="space-y-2.5">
+                  <p className="text-[9px] tracking-[0.3em] uppercase text-dark-teal/70 font-semibold">{wedding.venue.name}</p>
+                  <p className="text-[11px] text-teal-muted leading-relaxed max-w-[170px]">{wedding.venue.address}</p>
+                  <p className="text-[11px] text-teal-muted">{wedding.timeLabel}</p>
+                </div>
+                <div className="my-6 h-px w-12 bg-dark-teal/12" />
+                <div className="flex flex-col gap-3.5">
+                  <a href={wedding.venue.mapUrl} onClick={handleGetDirections} rel="noreferrer"
+                    className="text-[9px] tracking-[0.22em] uppercase text-floral-crimson border-b border-floral-crimson/30 pb-px hover:border-floral-crimson transition-colors inline-block">
+                    Get Directions →
+                  </a>
+                  <button onClick={handleSaveToCalendar}
+                    className="text-[9px] tracking-[0.22em] uppercase text-teal-muted border-b border-teal-muted/25 pb-px hover:text-floral-crimson transition-colors text-left">
+                    Save to Calendar →
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* ─── MOBILE: stacked, no squeezing ──────────────────────── */}
+            <div className="lg:hidden flex flex-col gap-0">
+
+              {/* 1. Tagline + headline */}
+              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}
+                className="text-center pb-8 border-b border-dark-teal/8">
+                <p className="text-[8px] tracking-[0.55em] uppercase text-teal-muted mb-5">Join us to celebrate</p>
+                <div className="relative w-full">
+                  <h1 className="font-wedding text-[3.8rem] sm:text-[5rem] leading-[1.45] gold-headline">
+                    We&apos;re<br />getting<br />married
+                  </h1>
+                  {CONFETTI_SCATTER.map((p, i) => (
+                    <span key={i} aria-hidden="true" className="confetti-piece"
+                      style={{ top: p.top, left: p.left, width: p.w, height: p.h,
+                        background: p.color, ["--r" as string]: `${p.r}deg`, animationDelay: `${p.delay}s` }} />
+                  ))}
+                </div>
+                <p className="mt-6 text-[9px] tracking-[0.28em] uppercase text-teal-muted leading-[2] max-w-[240px] mx-auto">
+                  &ldquo;What God has joined together, let no one separate.&rdquo;
+                  <span className="block mt-1.5 text-teal-muted/60">— Mark 10:9</span>
+                </p>
+              </motion.div>
+
+              {/* 2. Photo */}
+              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.15 }}
+                className="flex justify-center py-8 border-b border-dark-teal/8">
+                <div className="relative w-[200px] sm:w-[240px] overflow-hidden rounded-2xl
+                                shadow-[0_24px_56px_-12px_rgba(0,0,0,0.3)]
+                                ring-1 ring-dark-teal/10">
+                  <CoupleImg src="/images/couple-hero-2.jpg" alt="Grace &amp; Noelvie"
+                    className="w-full aspect-[3/4] object-cover object-top" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/15 via-transparent to-transparent pointer-events-none" />
+                </div>
+              </motion.div>
+
+              {/* 3. Event summary — compact horizontal */}
+              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.25 }}
+                className="py-8 text-center">
+                <p className="text-[8px] tracking-[0.55em] uppercase text-teal-muted mb-5">The Event</p>
+                <p className="font-display text-3xl sm:text-4xl font-light text-dark-teal tracking-tight mb-4">
+                  Saturday · August 22, 2026
+                </p>
+                <p className="text-[10px] tracking-[0.28em] uppercase text-dark-teal/60 mb-1">{wedding.venue.name}</p>
+                <p className="text-[11px] text-teal-muted mb-5">{wedding.venue.address}</p>
+                <div className="flex items-center justify-center gap-5">
+                  <a href={wedding.venue.mapUrl} onClick={handleGetDirections} rel="noreferrer"
+                    className="text-[9px] tracking-[0.22em] uppercase text-floral-crimson border-b border-floral-crimson/30 pb-px hover:border-floral-crimson transition-colors">
+                    Get Directions →
+                  </a>
+                  <span className="text-dark-teal/15 text-xs">|</span>
+                  <button onClick={handleSaveToCalendar}
+                    className="text-[9px] tracking-[0.22em] uppercase text-teal-muted border-b border-teal-muted/25 pb-px hover:text-floral-crimson transition-colors">
+                    Save to Calendar →
+                  </button>
+                </div>
+              </motion.div>
+
+            </div>
           </div>
         </div>
 
-        {/* Bottom strip: section nav + countdown */}
-        <div className="relative z-[2] border-t border-dark-teal/10 px-5 py-5 sm:py-6">
-          <nav className="flex items-center justify-center flex-wrap gap-x-3 sm:gap-x-5 gap-y-2 mb-4">
-            {[
-              { label: "Our Story", id: "story" },
-              { label: "Celebrations", id: "events" },
-              { label: "Venue", id: "venue-section" },
-              { label: "RSVP", id: "rsvp-section" },
-            ].map((link, i, arr) => (
-              <Fragment key={link.id}>
-                <button onClick={() => scrollTo(link.id)} className="text-[8px] sm:text-[9px] tracking-[0.28em] uppercase text-teal-muted hover:text-floral-crimson transition-colors">
-                  {link.label}
-                </button>
-                {i < arr.length - 1 && <span className="text-dark-teal/20 text-[10px] leading-none select-none">·</span>}
-              </Fragment>
-            ))}
-          </nav>
-          {countdown.ready && (
-            <div className="flex items-center justify-center gap-2 sm:gap-4">
+        {/* ── Bottom strip: nav + countdown ── */}
+        <div className="relative z-[2] border-t border-dark-teal/8 px-6 sm:px-10 py-5 sm:py-6">
+          <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+
+            {/* Section nav */}
+            <nav className="flex items-center gap-4 sm:gap-6">
               {[
-                { value: countdown.days,    label: "Days" },
-                { value: countdown.hours,   label: "Hrs"  },
-                { value: countdown.minutes, label: "Min"  },
-                { value: countdown.seconds, label: "Sec"  },
-              ].map((unit, i, arr) => (
-                <Fragment key={unit.label}>
-                  <div className="text-center min-w-[2.5rem] sm:min-w-[3.5rem]">
-                    <span className="font-display text-3xl sm:text-4xl font-light text-dark-teal tabular-nums leading-none">
-                      {String(unit.value).padStart(2, "0")}
-                    </span>
-                    <p className="text-[7px] sm:text-[8px] tracking-[0.3em] uppercase text-teal-muted mt-1">{unit.label}</p>
-                  </div>
-                  {i < arr.length - 1 && (
-                    <span className="font-display text-2xl sm:text-3xl text-dark-teal/20 pb-4 select-none">:</span>
-                  )}
+                { label: "Our Story", id: "story" },
+                { label: "Celebrations", id: "events" },
+                { label: "Venue", id: "venue-section" },
+                { label: "RSVP", id: "rsvp-section" },
+              ].map((link, i, arr) => (
+                <Fragment key={link.id}>
+                  <button onClick={() => scrollTo(link.id)}
+                    className="text-[8px] tracking-[0.3em] uppercase text-teal-muted hover:text-floral-crimson transition-colors whitespace-nowrap">
+                    {link.label}
+                  </button>
+                  {i < arr.length - 1 && <span className="text-dark-teal/15 text-[8px] select-none hidden sm:inline">·</span>}
                 </Fragment>
               ))}
-            </div>
-          )}
+            </nav>
+
+            {/* Countdown */}
+            {countdown.ready && (
+              <div className="flex items-end gap-3 sm:gap-4">
+                {[
+                  { value: countdown.days,    label: "Days" },
+                  { value: countdown.hours,   label: "Hrs"  },
+                  { value: countdown.minutes, label: "Min"  },
+                  { value: countdown.seconds, label: "Sec"  },
+                ].map((unit, i, arr) => (
+                  <Fragment key={unit.label}>
+                    <div className="text-center">
+                      <span className="font-display text-2xl sm:text-3xl font-light text-dark-teal tabular-nums leading-none block">
+                        {String(unit.value).padStart(2, "0")}
+                      </span>
+                      <p className="text-[6px] sm:text-[7px] tracking-[0.35em] uppercase text-teal-muted mt-1">{unit.label}</p>
+                    </div>
+                    {i < arr.length - 1 && (
+                      <span className="font-display text-xl sm:text-2xl text-dark-teal/20 mb-4 leading-none select-none">:</span>
+                    )}
+                  </Fragment>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </section>
 
@@ -672,8 +966,8 @@ export default function SaveTheDate() {
           {timelineItems.map((item, index) => (
             <motion.div key={item.id} initial={{ opacity: 0.15, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-80px" }} transition={{ duration: 0.7 }}
               className={`flex flex-col ${index % 2 === 1 ? "sm:flex-row-reverse" : "sm:flex-row"} gap-8 sm:gap-12 items-center`}>
-              <div className="w-full sm:w-1/2 overflow-hidden group rounded-2xl">
-                <img src={item.image} alt={item.title} className="w-full h-72 sm:h-80 object-cover object-top grayscale hover:grayscale-0 active:grayscale-0 group-hover:scale-[1.03] group-active:scale-[1.03] transition-all duration-700" />
+              <div className="relative w-full sm:w-1/2 overflow-hidden group rounded-2xl shadow-[0_8px_32px_-8px_rgba(0,0,0,0.18)] transition-shadow duration-500 hover:shadow-[0_16px_48px_-8px_rgba(114,47,55,0.28)]">
+                <CoupleImg src={item.image} alt={item.title} className="w-full h-72 sm:h-80 object-cover object-top group-hover:scale-[1.03] group-active:scale-[1.03] transition-transform duration-700" />
               </div>
               <div className={`w-full sm:w-1/2 ${index % 2 === 1 ? "sm:text-right" : ""}`}>
                 <span className="text-[9px] tracking-[0.4em] uppercase text-floral-crimson font-medium">{item.dateLabel}</span>
@@ -689,24 +983,28 @@ export default function SaveTheDate() {
       {/* ══════════════════════════════════
           CELEBRATIONS — Creative 2×2 grid
       ══════════════════════════════════ */}
-      <section id="events" className="relative overflow-hidden" style={{ background: floralGradient }}>
-        <FloralBackground />
+      <section id="events" className="relative overflow-hidden"
+        style={{ background: "linear-gradient(160deg, #4A1520 0%, #722F37 30%, #8E3D4E 55%, #7A2D3E 78%, #4A1520 100%)" }}>
 
-        <div className="relative z-10 px-5 sm:px-10 py-12 sm:py-16">
+        {/* Subtle noise texture for depth */}
+        <div className="absolute inset-0 opacity-[0.04] pointer-events-none"
+          style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`, backgroundSize: "180px 180px" }} />
+
+        <div className="relative z-10 px-5 sm:px-10 py-14 sm:py-20">
 
           {/* ── Section header ── */}
-          <div className="text-center mb-10 sm:mb-12">
-            <div className="flex items-center justify-center gap-4 mb-5">
-              <div className="h-px w-12 sm:w-20" style={{ background: "rgba(200,160,40,0.75)" }} />
-              <span className="text-[8px] tracking-[0.55em] uppercase text-white/80" style={{ textShadow: "0 1px 6px rgba(90,15,30,0.6)" }}>
+          <div className="text-center mb-12 sm:mb-16">
+            <div className="flex items-center justify-center gap-4 mb-6">
+              <div className="h-px w-10 sm:w-24" style={{ background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.85))" }} />
+              <span className="text-[8px] tracking-[0.6em] uppercase text-white/70">
                 The Wedding Programme
               </span>
-              <div className="h-px w-12 sm:w-20" style={{ background: "rgba(200,160,40,0.75)" }} />
+              <div className="h-px w-10 sm:w-24" style={{ background: "linear-gradient(90deg, rgba(212,175,55,0.85), transparent)" }} />
             </div>
-            <p className="font-wedding text-5xl sm:text-7xl text-white leading-none" style={{ textShadow: "0 3px 16px rgba(90,15,30,0.55)" }}>
+            <p className="font-wedding text-5xl sm:text-7xl text-white leading-none drop-shadow-lg">
               Grace &amp; Noelvie
             </p>
-            <p className="mt-3 text-[9px] tracking-[0.4em] uppercase text-white/70" style={{ textShadow: "0 1px 6px rgba(90,15,30,0.5)" }}>
+            <p className="mt-3 text-[9px] tracking-[0.42em] uppercase text-white/60">
               Saturday · August 22, 2026 · Youngsville, NC
             </p>
           </div>
@@ -728,28 +1026,28 @@ export default function SaveTheDate() {
                   transition={{ duration: 0.7, ease: "easeOut" }}
                   className="w-full sm:w-[300px] flex-shrink-0"
                 >
-                  <div className="rounded-xl overflow-hidden bg-[#FDF8F5] shadow-[0_24px_64px_-12px_rgba(90,15,30,0.55)]"
-                    style={{ border: "1px solid rgba(200,160,40,0.35)" }}>
+                  <div className="rounded-2xl overflow-hidden bg-[#FEFAF6] shadow-[0_28px_72px_-8px_rgba(30,8,14,0.65),0_4px_16px_-4px_rgba(0,0,0,0.25)]"
+                    style={{ border: "1px solid rgba(212,175,55,0.45)" }}>
                     {/* Gold top strip */}
-                    <div className="h-1" style={{ background: "linear-gradient(90deg, rgba(200,160,40,0.4), rgba(200,160,40,0.9), rgba(200,160,40,0.4))" }} />
-                    <div className="px-6 pt-6 pb-7 text-center">
-                      {/* Number */}
-                      <p className="font-display text-[5rem] leading-none text-floral-crimson/10 font-bold select-none -mb-4">I</p>
+                    <div className="h-[3px]" style={{ background: "linear-gradient(90deg, rgba(212,175,55,0.3), rgba(212,175,55,1), rgba(212,175,55,0.3))" }} />
+                    <div className="px-7 pt-7 pb-8 text-center">
+                      {/* Watermark numeral */}
+                      <p className="font-display text-[5rem] leading-none font-bold select-none -mb-4" style={{ color: "rgba(114,47,55,0.07)" }}>I</p>
                       {/* Event name */}
-                      <p className="font-wedding text-4xl text-floral-crimson mb-1">{event.title}</p>
+                      <p className="font-wedding text-4xl text-floral-crimson mb-1 drop-shadow-sm">{event.title}</p>
                       {/* Gold ornament */}
                       <div className="flex items-center justify-center gap-2 my-4">
-                        <div className="h-px flex-1" style={{ background: "rgba(200,160,40,0.5)" }} />
-                        <span style={{ color: "rgba(200,160,40,0.9)", fontSize: "10px" }}>✦</span>
-                        <div className="h-px flex-1" style={{ background: "rgba(200,160,40,0.5)" }} />
+                        <div className="h-px flex-1" style={{ background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.7))" }} />
+                        <span style={{ color: "rgba(212,175,55,0.95)", fontSize: "11px" }}>✦</span>
+                        <div className="h-px flex-1" style={{ background: "linear-gradient(90deg, rgba(212,175,55,0.7), transparent)" }} />
                       </div>
-                      {/* Time — hero element */}
+                      {/* Time */}
                       {event.time && (
                         <p className="font-display text-2xl sm:text-3xl font-light text-dark-teal tracking-tight mb-5">{event.time}</p>
                       )}
                       {/* Venue */}
-                      <div className="space-y-1 mb-5">
-                        {event.venue && <p className="text-sm font-medium text-dark-teal">{event.venue}</p>}
+                      <div className="space-y-1.5 mb-5">
+                        {event.venue && <p className="text-sm font-semibold text-dark-teal tracking-wide">{event.venue}</p>}
                         {event.address && (
                           <a
                             href={`https://maps.google.com/?q=${encodeURIComponent(event.address)}`}
@@ -764,20 +1062,20 @@ export default function SaveTheDate() {
                       </div>
                       {/* Note */}
                       {event.note && (
-                        <p className="text-[10px] italic text-teal-muted border-t pt-4" style={{ borderColor: "rgba(200,160,40,0.25)" }}>
+                        <p className="text-[10px] italic text-teal-muted border-t pt-4 leading-relaxed" style={{ borderColor: "rgba(212,175,55,0.3)" }}>
                           {event.note}
                         </p>
                       )}
                       {/* Status pill */}
                       {!isPast && (
                         <div className="mt-5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[8px] tracking-[0.3em] uppercase"
-                          style={{ background: "rgba(139,26,46,0.08)", color: "#8B1A2E", border: "1px solid rgba(139,26,46,0.2)" }}>
+                          style={{ background: "rgba(114,47,55,0.07)", color: "#722F37", border: "1px solid rgba(114,47,55,0.18)" }}>
                           {daysUntil(event.dateISO)}d away
                         </div>
                       )}
                     </div>
                     {/* Gold bottom strip */}
-                    <div className="h-1" style={{ background: "linear-gradient(90deg, rgba(200,160,40,0.4), rgba(200,160,40,0.9), rgba(200,160,40,0.4))" }} />
+                    <div className="h-[3px]" style={{ background: "linear-gradient(90deg, rgba(212,175,55,0.3), rgba(212,175,55,1), rgba(212,175,55,0.3))" }} />
                   </div>
                 </motion.div>
               );
@@ -804,22 +1102,22 @@ export default function SaveTheDate() {
                   transition={{ duration: 0.7, delay: 0.12, ease: "easeOut" }}
                   className="w-full sm:w-[300px] flex-shrink-0"
                 >
-                  <div className="rounded-xl overflow-hidden bg-[#FDF8F5] shadow-[0_24px_64px_-12px_rgba(90,15,30,0.55)]"
-                    style={{ border: "1px solid rgba(200,160,40,0.35)" }}>
-                    <div className="h-1" style={{ background: "linear-gradient(90deg, rgba(200,160,40,0.4), rgba(200,160,40,0.9), rgba(200,160,40,0.4))" }} />
-                    <div className="px-6 pt-6 pb-7 text-center">
-                      <p className="font-display text-[5rem] leading-none text-floral-crimson/10 font-bold select-none -mb-4">II</p>
-                      <p className="font-wedding text-4xl text-floral-crimson mb-1">{event.title}</p>
+                  <div className="rounded-2xl overflow-hidden bg-[#FEFAF6] shadow-[0_28px_72px_-8px_rgba(30,8,14,0.65),0_4px_16px_-4px_rgba(0,0,0,0.25)]"
+                    style={{ border: "1px solid rgba(212,175,55,0.45)" }}>
+                    <div className="h-[3px]" style={{ background: "linear-gradient(90deg, rgba(212,175,55,0.3), rgba(212,175,55,1), rgba(212,175,55,0.3))" }} />
+                    <div className="px-7 pt-7 pb-8 text-center">
+                      <p className="font-display text-[5rem] leading-none font-bold select-none -mb-4" style={{ color: "rgba(114,47,55,0.07)" }}>II</p>
+                      <p className="font-wedding text-4xl text-floral-crimson mb-1 drop-shadow-sm">{event.title}</p>
                       <div className="flex items-center justify-center gap-2 my-4">
-                        <div className="h-px flex-1" style={{ background: "rgba(200,160,40,0.5)" }} />
-                        <span style={{ color: "rgba(200,160,40,0.9)", fontSize: "10px" }}>✦</span>
-                        <div className="h-px flex-1" style={{ background: "rgba(200,160,40,0.5)" }} />
+                        <div className="h-px flex-1" style={{ background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.7))" }} />
+                        <span style={{ color: "rgba(212,175,55,0.95)", fontSize: "11px" }}>✦</span>
+                        <div className="h-px flex-1" style={{ background: "linear-gradient(90deg, rgba(212,175,55,0.7), transparent)" }} />
                       </div>
                       {event.time && (
                         <p className="font-display text-2xl sm:text-3xl font-light text-dark-teal tracking-tight mb-5">{event.time}</p>
                       )}
-                      <div className="space-y-1 mb-5">
-                        {event.venue && <p className="text-sm font-medium text-dark-teal">{event.venue}</p>}
+                      <div className="space-y-1.5 mb-5">
+                        {event.venue && <p className="text-sm font-semibold text-dark-teal tracking-wide">{event.venue}</p>}
                         {event.address && (
                           <a
                             href={`https://maps.google.com/?q=${encodeURIComponent(event.address)}`}
@@ -834,12 +1132,12 @@ export default function SaveTheDate() {
                       </div>
                       {!isPast && (
                         <div className="mt-5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[8px] tracking-[0.3em] uppercase"
-                          style={{ background: "rgba(139,26,46,0.08)", color: "#8B1A2E", border: "1px solid rgba(139,26,46,0.2)" }}>
+                          style={{ background: "rgba(114,47,55,0.07)", color: "#722F37", border: "1px solid rgba(114,47,55,0.18)" }}>
                           {daysUntil(event.dateISO)}d away
                         </div>
                       )}
                     </div>
-                    <div className="h-1" style={{ background: "linear-gradient(90deg, rgba(200,160,40,0.4), rgba(200,160,40,0.9), rgba(200,160,40,0.4))" }} />
+                    <div className="h-[3px]" style={{ background: "linear-gradient(90deg, rgba(212,175,55,0.3), rgba(212,175,55,1), rgba(212,175,55,0.3))" }} />
                   </div>
                 </motion.div>
               );
@@ -1045,7 +1343,7 @@ export default function SaveTheDate() {
             </button>
           </div>
           <p className="mt-8 text-[9px] tracking-[0.2em] uppercase text-teal-muted flex items-center justify-center gap-1.5">
-            Made with <Heart className="h-3 w-3 text-rose-400 fill-rose-400" /> for their day ·{" "}
+            Made with <Heart className="h-3 w-3 text-floral-crimson fill-current" /> for their day ·{" "}
             <a href="https://rajil.me" target="_blank" rel="noreferrer" className="hover:text-floral-crimson transition-colors underline underline-offset-2">Rajil Vembe</a>
           </p>
         </div>

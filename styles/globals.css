@@ -3,35 +3,43 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Wedding Color Palette - Material Design 3 inspired */
-  --md-primary: oklch(0.45 0.12 165); /* Adjusted to a more vibrant teal-green */
+  /* Wedding Color Palette — Black · White · Burgundy · Gold */
+  --md-primary: oklch(0.35 0.10 10);   /* Burgundy-tinted primary */
   --md-on-primary: oklch(1 0 0);
-  --md-primary-container: oklch(0.92 0.04 165);
-  --md-on-primary-container: oklch(0.25 0.08 165);
-  
-  --md-secondary: oklch(0.55 0.06 140);
+  --md-primary-container: oklch(0.92 0.03 10);
+  --md-on-primary-container: oklch(0.2 0.07 10);
+
+  --md-secondary: oklch(0.50 0.04 30);
   --md-on-secondary: oklch(1 0 0);
-  --md-secondary-container: oklch(0.92 0.03 140);
-  --md-on-secondary-container: oklch(0.3 0.05 140);
-  
-  --md-surface: oklch(0.98 0.01 60);
-  --md-on-surface: oklch(0.2 0.02 165);
-  
-  /* The "Mint" background from the RSVP page */
-  --mint-bg: #c5e0da;
-  --teal-accent: #3d8b7a;
-  --dark-teal: #1d3d37;
-  /* WCAG AA-compliant muted text: 7:1 on #faf9f6, 5.3:1 on mint — passes AA on all app backgrounds */
-  --teal-muted: #3d5c54;
-  --floral-crimson: #8B1A2E;
+  --md-secondary-container: oklch(0.94 0.015 30);
+  --md-on-secondary-container: oklch(0.25 0.04 30);
+
+  --md-surface: oklch(0.99 0.005 60);
+  --md-on-surface: oklch(0.12 0.01 20);
+
+  /* ── Core palette ──────────────────────────────────────────── */
+  /* Dark overlay background (full-screen nav menu) */
+  --mint-bg: #0D0B0B;
+  /* Burgundy — primary interactive / accent color */
+  --teal-accent: #722F37;
+  /* Near-black charcoal — primary text on white */
+  --dark-teal: #141212;
+  /* Charcoal-warm — secondary/muted text (≈10:1 on white, WCAG AAA) */
+  --teal-muted: #4A4040;
+  /* Burgundy accent text (same hue as teal-accent) */
+  --floral-crimson: #722F37;
   --error-color: #e11d48;
+
+  /* ── Gold ornament tokens ──────────────────────────────────── */
+  --gold: #B8920A;
+  --gold-light: #D4AF37;
 
   /* Standard Tailwind variables mapping */
   --background: var(--md-surface);
   --foreground: var(--md-on-surface);
   --primary: var(--teal-accent);
   --primary-foreground: white;
-  --border: oklch(0.9 0.01 165);
+  --border: oklch(0.9 0.008 20);
 }
 
 @theme {
@@ -42,22 +50,22 @@
   --color-border: var(--border);
   --color-input: var(--border);
   --color-ring: var(--primary);
-  
+
   --color-card: var(--background);
   --color-card-foreground: var(--foreground);
-  
+
   --color-popover: var(--background);
   --color-popover-foreground: var(--foreground);
-  
+
   --color-secondary: var(--md-secondary-container);
   --color-secondary-foreground: var(--md-on-secondary-container);
-  
+
   --color-muted: var(--md-secondary-container);
   --color-muted-foreground: var(--md-on-secondary-container);
-  
+
   --color-accent: var(--md-primary-container);
   --color-accent-foreground: var(--md-on-primary-container);
-  
+
   --color-destructive: var(--error-color);
   --color-destructive-foreground: white;
 
@@ -67,10 +75,61 @@
   --color-teal-muted: var(--teal-muted);
   --color-floral-crimson: var(--floral-crimson);
   --color-error: var(--error-color);
-  
+  --color-gold: var(--gold);
+  --color-gold-light: var(--gold-light);
+
   --font-wedding: var(--font-wedding), cursive;
   --font-display: var(--font-display), serif;
   --font-sans: var(--font-sans), sans-serif;
+}
+
+/* ── Gold gradient on a block-level element (no inline-block clipping) ───── */
+/*
+ * Applied to the h1 directly so the gradient box = full column width.
+ * Glyph ink that overflows the character's advance width still sits inside
+ * the wide block, so overflow-x:hidden on the page never clips a letter.
+ */
+.gold-headline {
+  background: linear-gradient(
+    160deg,
+    #9A7808 0%,
+    #D4AF37 35%,
+    #F5E080 55%,
+    #C8A028 78%,
+    #9A7808 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* ── Confetti piece float ─────────────────────────────────────────────────── */
+@keyframes confetti-float {
+  0%, 100% { opacity: 0;    transform: translateY(3px)  rotate(var(--r, 0deg)); }
+  20%       { opacity: 0.9; transform: translateY(0px)   rotate(var(--r, 0deg)); }
+  55%       { opacity: 0.8; transform: translateY(-4px)  rotate(var(--r, 0deg)); }
+  80%       { opacity: 0.6; transform: translateY(-2px)  rotate(var(--r, 0deg)); }
+}
+
+.confetti-piece {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 1px;
+  animation: confetti-float 3.2s ease-in-out infinite;
+}
+
+/* ── Wax seal pulse ───────────────────────────────────────────────────────── */
+@keyframes seal-pulse {
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(114,47,55,0.5)); }
+  50%       { filter: drop-shadow(0 0 18px rgba(184,80,80,0.7)); }
+}
+.seal-glow { animation: seal-pulse 1.4s ease-in-out infinite; }
+
+/* ── Confetti loader drift ────────────────────────────────────────────────── */
+@keyframes loader-drift {
+  0%, 100% { transform: translateY(0px) rotate(var(--r, 0deg)); opacity: 0.5; }
+  50%       { transform: translateY(-8px) rotate(var(--r, 0deg)); opacity: 0.9; }
 }
 
 @layer base {
@@ -96,7 +155,7 @@
     font-style: normal;
     font-weight: 400;
   }
-  
+
   .surface {
     @apply bg-card border border-border;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
