@@ -376,7 +376,6 @@ const incomingEvents: EventItem[] = [
     time: "1:00 PM – 3:00 PM",
     venue: "Unity of the Triangle Church",
     address: "5570 Munford Rd, Raleigh, NC 27612",
-    note: "Pictures will be taken at the reception venue immediately after.",
     description: "1:00 PM – 3:00 PM · Unity of the Triangle Church · 5570 Munford Rd, Raleigh, NC 27612",
     accentBg: "bg-rose-400",
     accentBorder: "border-rose-400",
@@ -424,8 +423,8 @@ const seats: Seat[] = [
 
 const timelineItems: TimelineItem[] = [
   { id: "meet", dateLabel: "2015", title: "A friendship begins", description: "Their journey began as a simple friendship — but it was truly the answer to a whispered prayer from both Grace and Noelvie.", image: "/images/story-1.jpg", objectPosition: "50% 20%" },
-  { id: "first-date", dateLabel: "First Date", title: "The Chinese buffet", description: "On their first date, while driving to the restaurant, Grace gently wiped Noelvie's nose with his bare hands when he realized there were no tissues in the car. That simple yet caring gesture instantly melted Noelvie's heart and revealed the warmth and kindness that defined Grace's character.", image: "/images/story-2.jpg" },
-  { id: "proposal", dateLabel: "2017", title: "The engagement", description: "After two beautiful years of growing together, Grace asked Noelvie to be his fiancée at a traditional engagement filled with family and friends.", image: "/images/story-3.jpg" },
+  { id: "first-date", dateLabel: "First Date", title: "First Date", description: "At first sight, Grace fell for Noelvie’s loving spirit and beautiful hair. In turn, Noelvie fell for Grace’s kind heart and beautiful eyes.", image: "/images/story-2.jpg" },
+  { id: "proposal", dateLabel: "2017", title: "The engagement", description: "A few years later, Grace asked Noelvie to be his fiancée during a beautiful traditional engagement surrounded by loved ones.", image: "/images/story-3.jpg" },
   { id: "wedding", dateLabel: "2026", title: "Wedding day", description: "Now, after years of knowing, growing, laughing, praying, and loving deeply — they are ready to celebrate with family and friends.", image: "/images/couple-hero-3.jpg" },
 ];
 
@@ -572,10 +571,30 @@ export default function SaveTheDate() {
   }
 
   function handleCopyLink() {
-    navigator.clipboard.writeText(window.location.href).then(
-      () => toast({ title: "Link copied", description: "Share it with your guests to RSVP." }),
-      () => toast({ title: "Couldn't copy", description: "Please copy the URL from the address bar.", variant: "destructive" })
-    );
+    const url = window.location.href;
+    const onSuccess = () => toast({ title: "Link copied", description: "Share it with your guests to RSVP." });
+    const onError = () => toast({ title: "Couldn't copy", description: "Please copy the URL from the address bar.", variant: "destructive" });
+
+    // navigator.clipboard is only available in secure contexts (HTTPS/localhost).
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(url).then(onSuccess, onError);
+      return;
+    }
+
+    // Fallback for insecure contexts / older browsers.
+    try {
+      const textarea = document.createElement("textarea");
+      textarea.value = url;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      const ok = document.execCommand("copy");
+      document.body.removeChild(textarea);
+      ok ? onSuccess() : onError();
+    } catch {
+      onError();
+    }
   }
 
   function openDirections(address: string) {
@@ -815,7 +834,7 @@ export default function SaveTheDate() {
               {/* Center — photo */}
               <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9 }}
                 className="flex justify-center">
-                <div className="relative w-[23rem] xl:w-[27rem] rotate-[1.5deg]
+                <div className="relative w-[29rem] xl:w-[35rem] rotate-[1.5deg]
                                 shadow-[0_40px_80px_-12px_rgba(0,0,0,0.45)]
                                 overflow-hidden rounded-2xl
                                 ring-1 ring-dark-teal/10">
@@ -878,7 +897,7 @@ export default function SaveTheDate() {
               {/* 2. Photo */}
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.15 }}
                 className="flex justify-center py-8 border-b border-dark-teal/8">
-                <div className="relative w-[270px] sm:w-[320px] overflow-hidden rounded-2xl
+                <div className="relative w-[350px] sm:w-[420px] overflow-hidden rounded-2xl
                                 shadow-[0_24px_56px_-12px_rgba(0,0,0,0.3)]
                                 ring-1 ring-dark-teal/10">
                   <CoupleImg src="/images/couple-hero-2.jpg" alt="Grace &amp; Noelvie"
@@ -968,7 +987,7 @@ export default function SaveTheDate() {
       <section id="story" className="mx-auto max-w-4xl px-5 sm:px-10 py-16 sm:py-24">
         <div className="text-center mb-12 sm:mb-16">
           <p className="text-[8px] tracking-[0.4em] uppercase text-teal-muted mb-3">About us</p>
-          <h2 className="font-display text-3xl sm:text-5xl text-dark-teal font-light tracking-tight">Our Story</h2>
+          <h2 className="font-display text-3xl sm:text-5xl text-floral-crimson font-light tracking-tight">Our Story</h2>
           <div className="mt-4 h-px w-12 bg-dark-teal/15 mx-auto" />
         </div>
 
@@ -1007,7 +1026,7 @@ export default function SaveTheDate() {
             <div className="flex items-center justify-center gap-4 mb-6">
               <div className="h-px w-10 sm:w-24" style={{ background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.85))" }} />
               <span className="text-[8px] tracking-[0.6em] uppercase text-white/70">
-                The Wedding Programme
+                The Wedding Program
               </span>
               <div className="h-px w-10 sm:w-24" style={{ background: "linear-gradient(90deg, rgba(212,175,55,0.85), transparent)" }} />
             </div>
@@ -1213,7 +1232,7 @@ export default function SaveTheDate() {
                   <p className="text-[8px] tracking-[0.4em] uppercase text-teal-muted mb-1">Confirm attendance</p>
                   <h2 className="font-display text-3xl font-light text-dark-teal tracking-tight">RSVP</h2>
                 </div>
-                <span className="text-[9px] tracking-[0.2em] uppercase text-floral-crimson border border-teal-accent/30 px-3 py-1.5">
+                <span className="hidden text-[9px] tracking-[0.2em] uppercase text-floral-crimson border border-teal-accent/30 px-3 py-1.5">
                   {rsvps.filter((r) => r.status === "yes").length} Attending
                 </span>
               </div>
@@ -1234,6 +1253,7 @@ export default function SaveTheDate() {
                       <p className="text-base font-medium text-floral-crimson">{formatSeat(assignedSeatForName)}</p>
                     </div>
                   )}
+                  <p className="mt-5 text-sm font-medium text-floral-crimson">Please Don&apos;t be late!</p>
                 </div>
               ) : (
                 <div className="space-y-4">

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { DM_Sans, Fraunces, Great_Vibes } from "next/font/google";
 import { Providers } from "./providers";
 import { OfflineBanner } from "@/components/OfflineBanner";
@@ -25,6 +25,7 @@ const greatVibes = Great_Vibes({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
   title: "Grace & Noelvie — Our Wedding",
   description: "Join us to celebrate the wedding of Grace & Noelvie on August 22, 2026. RSVP, find your seat, and explore our story.",
   openGraph: {
@@ -44,6 +45,9 @@ export const metadata: Metadata = {
     shortcut: "/favicon.svg",
     apple: "/favicon.svg",
   },
+};
+
+export const viewport: Viewport = {
   themeColor: "#722F37",
 };
 
