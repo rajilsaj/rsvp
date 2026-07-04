@@ -1,25 +1,89 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, Mail, Phone, Users, X } from "lucide-react";
+import { Check, Mail, Phone, Plus, Users, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import type { Guest } from "@/lib/google-sheets";
 
 type Filter = "all" | "confirmed" | "declined" | "pending";
+
+type NewGuest = {
+  names: string;
+  phone: string;
+  email: string;
+  attending: "" | "yes" | "no";
+  plusOnes: number;
+};
+
+const emptyGuest: NewGuest = {
+  names: "",
+  phone: "",
+  email: "",
+  attending: "",
+  plusOnes: 0,
+};
 
 export default function GuestsPage() {
   const [guests, setGuests] = useState<Guest[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>("all");
 
-  useEffect(() => {
-    fetch("/api/guests")
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState<NewGuest>(emptyGuest);
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+
+  function loadGuests() {
+    return fetch("/api/guests")
       .then((r) => r.json())
-      .then(setGuests)
-      .finally(() => setLoading(false));
+      .then(setGuests);
+  }
+
+  useEffect(() => {
+    loadGuests().finally(() => setLoading(false));
   }, []);
+
+  async function handleAddGuest(e: React.FormEvent) {
+    e.preventDefault();
+    setFormError(null);
+
+    if (!form.names.trim()) {
+      setFormError("Name is required.");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/guests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...form,
+          names: form.names.trim(),
+          phone: form.phone.trim(),
+          email: form.email.trim(),
+          plusOnes: Number(form.plusOnes) || 0,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setFormError(data?.message ?? "Failed to add guest.");
+        return;
+      }
+
+      await loadGuests();
+      setForm(emptyGuest);
+      setShowForm(false);
+    } catch {
+      setFormError("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   const stats = {
     total: guests.length,
@@ -45,10 +109,105 @@ export default function GuestsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-display text-3xl mb-1">Guests</h1>
-        <p className="text-muted-foreground text-sm">All guest RSVPs and their status</p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+        <div>
+          <h1 className="font-display text-2xl sm:text-3xl mb-1">Guests</h1>
+          <p className="text-muted-foreground text-sm">All guest RSVPs and their status</p>
+        </div>
+        <Button
+          className="rounded-full shrink-0 w-full sm:w-auto"
+          onClick={() => {
+            setShowForm((s) => !s);
+            setFormError(null);
+          }}
+        >
+          <Plus className="w-4 h-4 mr-1" />
+          Add guest
+        </Button>
       </div>
+
+      {showForm && (
+        <Card className="surface rounded-2xl p-5">
+          <form onSubmit={handleAddGuest} className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">Name(s) *</label>
+                <Input
+                  value={form.names}
+                  onChange={(e) => setForm({ ...form, names: e.target.value })}
+                  placeholder="e.g. John & Jane Doe"
+                  autoFocus
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">Phone</label>
+                <Input
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  placeholder="Phone number"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">Email</label>
+                <Input
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  placeholder="email@example.com"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">Attending</label>
+                <select
+                  value={form.attending}
+                  onChange={(e) =>
+                    setForm({ ...form, attending: e.target.value as NewGuest["attending"] })
+                  }
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                >
+                  <option value="">Pending</option>
+                  <option value="yes">Yes</option>
+                  <option value="no">No</option>
+                </select>
+              </div>
+              {form.attending === "yes" && (
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium">+Ones</label>
+                  <Input
+                    type="number"
+                    min={0}
+                    max={10}
+                    value={form.plusOnes}
+                    onChange={(e) =>
+                      setForm({ ...form, plusOnes: Number(e.target.value) })
+                    }
+                  />
+                </div>
+              )}
+            </div>
+
+            {formError && <p className="text-sm text-destructive">{formError}</p>}
+
+            <div className="flex gap-2">
+              <Button type="submit" className="rounded-full" disabled={submitting}>
+                {submitting ? "Adding…" : "Add guest"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-full"
+                onClick={() => {
+                  setShowForm(false);
+                  setForm(emptyGuest);
+                  setFormError(null);
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </Card>
+      )}
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {(
@@ -72,7 +231,7 @@ export default function GuestsPage() {
             key={f}
             variant={filter === f ? "default" : "outline"}
             size="sm"
-            className="rounded-full capitalize"
+            className="rounded-full capitalize flex-1 sm:flex-none min-w-[calc(50%-0.25rem)] sm:min-w-0"
             onClick={() => setFilter(f)}
           >
             {f}
@@ -80,7 +239,82 @@ export default function GuestsPage() {
         ))}
       </div>
 
-      <Card className="surface rounded-2xl overflow-hidden">
+      {/* Mobile: stacked cards */}
+      <div className="space-y-3 md:hidden">
+        {filtered.map((g, i) => (
+          <Card key={i} className="surface rounded-2xl p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="font-medium break-words">{g.names}</p>
+                {g.optOut && (
+                  <Badge variant="destructive" className="text-xs mt-1 rounded-full">
+                    Opted out
+                  </Badge>
+                )}
+              </div>
+              {g.attending === "yes" ? (
+                <Badge className="rounded-full text-xs shrink-0">Yes</Badge>
+              ) : g.attending === "no" ? (
+                <Badge variant="destructive" className="rounded-full text-xs shrink-0">
+                  No
+                </Badge>
+              ) : (
+                <Badge variant="secondary" className="rounded-full text-xs shrink-0">
+                  Pending
+                </Badge>
+              )}
+            </div>
+
+            {(g.phone || g.email) && (
+              <div className="mt-3 space-y-1 text-muted-foreground">
+                {g.phone && (
+                  <p className="flex items-center gap-1.5 text-xs break-all">
+                    <Phone className="w-3 h-3 shrink-0" />
+                    {g.phone}
+                  </p>
+                )}
+                {g.email && (
+                  <p className="flex items-center gap-1.5 text-xs break-all">
+                    <Mail className="w-3 h-3 shrink-0" />
+                    {g.email}
+                  </p>
+                )}
+              </div>
+            )}
+
+            <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <span className="font-medium text-foreground">+Ones:</span>
+                {g.attending === "yes" ? (
+                  g.plusOnes > 0 ? (
+                    <span className="flex items-center gap-1">
+                      <Check className="w-3 h-3 text-primary" />
+                      {g.plusOnes}
+                    </span>
+                  ) : (
+                    "0"
+                  )
+                ) : (
+                  "—"
+                )}
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="font-medium text-foreground">Seating:</span>
+                {g.table ? `${g.table} / ${g.seats}` : "—"}
+              </span>
+            </div>
+          </Card>
+        ))}
+        {filtered.length === 0 && (
+          <Card className="surface rounded-2xl p-10 text-center text-muted-foreground">
+            <Users className="w-8 h-8 mx-auto mb-2 opacity-40" />
+            No guests found.
+          </Card>
+        )}
+      </div>
+
+      {/* Desktop: table */}
+      <Card className="surface rounded-2xl overflow-hidden hidden md:block">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -160,6 +394,21 @@ export default function GuestsPage() {
           </table>
         </div>
       </Card>
+
+      {/* Floating add button — stays reachable while scrolling on mobile */}
+      {!showForm && (
+        <Button
+          className="sm:hidden fixed bottom-5 right-5 z-20 rounded-full h-14 w-14 p-0 shadow-lg"
+          aria-label="Add guest"
+          onClick={() => {
+            setShowForm(true);
+            setFormError(null);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+        >
+          <Plus className="w-6 h-6" />
+        </Button>
+      )}
     </div>
   );
 }
