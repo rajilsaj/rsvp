@@ -89,7 +89,9 @@ export default function GuestsPage() {
     total: guests.length,
     confirmed: guests.filter((g) => g.attending === "yes").length,
     declined: guests.filter((g) => g.attending === "no").length,
-    pending: guests.filter((g) => g.attending === "").length,
+    finalGuests: guests
+      .filter((g) => g.attending === "yes")
+      .reduce((sum, g) => sum + 1 + (Number(g.plusOnes) || 0), 0),
   };
 
   const filtered = guests.filter((g) => {
@@ -215,7 +217,7 @@ export default function GuestsPage() {
             { label: "Total", value: stats.total },
             { label: "Confirmed", value: stats.confirmed },
             { label: "Declined", value: stats.declined },
-            { label: "Pending", value: stats.pending },
+            { label: "Final Number Guests + Ones", value: stats.finalGuests },
           ] as const
         ).map((s) => (
           <Card key={s.label} className="surface rounded-2xl p-4 text-center">
