@@ -251,6 +251,9 @@ export async function appendUpdate(update: Omit<Update, "id">): Promise<void> {
  * 8: OS
  * 9: Path
  * 10: UserAgent
+ * 11: SessionId
+ * 12: CountryCode
+ * 13: Name (registered guest name, if known)
  */
 const VISITOR_COL = {
   ID: 0,
@@ -264,11 +267,14 @@ const VISITOR_COL = {
   OS: 8,
   PATH: 9,
   USER_AGENT: 10,
+  SESSION_ID: 11,
+  COUNTRY_CODE: 12,
+  NAME: 13,
 } as const;
 
 const VISITOR_HEADERS = [
   "Id", "Timestamp", "IP", "Country", "Region", "City",
-  "Device", "Browser", "OS", "Path", "UserAgent",
+  "Device", "Browser", "OS", "Path", "UserAgent", "SessionId", "CountryCode", "Name",
 ];
 
 export type Visitor = {
@@ -283,6 +289,9 @@ export type Visitor = {
   os: string;
   path: string;
   userAgent: string;
+  sessionId: string;
+  countryCode: string;
+  name: string;
 };
 
 let visitorsSheetReady = false;
@@ -301,13 +310,14 @@ async function ensureVisitorsSheet(): Promise<void> {
         requests: [{ addSheet: { properties: { title: VISITORS_SHEET } } }],
       },
     });
-    await api.spreadsheets.values.update({
-      spreadsheetId: spreadsheetId(),
-      range: `${VISITORS_SHEET}!A1:K1`,
-      valueInputOption: "USER_ENTERED",
-      requestBody: { values: [VISITOR_HEADERS] },
-    });
   }
+  // Idempotent header write — also backfills headers for newly added columns
+  await api.spreadsheets.values.update({
+    spreadsheetId: spreadsheetId(),
+    range: `${VISITORS_SHEET}!A1:N1`,
+    valueInputOption: "USER_ENTERED",
+    requestBody: { values: [VISITOR_HEADERS] },
+  });
   visitorsSheetReady = true;
 }
 
@@ -316,7 +326,7 @@ export async function appendVisitor(visitor: Omit<Visitor, "id">): Promise<void>
   const id = randomUUID();
   await sheetsApi().spreadsheets.values.append({
     spreadsheetId: spreadsheetId(),
-    range: `${VISITORS_SHEET}!A:K`,
+    range: `${VISITORS_SHEET}!A:N`,
     valueInputOption: "USER_ENTERED",
     requestBody: {
       values: [[
@@ -331,6 +341,9 @@ export async function appendVisitor(visitor: Omit<Visitor, "id">): Promise<void>
         visitor.os,
         visitor.path,
         visitor.userAgent,
+        visitor.sessionId,
+        visitor.countryCode,
+        visitor.name,
       ]],
     },
   });
@@ -340,7 +353,7 @@ export async function getVisitors(): Promise<Visitor[]> {
   await ensureVisitorsSheet();
   const res = await sheetsApi().spreadsheets.values.get({
     spreadsheetId: spreadsheetId(),
-    range: `${VISITORS_SHEET}!A2:K`,
+    range: `${VISITORS_SHEET}!A2:N`,
   });
   const rows = (res.data.values ?? []) as string[][];
   return rows.map((row) => ({
@@ -355,5 +368,8 @@ export async function getVisitors(): Promise<Visitor[]> {
     os: row[VISITOR_COL.OS] ?? "",
     path: row[VISITOR_COL.PATH] ?? "",
     userAgent: row[VISITOR_COL.USER_AGENT] ?? "",
+    sessionId: row[VISITOR_COL.SESSION_ID] ?? "",
+    countryCode: row[VISITOR_COL.COUNTRY_CODE] ?? "",
+    name: row[VISITOR_COL.NAME] ?? "",
   }));
 }

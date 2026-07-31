@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AdminSignOut } from "@/components/AdminSignOut";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -34,10 +35,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               Visitors
             </Link>
           </div>
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-4">
             <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               View site →
             </Link>
+            <AdminSignOut />
           </div>
         </div>
       </nav>

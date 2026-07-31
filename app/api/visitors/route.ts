@@ -17,7 +17,7 @@ function getIp(request: NextRequest): string {
   );
 }
 
-type Geo = { country: string; region: string; city: string };
+type Geo = { country: string; region: string; city: string; countryCode: string };
 
 // Netlify injects an x-nf-geo header (JSON, sometimes base64-encoded).
 function geoFromNetlify(request: NextRequest): Geo | null {
@@ -31,8 +31,9 @@ function geoFromNetlify(request: NextRequest): Geo | null {
     const country = geo.country?.name ?? geo.country?.code ?? "";
     const region = geo.subdivision?.name ?? geo.subdivision?.code ?? "";
     const city = geo.city ?? "";
+    const countryCode = geo.country?.code ?? "";
     if (!country && !region && !city) return null;
-    return { country, region, city };
+    return { country, region, city, countryCode };
   } catch {
     return null;
   }
@@ -58,6 +59,7 @@ async function geoFromIpLookup(ip: string): Promise<Geo | null> {
       country: data.country ?? "",
       region: data.region ?? "",
       city: data.city ?? "",
+      countryCode: data.country_code ?? "",
     };
   } catch {
     return null;
@@ -94,12 +96,25 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
   const path =
     typeof body?.path === "string" ? body.path.slice(0, 200) : "";
+  const sessionId =
+    typeof body?.sessionId === "string" ? body.sessionId.slice(0, 64) : "";
 
   const ua = request.headers.get("user-agent") ?? "";
   const ip = getIp(request);
+
+  // Registered guests carry the wedding_rsvp_name cookie (set by the RSVP flow)
+  let name = "";
+  const rawName = request.cookies.get("wedding_rsvp_name")?.value ?? "";
+  try {
+    name = decodeURIComponent(rawName).slice(0, 120);
+  } catch {
+    name = rawName.slice(0, 120);
+  }
+
   const geo =
     geoFromNetlify(request) ??
-    (await geoFromIpLookup(ip)) ?? { country: "", region: "", city: "" };
+    (await geoFromIpLookup(ip)) ??
+    { country: "", region: "", city: "", countryCode: "" };
   const { device, browser, os } = parseUserAgent(ua);
 
   await appendVisitor({
@@ -113,6 +128,9 @@ export async function POST(request: NextRequest) {
     os,
     path,
     userAgent: ua.slice(0, 300),
+    sessionId,
+    countryCode: geo.countryCode,
+    name,
   });
 
   return NextResponse.json({ ok: true }, { status: 201 });
