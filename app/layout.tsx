@@ -3,6 +3,7 @@ import { DM_Sans, Fraunces, Great_Vibes } from "next/font/google";
 import { Providers } from "./providers";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { MusicProvider } from "@/components/MusicProvider";
+import { VisitorTracker } from "@/components/VisitorTracker";
 import "@/styles/globals.css";
 
 const dmSans = DM_Sans({
@@ -62,6 +63,7 @@ export default function RootLayout({
         <Providers>
           <MusicProvider>
             {children}
+            <VisitorTracker />
             <OfflineBanner />
           </MusicProvider>
         </Providers>

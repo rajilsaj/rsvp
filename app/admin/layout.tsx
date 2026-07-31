@@ -27,6 +27,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             >
               Updates
             </Link>
+            <Link
+              href="/admin/visitors"
+              className="px-3 py-1.5 rounded-full text-sm font-medium hover:bg-muted transition-colors"
+            >
+              Visitors
+            </Link>
           </div>
           <div className="ml-auto">
             <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">

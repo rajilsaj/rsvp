@@ -3,6 +3,7 @@ import { randomUUID } from "crypto";
 
 const GUESTS_SHEET = "Guests";
 const UPDATES_SHEET = "Updates";
+const VISITORS_SHEET = "Visitors";
 
 /**
  * Columns in 'Guests' sheet:
@@ -235,4 +236,124 @@ export async function appendUpdate(update: Omit<Update, "id">): Promise<void> {
       ]],
     },
   });
+}
+
+/**
+ * Columns in 'Visitors' sheet:
+ * 0: Id
+ * 1: Timestamp
+ * 2: IP
+ * 3: Country
+ * 4: Region
+ * 5: City
+ * 6: Device
+ * 7: Browser
+ * 8: OS
+ * 9: Path
+ * 10: UserAgent
+ */
+const VISITOR_COL = {
+  ID: 0,
+  TIMESTAMP: 1,
+  IP: 2,
+  COUNTRY: 3,
+  REGION: 4,
+  CITY: 5,
+  DEVICE: 6,
+  BROWSER: 7,
+  OS: 8,
+  PATH: 9,
+  USER_AGENT: 10,
+} as const;
+
+const VISITOR_HEADERS = [
+  "Id", "Timestamp", "IP", "Country", "Region", "City",
+  "Device", "Browser", "OS", "Path", "UserAgent",
+];
+
+export type Visitor = {
+  id: string;
+  timestamp: string;
+  ip: string;
+  country: string;
+  region: string;
+  city: string;
+  device: string;
+  browser: string;
+  os: string;
+  path: string;
+  userAgent: string;
+};
+
+let visitorsSheetReady = false;
+
+async function ensureVisitorsSheet(): Promise<void> {
+  if (visitorsSheetReady) return;
+  const api = sheetsApi();
+  const meta = await api.spreadsheets.get({ spreadsheetId: spreadsheetId() });
+  const exists = meta.data.sheets?.some(
+    (s) => s.properties?.title === VISITORS_SHEET
+  );
+  if (!exists) {
+    await api.spreadsheets.batchUpdate({
+      spreadsheetId: spreadsheetId(),
+      requestBody: {
+        requests: [{ addSheet: { properties: { title: VISITORS_SHEET } } }],
+      },
+    });
+    await api.spreadsheets.values.update({
+      spreadsheetId: spreadsheetId(),
+      range: `${VISITORS_SHEET}!A1:K1`,
+      valueInputOption: "USER_ENTERED",
+      requestBody: { values: [VISITOR_HEADERS] },
+    });
+  }
+  visitorsSheetReady = true;
+}
+
+export async function appendVisitor(visitor: Omit<Visitor, "id">): Promise<void> {
+  await ensureVisitorsSheet();
+  const id = randomUUID();
+  await sheetsApi().spreadsheets.values.append({
+    spreadsheetId: spreadsheetId(),
+    range: `${VISITORS_SHEET}!A:K`,
+    valueInputOption: "USER_ENTERED",
+    requestBody: {
+      values: [[
+        id,
+        visitor.timestamp,
+        visitor.ip,
+        visitor.country,
+        visitor.region,
+        visitor.city,
+        visitor.device,
+        visitor.browser,
+        visitor.os,
+        visitor.path,
+        visitor.userAgent,
+      ]],
+    },
+  });
+}
+
+export async function getVisitors(): Promise<Visitor[]> {
+  await ensureVisitorsSheet();
+  const res = await sheetsApi().spreadsheets.values.get({
+    spreadsheetId: spreadsheetId(),
+    range: `${VISITORS_SHEET}!A2:K`,
+  });
+  const rows = (res.data.values ?? []) as string[][];
+  return rows.map((row) => ({
+    id: row[VISITOR_COL.ID] ?? "",
+    timestamp: row[VISITOR_COL.TIMESTAMP] ?? "",
+    ip: row[VISITOR_COL.IP] ?? "",
+    country: row[VISITOR_COL.COUNTRY] ?? "",
+    region: row[VISITOR_COL.REGION] ?? "",
+    city: row[VISITOR_COL.CITY] ?? "",
+    device: row[VISITOR_COL.DEVICE] ?? "",
+    browser: row[VISITOR_COL.BROWSER] ?? "",
+    os: row[VISITOR_COL.OS] ?? "",
+    path: row[VISITOR_COL.PATH] ?? "",
+    userAgent: row[VISITOR_COL.USER_AGENT] ?? "",
+  }));
 }
