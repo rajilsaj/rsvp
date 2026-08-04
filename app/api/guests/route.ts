@@ -1,5 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { appendGuestRsvp, findGuestByName, getGuests } from "@/lib/google-sheets";
+import {
+  appendGuestRsvp,
+  deleteGuestRow,
+  findGuestById,
+  findGuestByName,
+  getGuests,
+  updateGuestPlusOnes,
+} from "@/lib/google-sheets";
 import { z } from "zod";
 
 export async function GET() {
@@ -41,4 +48,45 @@ export async function POST(request: NextRequest) {
   });
 
   return NextResponse.json(guest, { status: 201 });
+}
+
+const deleteGuestSchema = z.object({
+  id: z.string().min(1),
+});
+
+export async function DELETE(request: NextRequest) {
+  const body = await request.json().catch(() => null);
+  const parsed = deleteGuestSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ message: "Invalid delete request" }, { status: 400 });
+  }
+
+  const guest = await findGuestById(parsed.data.id);
+  if (!guest) {
+    return NextResponse.json({ message: "Guest not found" }, { status: 404 });
+  }
+
+  await deleteGuestRow(guest.row);
+  return NextResponse.json({ success: true });
+}
+
+const patchGuestSchema = z.object({
+  id: z.string().min(1),
+  plusOnes: z.number().int().min(0).max(10),
+});
+
+export async function PATCH(request: NextRequest) {
+  const body = await request.json().catch(() => null);
+  const parsed = patchGuestSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ message: "Invalid update request" }, { status: 400 });
+  }
+
+  const guest = await findGuestById(parsed.data.id);
+  if (!guest) {
+    return NextResponse.json({ message: "Guest not found" }, { status: 404 });
+  }
+
+  await updateGuestPlusOnes(guest.row, parsed.data.plusOnes);
+  return NextResponse.json({ success: true });
 }

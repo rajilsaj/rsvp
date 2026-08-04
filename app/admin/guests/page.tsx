@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, Mail, Phone, Plus, Users, X } from "lucide-react";
+import { Check, Mail, Minus, Phone, Plus, Users, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -35,6 +35,7 @@ export default function GuestsPage() {
   const [form, setForm] = useState<NewGuest>(emptyGuest);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
 
   function loadGuests() {
     return fetch("/api/guests")
@@ -82,6 +83,36 @@ export default function GuestsPage() {
       setFormError("Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function handleDeleteGuest(g: Guest) {
+    if (!window.confirm(`Remove ${g.names} from the guest list?`)) return;
+    setBusyId(g.id);
+    try {
+      const res = await fetch("/api/guests", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: g.id }),
+      });
+      if (res.ok) await loadGuests();
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function handleRemovePlusOne(g: Guest) {
+    if (g.plusOnes <= 0) return;
+    setBusyId(g.id);
+    try {
+      const res = await fetch("/api/guests", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: g.id, plusOnes: g.plusOnes - 1 }),
+      });
+      if (res.ok) await loadGuests();
+    } finally {
+      setBusyId(null);
     }
   }
 
@@ -254,17 +285,29 @@ export default function GuestsPage() {
                   </Badge>
                 )}
               </div>
-              {g.attending === "yes" ? (
-                <Badge className="rounded-full text-xs shrink-0">Yes</Badge>
-              ) : g.attending === "no" ? (
-                <Badge variant="destructive" className="rounded-full text-xs shrink-0">
-                  No
-                </Badge>
-              ) : (
-                <Badge variant="secondary" className="rounded-full text-xs shrink-0">
-                  Pending
-                </Badge>
-              )}
+              <div className="flex items-center gap-2 shrink-0">
+                {g.attending === "yes" ? (
+                  <Badge className="rounded-full text-xs">Yes</Badge>
+                ) : g.attending === "no" ? (
+                  <Badge variant="destructive" className="rounded-full text-xs">
+                    No
+                  </Badge>
+                ) : (
+                  <Badge variant="secondary" className="rounded-full text-xs">
+                    Pending
+                  </Badge>
+                )}
+                <button
+                  type="button"
+                  aria-label={`Remove ${g.names}`}
+                  title="Remove guest"
+                  disabled={busyId === g.id}
+                  onClick={() => handleDeleteGuest(g)}
+                  className="flex h-6 w-6 items-center justify-center rounded-full border border-destructive/50 text-destructive transition-colors hover:bg-destructive hover:text-white disabled:opacity-50"
+                >
+                  <Minus className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
 
             {(g.phone || g.email) && (
@@ -289,9 +332,19 @@ export default function GuestsPage() {
                 <span className="font-medium text-foreground">+Ones:</span>
                 {g.attending === "yes" ? (
                   g.plusOnes > 0 ? (
-                    <span className="flex items-center gap-1">
+                    <span className="flex items-center gap-1.5">
                       <Check className="w-3 h-3 text-primary" />
                       {g.plusOnes}
+                      <button
+                        type="button"
+                        aria-label={`Remove one +1 from ${g.names}`}
+                        title="Remove one +1"
+                        disabled={busyId === g.id}
+                        onClick={() => handleRemovePlusOne(g)}
+                        className="flex h-5 w-5 items-center justify-center rounded-full border border-muted-foreground/40 text-muted-foreground transition-colors hover:border-destructive hover:bg-destructive hover:text-white disabled:opacity-50"
+                      >
+                        <Minus className="w-3 h-3" />
+                      </button>
                     </span>
                   ) : (
                     "0"
@@ -326,6 +379,9 @@ export default function GuestsPage() {
                 <th className="text-center p-4 font-medium text-muted-foreground">Attending</th>
                 <th className="text-center p-4 font-medium text-muted-foreground">+Ones</th>
                 <th className="text-left p-4 font-medium text-muted-foreground">Seating</th>
+                <th className="p-4">
+                  <span className="sr-only">Actions</span>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -370,9 +426,19 @@ export default function GuestsPage() {
                   <td className="p-4 text-center text-muted-foreground">
                     {g.attending === "yes" ? (
                       g.plusOnes > 0 ? (
-                        <span className="flex items-center justify-center gap-1">
+                        <span className="flex items-center justify-center gap-1.5">
                           <Check className="w-3 h-3 text-primary" />
                           {g.plusOnes}
+                          <button
+                            type="button"
+                            aria-label={`Remove one +1 from ${g.names}`}
+                            title="Remove one +1"
+                            disabled={busyId === g.id}
+                            onClick={() => handleRemovePlusOne(g)}
+                            className="flex h-5 w-5 items-center justify-center rounded-full border border-muted-foreground/40 text-muted-foreground transition-colors hover:border-destructive hover:bg-destructive hover:text-white disabled:opacity-50"
+                          >
+                            <Minus className="w-3 h-3" />
+                          </button>
                         </span>
                       ) : (
                         <X className="w-4 h-4 text-muted-foreground mx-auto" />
@@ -382,11 +448,23 @@ export default function GuestsPage() {
                   <td className="p-4 text-muted-foreground text-xs">
                     {g.table ? `${g.table} / ${g.seats}` : "—"}
                   </td>
+                  <td className="p-4 text-center">
+                    <button
+                      type="button"
+                      aria-label={`Remove ${g.names}`}
+                      title="Remove guest"
+                      disabled={busyId === g.id}
+                      onClick={() => handleDeleteGuest(g)}
+                      className="mx-auto flex h-6 w-6 items-center justify-center rounded-full border border-destructive/50 text-destructive transition-colors hover:bg-destructive hover:text-white disabled:opacity-50"
+                    >
+                      <Minus className="w-3.5 h-3.5" />
+                    </button>
+                  </td>
                 </tr>
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="p-10 text-center text-muted-foreground">
+                  <td colSpan={6} className="p-10 text-center text-muted-foreground">
                     <Users className="w-8 h-8 mx-auto mb-2 opacity-40" />
                     No guests found.
                   </td>

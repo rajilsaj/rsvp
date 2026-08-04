@@ -200,6 +200,46 @@ export async function appendGuestRsvp(guest: {
   return guestData;
 }
 
+export async function findGuestById(id: string): Promise<Guest | null> {
+  const guests = await getGuests();
+  return guests.find((g) => g.id === id) ?? null;
+}
+
+async function getSheetId(title: string): Promise<number> {
+  const meta = await sheetsApi().spreadsheets.get({ spreadsheetId: spreadsheetId() });
+  const sheet = meta.data.sheets?.find((s) => s.properties?.title === title);
+  const sheetId = sheet?.properties?.sheetId;
+  if (sheetId === undefined || sheetId === null) {
+    throw new Error(`Sheet "${title}" not found`);
+  }
+  return sheetId;
+}
+
+export async function deleteGuestRow(row: number): Promise<void> {
+  const sheetId = await getSheetId(GUESTS_SHEET);
+  await sheetsApi().spreadsheets.batchUpdate({
+    spreadsheetId: spreadsheetId(),
+    requestBody: {
+      requests: [
+        {
+          deleteDimension: {
+            range: {
+              sheetId,
+              dimension: "ROWS",
+              startIndex: row - 1,
+              endIndex: row,
+            },
+          },
+        },
+      ],
+    },
+  });
+}
+
+export async function updateGuestPlusOnes(row: number, plusOnes: number): Promise<void> {
+  await updateCellRange(GUESTS_SHEET, row, COL.PLUS_ONES, [String(plusOnes)]);
+}
+
 export async function updateGuestSeating(
   row: number,
   table: string,
