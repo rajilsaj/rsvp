@@ -301,12 +301,11 @@ const FILM_PHOTOS = [
   "/images/couple-rsvp.jpg",
   "/images/story-3.jpg",
   "/images/story-4.jpg",
-  "/images/rsvp-bg.jpg",
 ];
 
 // Rounded sprocket hole, tiled horizontally along the strip edges
 const SPROCKET_TILE = `url("data:image/svg+xml,${encodeURIComponent(
-  '<svg xmlns="http://www.w3.org/2000/svg" width="26" height="12"><rect x="6" y="1" width="14" height="10" rx="2.5" fill="#faf9f6"/></svg>'
+  '<svg xmlns="http://www.w3.org/2000/svg" width="26" height="12"><rect x="6" y="1" width="14" height="10" rx="2.5" fill="#faf9f6" stroke="#7A5C05" stroke-opacity="0.55" stroke-width="1"/></svg>'
 )}")`;
 
 // Photographic grain, tiled across the whole strip
@@ -318,31 +317,17 @@ function FilmStrip() {
   // Two copies of the set → sliding to -50% loops seamlessly (pauses on hover)
   const frames = [...FILM_PHOTOS, ...FILM_PHOTOS];
   return (
-    <div
-      className="relative z-[2] overflow-hidden border-b border-dark-teal/8 py-8 sm:py-12"
-      style={{
-        background:
-          "linear-gradient(120deg, #B8920A 0%, #D9B944 22%, #F0DD9A 44%, #D4AF37 62%, #A87F06 100%)",
-      }}
-      aria-hidden="true"
-    >
-      {/* Sheen sweeping across the gold */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse 60% 120% at 28% 0%, rgba(255,255,255,0.4), transparent 62%), radial-gradient(ellipse 50% 100% at 78% 100%, rgba(114,47,55,0.16), transparent 65%)",
-        }}
-      />
-      {/* Brushed-gold texture */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{ backgroundImage: GRAIN_TILE, opacity: 0.09, mixBlendMode: "overlay" }}
-      />
-
+    <div className="relative z-[2] overflow-hidden py-8 sm:py-12" aria-hidden="true">
       {/* Oblique strip — oversized so it bleeds off both edges */}
       <div className="relative w-[130%] -ml-[15%] rotate-[-2.5deg]">
-        <div className="film-strip relative overflow-hidden bg-[#161211] shadow-[0_22px_48px_-14px_rgba(60,42,4,0.65)] ring-1 ring-black/25">
+        {/* The film itself is golden — holes are punched through to the page */}
+        <div
+          className="film-strip relative overflow-hidden shadow-[0_22px_48px_-14px_rgba(60,42,4,0.55)] ring-1 ring-[#8A6A06]/40"
+          style={{
+            background:
+              "linear-gradient(120deg, #B8920A 0%, #D9B944 22%, #F0DD9A 44%, #D4AF37 62%, #A87F06 100%)",
+          }}
+        >
           <div className="film-track flex w-max">
             {frames.map((src, i) => {
               const n = (i % FILM_PHOTOS.length) + 1;
@@ -393,17 +378,25 @@ function FilmStrip() {
             })}
           </div>
 
+          {/* Sheen sweeping along the golden film */}
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                "radial-gradient(ellipse 55% 140% at 30% 0%, rgba(255,255,255,0.35), transparent 60%), radial-gradient(ellipse 45% 120% at 80% 100%, rgba(114,47,55,0.14), transparent 65%)",
+            }}
+          />
           {/* Film grain */}
           <div
             className="pointer-events-none absolute inset-0"
-            style={{ backgroundImage: GRAIN_TILE, opacity: 0.14, mixBlendMode: "overlay" }}
+            style={{ backgroundImage: GRAIN_TILE, opacity: 0.12, mixBlendMode: "overlay" }}
           />
           {/* Faint vertical scratches */}
           <div
             className="pointer-events-none absolute inset-0"
             style={{
               backgroundImage:
-                "repeating-linear-gradient(90deg, transparent 0px, transparent 233px, rgba(255,255,255,0.05) 233px, rgba(255,255,255,0.05) 234px, transparent 234px, transparent 421px)",
+                "repeating-linear-gradient(90deg, transparent 0px, transparent 233px, rgba(90,60,0,0.10) 233px, rgba(90,60,0,0.10) 234px, transparent 234px, transparent 421px)",
             }}
           />
         </div>
