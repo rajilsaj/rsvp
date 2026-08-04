@@ -319,74 +319,95 @@ function FilmStrip() {
   const frames = [...FILM_PHOTOS, ...FILM_PHOTOS];
   return (
     <div
-      className="film-strip relative z-[2] overflow-hidden border-b border-dark-teal/8 bg-[#161211]"
+      className="relative z-[2] overflow-hidden border-b border-dark-teal/8 py-8 sm:py-12"
+      style={{
+        background:
+          "linear-gradient(120deg, #B8920A 0%, #D9B944 22%, #F0DD9A 44%, #D4AF37 62%, #A87F06 100%)",
+      }}
       aria-hidden="true"
     >
-      <div className="film-track flex w-max">
-        {frames.map((src, i) => {
-          const n = (i % FILM_PHOTOS.length) + 1;
-          return (
-            <div
-              key={i}
-              className="relative w-[156px] sm:w-[208px] shrink-0 py-[19px]"
-              style={{
-                backgroundImage: `${SPROCKET_TILE}, ${SPROCKET_TILE}`,
-                backgroundPosition: "left top 4px, left bottom 4px",
-                backgroundRepeat: "repeat-x, repeat-x",
-              }}
-            >
-              <div className="relative px-[3px]">
-                <img
-                  src={src}
-                  alt=""
-                  loading="lazy"
-                  draggable={false}
-                  className="h-32 sm:h-40 w-full rounded-[2px] object-cover"
-                  style={{ filter: "sepia(0.22) contrast(1.07) saturate(0.9)" }}
-                />
-                {/* Soft vignette on each frame */}
-                <div
-                  className="absolute inset-y-0 inset-x-[3px] rounded-[2px]"
-                  style={{ boxShadow: "inset 0 0 28px rgba(0,0,0,0.42)" }}
-                />
-              </div>
-              {/* Typewriter stamps, like a developed negative */}
-              {n % 3 === 2 ? (
-                <span
-                  className="absolute bottom-[25px] left-[13px] font-mono text-[9px] tracking-[0.25em]"
-                  style={{ color: "rgba(224,138,60,0.85)", textShadow: "0 0 6px rgba(0,0,0,0.65)" }}
-                >
-                  08.22.26
-                </span>
-              ) : (
-                <span
-                  className="absolute bottom-[25px] right-[13px] font-mono text-[8px] tracking-[0.22em]"
-                  style={{ color: "rgba(224,138,60,0.6)", textShadow: "0 0 6px rgba(0,0,0,0.65)" }}
-                >
-                  {String(n).padStart(2, "0")}A
-                </span>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Film grain */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{ backgroundImage: GRAIN_TILE, opacity: 0.14, mixBlendMode: "overlay" }}
-      />
-      {/* Faint vertical scratches */}
+      {/* Sheen sweeping across the gold */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{
-          backgroundImage:
-            "repeating-linear-gradient(90deg, transparent 0px, transparent 233px, rgba(255,255,255,0.05) 233px, rgba(255,255,255,0.05) 234px, transparent 234px, transparent 421px)",
+          background:
+            "radial-gradient(ellipse 60% 120% at 28% 0%, rgba(255,255,255,0.4), transparent 62%), radial-gradient(ellipse 50% 100% at 78% 100%, rgba(114,47,55,0.16), transparent 65%)",
         }}
       />
-      {/* Edge fades so frames slide in and out of the dark */}
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-10 sm:w-16 bg-gradient-to-r from-[#161211] to-transparent" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-10 sm:w-16 bg-gradient-to-l from-[#161211] to-transparent" />
+      {/* Brushed-gold texture */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{ backgroundImage: GRAIN_TILE, opacity: 0.09, mixBlendMode: "overlay" }}
+      />
+
+      {/* Oblique strip — oversized so it bleeds off both edges */}
+      <div className="relative w-[130%] -ml-[15%] rotate-[-2.5deg]">
+        <div className="film-strip relative overflow-hidden bg-[#161211] shadow-[0_22px_48px_-14px_rgba(60,42,4,0.65)] ring-1 ring-black/25">
+          <div className="film-track flex w-max">
+            {frames.map((src, i) => {
+              const n = (i % FILM_PHOTOS.length) + 1;
+              return (
+                <div
+                  key={i}
+                  className="relative w-[130px] sm:w-[156px] shrink-0 py-[19px]"
+                  style={{
+                    backgroundImage: `${SPROCKET_TILE}, ${SPROCKET_TILE}`,
+                    backgroundPosition: "left top 4px, left bottom 4px",
+                    backgroundRepeat: "repeat-x, repeat-x",
+                  }}
+                >
+                  <div className="relative px-[3px]">
+                    {/* Portrait frame + object-contain → the photo is always fully visible */}
+                    <img
+                      src={src}
+                      alt=""
+                      loading="lazy"
+                      draggable={false}
+                      className="h-40 sm:h-48 w-full rounded-[2px] bg-[#0C0A09] object-contain"
+                      style={{ filter: "sepia(0.22) contrast(1.07) saturate(0.9)" }}
+                    />
+                    {/* Soft vignette on each frame */}
+                    <div
+                      className="absolute inset-y-0 inset-x-[3px] rounded-[2px]"
+                      style={{ boxShadow: "inset 0 0 28px rgba(0,0,0,0.42)" }}
+                    />
+                  </div>
+                  {/* Typewriter stamps, like a developed negative */}
+                  {n % 3 === 2 ? (
+                    <span
+                      className="absolute bottom-[25px] left-[13px] font-mono text-[9px] tracking-[0.25em]"
+                      style={{ color: "rgba(224,138,60,0.85)", textShadow: "0 0 6px rgba(0,0,0,0.65)" }}
+                    >
+                      08.22.26
+                    </span>
+                  ) : (
+                    <span
+                      className="absolute bottom-[25px] right-[13px] font-mono text-[8px] tracking-[0.22em]"
+                      style={{ color: "rgba(224,138,60,0.6)", textShadow: "0 0 6px rgba(0,0,0,0.65)" }}
+                    >
+                      {String(n).padStart(2, "0")}A
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Film grain */}
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{ backgroundImage: GRAIN_TILE, opacity: 0.14, mixBlendMode: "overlay" }}
+          />
+          {/* Faint vertical scratches */}
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(90deg, transparent 0px, transparent 233px, rgba(255,255,255,0.05) 233px, rgba(255,255,255,0.05) 234px, transparent 234px, transparent 421px)",
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 }
