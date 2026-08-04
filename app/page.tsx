@@ -325,11 +325,11 @@ function FilmStrip() {
   // Two copies of the set → sliding to -50% loops seamlessly (pauses on hover)
   const frames = [...FILM_PHOTOS, ...FILM_PHOTOS];
   return (
-    <div className="relative z-[2] overflow-hidden py-4 sm:py-6" aria-hidden="true">
+    <div className="relative z-[2] overflow-hidden" aria-hidden="true">
       <div className="relative">
         {/* The film itself is golden — holes are punched through to the page */}
         <div
-          className="film-strip relative overflow-hidden shadow-[0_22px_48px_-14px_rgba(60,42,4,0.55)] ring-1 ring-[#8A6A06]/40"
+          className="film-strip relative overflow-hidden"
           style={{
             background:
               "linear-gradient(120deg, #B8920A 0%, #D9B944 22%, #F0DD9A 44%, #D4AF37 62%, #A87F06 100%)",
