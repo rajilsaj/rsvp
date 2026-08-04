@@ -13,6 +13,17 @@ const photos = [
   { src: "/images/story-4.jpg", alt: "Our story" },
 ];
 
+// The bride portrait leads as the featured tile
+const bachelorettePhotos = [
+  { src: "/images/bachelorette/bachelorette-3.jpg", alt: "Bride to be" },
+  { src: "/images/bachelorette/bachelorette-1.jpg", alt: "The bachelorette" },
+  { src: "/images/bachelorette/bachelorette-2.jpg", alt: "The bachelorette" },
+  { src: "/images/bachelorette/bachelorette-4.jpg", alt: "The bachelorette" },
+  { src: "/images/bachelorette/bachelorette-5.jpg", alt: "The bachelorette" },
+  { src: "/images/bachelorette/bachelorette-6.jpg", alt: "The bachelorette" },
+  { src: "/images/bachelorette/bachelorette-7.jpg", alt: "The bachelorette" },
+];
+
 export default function PhotosPage() {
   return (
     <div className="min-h-[100dvh] bg-[#faf9f6] text-dark-teal">
@@ -59,6 +70,35 @@ export default function PhotosPage() {
             </motion.div>
           ))}
 
+        </div>
+
+        {/* Bachelorette */}
+        <div className="mt-20 sm:mt-24">
+          <div className="text-center mb-10 sm:mb-12">
+            <p className="text-[8px] tracking-[0.4em] uppercase text-teal-muted mb-3">Bride to be</p>
+            <h2 className="font-display text-3xl sm:text-5xl font-light text-floral-crimson tracking-tight">The Bachelorette</h2>
+            <div className="mt-4 h-px w-12 bg-dark-teal/15 mx-auto" />
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+            {bachelorettePhotos.map((photo, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0.15, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.06, duration: 0.5 }}
+                className={`overflow-hidden group ${i === 0 ? "col-span-2 sm:col-span-1 row-span-2" : ""}`}
+              >
+                <img
+                  src={photo.src}
+                  alt={photo.alt}
+                  loading="lazy"
+                  className={`w-full object-cover grayscale hover:grayscale-0 active:grayscale-0 group-hover:scale-[1.04] group-active:scale-[1.04] transition-all duration-700 ${i === 0 ? "h-[360px] sm:h-[500px]" : "h-44 sm:h-56"}`}
+                />
+              </motion.div>
+            ))}
+          </div>
         </div>
 
         {/* Bottom ornament */}

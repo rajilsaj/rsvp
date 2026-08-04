@@ -286,7 +286,14 @@ function FloatingPetals() {
 }
 
 /* ── Old film strip with sliding photos (under the navbar) ───────────────── */
+const BACHELORETTE_PHOTOS = Array.from(
+  { length: 7 },
+  (_, i) => `/images/bachelorette/bachelorette-${i + 1}.jpg`
+);
+
+// Bachelorette photos lead the reel, followed by the couple's photos
 const FILM_PHOTOS = [
+  ...BACHELORETTE_PHOTOS,
   "/images/couple-hero-2.jpg",
   "/images/story-1.jpg",
   "/images/couple-hero-3.jpg",
@@ -302,51 +309,84 @@ const SPROCKET_TILE = `url("data:image/svg+xml,${encodeURIComponent(
   '<svg xmlns="http://www.w3.org/2000/svg" width="26" height="12"><rect x="6" y="1" width="14" height="10" rx="2.5" fill="#faf9f6"/></svg>'
 )}")`;
 
+// Photographic grain, tiled across the whole strip
+const GRAIN_TILE = `url("data:image/svg+xml,${encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/></filter><rect width="140" height="140" filter="url(#n)"/></svg>'
+)}")`;
+
 function FilmStrip() {
-  // Two copies of the set → animating x to -50% loops seamlessly
+  // Two copies of the set → sliding to -50% loops seamlessly (pauses on hover)
   const frames = [...FILM_PHOTOS, ...FILM_PHOTOS];
   return (
     <div
-      className="relative z-[2] overflow-hidden border-b border-dark-teal/8 bg-[#161211]"
+      className="film-strip relative z-[2] overflow-hidden border-b border-dark-teal/8 bg-[#161211]"
       aria-hidden="true"
     >
-      <motion.div
-        className="flex w-max"
-        animate={{ x: ["0%", "-50%"] }}
-        transition={{ duration: 55, ease: "linear", repeat: Infinity }}
-      >
-        {frames.map((src, i) => (
-          <div
-            key={i}
-            className="relative w-[156px] sm:w-[208px] shrink-0 py-[19px]"
-            style={{
-              backgroundImage: `${SPROCKET_TILE}, ${SPROCKET_TILE}`,
-              backgroundPosition: "left top 4px, left bottom 4px",
-              backgroundRepeat: "repeat-x, repeat-x",
-            }}
-          >
-            <div className="px-[3px]">
-              <img
-                src={src}
-                alt=""
-                loading="lazy"
-                draggable={false}
-                className="h-28 sm:h-36 w-full object-cover"
-                style={{ filter: "sepia(0.28) contrast(1.06) saturate(0.85)" }}
-              />
+      <div className="film-track flex w-max">
+        {frames.map((src, i) => {
+          const n = (i % FILM_PHOTOS.length) + 1;
+          return (
+            <div
+              key={i}
+              className="relative w-[156px] sm:w-[208px] shrink-0 py-[19px]"
+              style={{
+                backgroundImage: `${SPROCKET_TILE}, ${SPROCKET_TILE}`,
+                backgroundPosition: "left top 4px, left bottom 4px",
+                backgroundRepeat: "repeat-x, repeat-x",
+              }}
+            >
+              <div className="relative px-[3px]">
+                <img
+                  src={src}
+                  alt=""
+                  loading="lazy"
+                  draggable={false}
+                  className="h-32 sm:h-40 w-full rounded-[2px] object-cover"
+                  style={{ filter: "sepia(0.22) contrast(1.07) saturate(0.9)" }}
+                />
+                {/* Soft vignette on each frame */}
+                <div
+                  className="absolute inset-y-0 inset-x-[3px] rounded-[2px]"
+                  style={{ boxShadow: "inset 0 0 28px rgba(0,0,0,0.42)" }}
+                />
+              </div>
+              {/* Typewriter stamps, like a developed negative */}
+              {n % 3 === 2 ? (
+                <span
+                  className="absolute bottom-[25px] left-[13px] font-mono text-[9px] tracking-[0.25em]"
+                  style={{ color: "rgba(224,138,60,0.85)", textShadow: "0 0 6px rgba(0,0,0,0.65)" }}
+                >
+                  08.22.26
+                </span>
+              ) : (
+                <span
+                  className="absolute bottom-[25px] right-[13px] font-mono text-[8px] tracking-[0.22em]"
+                  style={{ color: "rgba(224,138,60,0.6)", textShadow: "0 0 6px rgba(0,0,0,0.65)" }}
+                >
+                  {String(n).padStart(2, "0")}A
+                </span>
+              )}
             </div>
-            {/* Occasional typewriter date stamp, like a developed negative */}
-            {i % 4 === 1 && (
-              <span
-                className="absolute bottom-[24px] left-[12px] font-mono text-[9px] tracking-[0.25em]"
-                style={{ color: "rgba(224,138,60,0.85)", textShadow: "0 0 6px rgba(0,0,0,0.6)" }}
-              >
-                08.22.26
-              </span>
-            )}
-          </div>
-        ))}
-      </motion.div>
+          );
+        })}
+      </div>
+
+      {/* Film grain */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{ backgroundImage: GRAIN_TILE, opacity: 0.14, mixBlendMode: "overlay" }}
+      />
+      {/* Faint vertical scratches */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          backgroundImage:
+            "repeating-linear-gradient(90deg, transparent 0px, transparent 233px, rgba(255,255,255,0.05) 233px, rgba(255,255,255,0.05) 234px, transparent 234px, transparent 421px)",
+        }}
+      />
+      {/* Edge fades so frames slide in and out of the dark */}
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-10 sm:w-16 bg-gradient-to-r from-[#161211] to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-10 sm:w-16 bg-gradient-to-l from-[#161211] to-transparent" />
     </div>
   );
 }

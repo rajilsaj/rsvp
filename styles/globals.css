@@ -148,6 +148,19 @@
   50%       { transform: translateY(-8px) rotate(var(--r, 0deg)); opacity: 0.9; }
 }
 
+/* ── Old film strip slider (homepage, under the navbar) ── */
+@keyframes film-slide {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.film-track {
+  animation: film-slide 60s linear infinite;
+  will-change: transform;
+}
+.film-strip:hover .film-track {
+  animation-play-state: paused;
+}
+
 @layer base {
   * {
     @apply border-border;
