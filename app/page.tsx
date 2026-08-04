@@ -285,6 +285,72 @@ function FloatingPetals() {
   );
 }
 
+/* ── Old film strip with sliding photos (under the navbar) ───────────────── */
+const FILM_PHOTOS = [
+  "/images/couple-hero-2.jpg",
+  "/images/story-1.jpg",
+  "/images/couple-hero-3.jpg",
+  "/images/story-2.jpg",
+  "/images/couple-rsvp.jpg",
+  "/images/story-3.jpg",
+  "/images/story-4.jpg",
+  "/images/rsvp-bg.jpg",
+];
+
+// Rounded sprocket hole, tiled horizontally along the strip edges
+const SPROCKET_TILE = `url("data:image/svg+xml,${encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="26" height="12"><rect x="6" y="1" width="14" height="10" rx="2.5" fill="#faf9f6"/></svg>'
+)}")`;
+
+function FilmStrip() {
+  // Two copies of the set → animating x to -50% loops seamlessly
+  const frames = [...FILM_PHOTOS, ...FILM_PHOTOS];
+  return (
+    <div
+      className="relative z-[2] overflow-hidden border-b border-dark-teal/8 bg-[#161211]"
+      aria-hidden="true"
+    >
+      <motion.div
+        className="flex w-max"
+        animate={{ x: ["0%", "-50%"] }}
+        transition={{ duration: 55, ease: "linear", repeat: Infinity }}
+      >
+        {frames.map((src, i) => (
+          <div
+            key={i}
+            className="relative w-[156px] sm:w-[208px] shrink-0 py-[19px]"
+            style={{
+              backgroundImage: `${SPROCKET_TILE}, ${SPROCKET_TILE}`,
+              backgroundPosition: "left top 4px, left bottom 4px",
+              backgroundRepeat: "repeat-x, repeat-x",
+            }}
+          >
+            <div className="px-[3px]">
+              <img
+                src={src}
+                alt=""
+                loading="lazy"
+                draggable={false}
+                className="h-28 sm:h-36 w-full object-cover"
+                style={{ filter: "sepia(0.28) contrast(1.06) saturate(0.85)" }}
+              />
+            </div>
+            {/* Occasional typewriter date stamp, like a developed negative */}
+            {i % 4 === 1 && (
+              <span
+                className="absolute bottom-[24px] left-[12px] font-mono text-[9px] tracking-[0.25em]"
+                style={{ color: "rgba(224,138,60,0.85)", textShadow: "0 0 6px rgba(0,0,0,0.6)" }}
+              >
+                08.22.26
+              </span>
+            )}
+          </div>
+        ))}
+      </motion.div>
+    </div>
+  );
+}
+
 function launchConfetti() {
   const colors = ["#722F37", "#D4AF37", "#FAF8F5", "#8E3D47", "#B8920A", "#ffffff"];
 
@@ -799,6 +865,9 @@ export default function SaveTheDate() {
             RSVP
           </button>
         </header>
+
+        {/* ── Old film strip photo slider ── */}
+        <FilmStrip />
 
         {/* ── Hero content ── */}
         <div className="relative z-[2] flex-1 flex flex-col justify-center px-6 sm:px-10 py-10 sm:py-12">
