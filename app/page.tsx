@@ -286,21 +286,29 @@ function FloatingPetals() {
 }
 
 /* ── Old film strip with sliding photos (under the navbar) ───────────────── */
-const BACHELORETTE_PHOTOS = Array.from(
-  { length: 7 },
-  (_, i) => `/images/bachelorette/bachelorette-${i + 1}.jpg`
-);
+// Frame widths are multiples of the 26px sprocket tile so perforations stay
+// continuous; each width matches its photo's aspect ratio to avoid cropping.
+const FRAME_PORTRAIT = "w-[130px] sm:w-[156px]"; // ~3:4
+const FRAME_WIDE = "w-[260px] sm:w-[312px]"; // ~16:10
+const FRAME_MID = "w-[208px] sm:w-[234px]"; // ~5:4
+const FRAME_SQUARE = "w-[156px] sm:w-[182px]"; // ~1:1
 
 // Bachelorette photos lead the reel, followed by the couple's photos
 const FILM_PHOTOS = [
-  ...BACHELORETTE_PHOTOS,
-  "/images/couple-hero-2.jpg",
-  "/images/story-1.jpg",
-  "/images/couple-hero-3.jpg",
-  "/images/story-2.jpg",
-  "/images/couple-rsvp.jpg",
-  "/images/story-3.jpg",
-  "/images/story-4.jpg",
+  { src: "/images/bachelorette/bachelorette-1.jpg", frame: FRAME_PORTRAIT },
+  { src: "/images/bachelorette/bachelorette-2.jpg", frame: FRAME_WIDE },
+  { src: "/images/bachelorette/bachelorette-3.jpg", frame: FRAME_PORTRAIT },
+  { src: "/images/bachelorette/bachelorette-4.jpg", frame: FRAME_PORTRAIT },
+  { src: "/images/bachelorette/bachelorette-5.jpg", frame: FRAME_PORTRAIT },
+  { src: "/images/bachelorette/bachelorette-6.jpg", frame: FRAME_PORTRAIT },
+  { src: "/images/bachelorette/bachelorette-7.jpg", frame: FRAME_PORTRAIT },
+  { src: "/images/couple-hero-2.jpg", frame: FRAME_PORTRAIT },
+  { src: "/images/story-1.jpg", frame: FRAME_PORTRAIT },
+  { src: "/images/couple-hero-3.jpg", frame: FRAME_PORTRAIT },
+  { src: "/images/story-2.jpg", frame: FRAME_MID },
+  { src: "/images/couple-rsvp.jpg", frame: FRAME_PORTRAIT },
+  { src: "/images/story-3.jpg", frame: FRAME_SQUARE },
+  { src: "/images/story-4.jpg", frame: FRAME_PORTRAIT },
 ];
 
 // Rounded sprocket hole, tiled horizontally along the strip edges
@@ -317,9 +325,8 @@ function FilmStrip() {
   // Two copies of the set → sliding to -50% loops seamlessly (pauses on hover)
   const frames = [...FILM_PHOTOS, ...FILM_PHOTOS];
   return (
-    <div className="relative z-[2] overflow-hidden py-8 sm:py-12" aria-hidden="true">
-      {/* Oblique strip — oversized so it bleeds off both edges */}
-      <div className="relative w-[130%] -ml-[15%] rotate-[-2.5deg]">
+    <div className="relative z-[2] overflow-hidden py-4 sm:py-6" aria-hidden="true">
+      <div className="relative">
         {/* The film itself is golden — holes are punched through to the page */}
         <div
           className="film-strip relative overflow-hidden shadow-[0_22px_48px_-14px_rgba(60,42,4,0.55)] ring-1 ring-[#8A6A06]/40"
@@ -329,12 +336,12 @@ function FilmStrip() {
           }}
         >
           <div className="film-track flex w-max">
-            {frames.map((src, i) => {
+            {frames.map((photo, i) => {
               const n = (i % FILM_PHOTOS.length) + 1;
               return (
                 <div
                   key={i}
-                  className="relative w-[130px] sm:w-[156px] shrink-0 py-[19px]"
+                  className={`relative ${photo.frame} shrink-0 py-[19px]`}
                   style={{
                     backgroundImage: `${SPROCKET_TILE}, ${SPROCKET_TILE}`,
                     backgroundPosition: "left top 4px, left bottom 4px",
@@ -342,19 +349,14 @@ function FilmStrip() {
                   }}
                 >
                   <div className="relative px-[3px]">
-                    {/* Portrait frame + object-contain → the photo is always fully visible */}
+                    {/* Frame width matches the photo's aspect, so the crop stays minimal */}
                     <img
-                      src={src}
+                      src={photo.src}
                       alt=""
                       loading="lazy"
                       draggable={false}
-                      className="h-40 sm:h-48 w-full rounded-[2px] bg-[#0C0A09] object-contain"
+                      className="h-40 sm:h-48 w-full rounded-[2px] object-cover"
                       style={{ filter: "sepia(0.22) contrast(1.07) saturate(0.9)" }}
-                    />
-                    {/* Soft vignette on each frame */}
-                    <div
-                      className="absolute inset-y-0 inset-x-[3px] rounded-[2px]"
-                      style={{ boxShadow: "inset 0 0 28px rgba(0,0,0,0.42)" }}
                     />
                   </div>
                   {/* Typewriter stamps, like a developed negative */}
