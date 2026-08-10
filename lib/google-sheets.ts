@@ -4,6 +4,7 @@ import { randomUUID } from "crypto";
 const GUESTS_SHEET = "Guests";
 const UPDATES_SHEET = "Updates";
 const VISITORS_SHEET = "Visitors";
+const GUEST_HISTORY_SHEET = "GuestsHistory";
 
 /**
  * Columns in 'Guests' sheet:
@@ -58,6 +59,13 @@ export type Guest = {
   table: string;
   seats: string;
   optOut: boolean;
+};
+
+export type GuestHistoryEntry = {
+  timestamp: string;
+  action: string;
+  guestNames: string;
+  details: string;
 };
 
 export type Update = {
@@ -236,8 +244,77 @@ export async function deleteGuestRow(row: number): Promise<void> {
   });
 }
 
+export async function updateGuestAttending(row: number, attending: string): Promise<void> {
+  if (attending === "yes") {
+    await updateCellRange(GUESTS_SHEET, row, COL.ATTENDING, [attending]);
+  } else {
+    // Declined / pending guests keep no +1s (matches POST behavior)
+    await updateCellRange(GUESTS_SHEET, row, COL.ATTENDING, [attending, "0"]);
+  }
+}
+
 export async function updateGuestPlusOnes(row: number, plusOnes: number): Promise<void> {
   await updateCellRange(GUESTS_SHEET, row, COL.PLUS_ONES, [String(plusOnes)]);
+}
+
+let historySheetReady = false;
+
+async function ensureHistorySheet(): Promise<void> {
+  if (historySheetReady) return;
+  const meta = await sheetsApi().spreadsheets.get({ spreadsheetId: spreadsheetId() });
+  const exists = meta.data.sheets?.some(
+    (s) => s.properties?.title === GUEST_HISTORY_SHEET
+  );
+  if (!exists) {
+    await sheetsApi().spreadsheets.batchUpdate({
+      spreadsheetId: spreadsheetId(),
+      requestBody: {
+        requests: [{ addSheet: { properties: { title: GUEST_HISTORY_SHEET } } }],
+      },
+    });
+    await sheetsApi().spreadsheets.values.append({
+      spreadsheetId: spreadsheetId(),
+      range: `${GUEST_HISTORY_SHEET}!A:D`,
+      valueInputOption: "USER_ENTERED",
+      requestBody: { values: [["Timestamp", "Action", "Guest", "Details"]] },
+    });
+  }
+  historySheetReady = true;
+}
+
+export async function appendGuestHistory(
+  entry: Omit<GuestHistoryEntry, "timestamp">
+): Promise<void> {
+  await ensureHistorySheet();
+  await sheetsApi().spreadsheets.values.append({
+    spreadsheetId: spreadsheetId(),
+    range: `${GUEST_HISTORY_SHEET}!A:D`,
+    valueInputOption: "RAW",
+    requestBody: {
+      values: [[new Date().toISOString(), entry.action, entry.guestNames, entry.details]],
+    },
+  });
+}
+
+export async function getGuestHistory(): Promise<GuestHistoryEntry[]> {
+  try {
+    const res = await sheetsApi().spreadsheets.values.get({
+      spreadsheetId: spreadsheetId(),
+      range: `${GUEST_HISTORY_SHEET}!A2:D`,
+    });
+    const rows = (res.data.values ?? []) as string[][];
+    return rows
+      .map((r) => ({
+        timestamp: r[0] ?? "",
+        action: r[1] ?? "",
+        guestNames: r[2] ?? "",
+        details: r[3] ?? "",
+      }))
+      .reverse();
+  } catch {
+    // Sheet doesn't exist yet — no history recorded
+    return [];
+  }
 }
 
 export async function updateGuestSeating(

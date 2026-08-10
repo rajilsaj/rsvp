@@ -1,13 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
+  appendGuestHistory,
   appendGuestRsvp,
   deleteGuestRow,
   findGuestById,
   findGuestByName,
   getGuests,
+  updateGuestAttending,
   updateGuestPlusOnes,
 } from "@/lib/google-sheets";
 import { z } from "zod";
+
+function attendingLabel(attending: string): string {
+  return attending === "yes" ? "Attending" : attending === "no" ? "Not attending" : "Pending";
+}
+
+async function logHistory(action: string, guestNames: string, details: string) {
+  try {
+    await appendGuestHistory({ action, guestNames, details });
+  } catch (err) {
+    // History is best-effort — never fail the main operation
+    console.error("Failed to log guest history:", err);
+  }
+}
 
 export async function GET() {
   const guests = await getGuests();
@@ -47,6 +62,14 @@ export async function POST(request: NextRequest) {
     plusOnes: attending === "yes" ? plusOnes : 0,
   });
 
+  await logHistory(
+    "Guest added",
+    names,
+    attending === "yes"
+      ? `Attending, +Ones: ${plusOnes}`
+      : attendingLabel(attending)
+  );
+
   return NextResponse.json(guest, { status: 201 });
 }
 
@@ -67,13 +90,27 @@ export async function DELETE(request: NextRequest) {
   }
 
   await deleteGuestRow(guest.row);
+
+  await logHistory(
+    "Guest removed",
+    guest.names,
+    `Was ${attendingLabel(guest.attending).toLowerCase()}${
+      guest.plusOnes > 0 ? ` with ${guest.plusOnes} +One${guest.plusOnes > 1 ? "s" : ""}` : ""
+    }`
+  );
+
   return NextResponse.json({ success: true });
 }
 
-const patchGuestSchema = z.object({
-  id: z.string().min(1),
-  plusOnes: z.number().int().min(0).max(10),
-});
+const patchGuestSchema = z
+  .object({
+    id: z.string().min(1),
+    plusOnes: z.number().int().min(0).max(10).optional(),
+    attending: z.enum(["", "yes", "no"]).optional(),
+  })
+  .refine((d) => d.plusOnes !== undefined || d.attending !== undefined, {
+    message: "Nothing to update",
+  });
 
 export async function PATCH(request: NextRequest) {
   const body = await request.json().catch(() => null);
@@ -87,6 +124,22 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ message: "Guest not found" }, { status: 404 });
   }
 
-  await updateGuestPlusOnes(guest.row, parsed.data.plusOnes);
+  const { attending, plusOnes } = parsed.data;
+  if (attending !== undefined && attending !== guest.attending) {
+    await updateGuestAttending(guest.row, attending);
+    await logHistory(
+      "RSVP changed",
+      guest.names,
+      `${attendingLabel(guest.attending)} → ${attendingLabel(attending)}${
+        attending !== "yes" && guest.plusOnes > 0
+          ? ` (${guest.plusOnes} +One${guest.plusOnes > 1 ? "s" : ""} removed)`
+          : ""
+      }`
+    );
+  }
+  if (plusOnes !== undefined && plusOnes !== guest.plusOnes) {
+    await updateGuestPlusOnes(guest.row, plusOnes);
+    await logHistory("+Ones changed", guest.names, `${guest.plusOnes} → ${plusOnes}`);
+  }
   return NextResponse.json({ success: true });
 }

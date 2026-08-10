@@ -17,6 +17,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               Guests
             </Link>
             <Link
+              href="/admin/guests-history"
+              className="px-3 py-1.5 rounded-full text-sm font-medium hover:bg-muted transition-colors"
+            >
+              History
+            </Link>
+            <Link
               href="/admin/seating"
               className="px-3 py-1.5 rounded-full text-sm font-medium hover:bg-muted transition-colors"
             >

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, Mail, Minus, Phone, Plus, Users, X } from "lucide-react";
+import { Check, Mail, Minus, Phone, Plus, Search, Users, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -36,6 +36,8 @@ export default function GuestsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [confirmGuest, setConfirmGuest] = useState<Guest | null>(null);
 
   function loadGuests() {
     return fetch("/api/guests")
@@ -101,6 +103,21 @@ export default function GuestsPage() {
     }
   }
 
+  async function handleSetAttending(g: Guest, attending: "yes" | "no") {
+    setConfirmGuest(null);
+    setBusyId(g.id);
+    try {
+      const res = await fetch("/api/guests", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: g.id, attending }),
+      });
+      if (res.ok) await loadGuests();
+    } finally {
+      setBusyId(null);
+    }
+  }
+
   async function handleAddPlusOne(g: Guest) {
     if (g.plusOnes >= 10) return;
     setBusyId(g.id);
@@ -141,6 +158,9 @@ export default function GuestsPage() {
   };
 
   const filtered = guests.filter((g) => {
+    if (search.trim() && !g.names.toLowerCase().includes(search.trim().toLowerCase())) {
+      return false;
+    }
     if (filter === "confirmed") return g.attending === "yes";
     if (filter === "declined") return g.attending === "no";
     if (filter === "pending") return g.attending === "";
@@ -273,6 +293,28 @@ export default function GuestsPage() {
         ))}
       </div>
 
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search guests by name…"
+          aria-label="Search guests by name"
+          className="rounded-full pl-10 pr-9"
+        />
+        {search && (
+          <button
+            type="button"
+            aria-label="Clear search"
+            onClick={() => setSearch("")}
+            className="absolute right-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
+
       <div className="flex gap-2 flex-wrap">
         {(["all", "confirmed", "pending", "declined"] as Filter[]).map((f) => (
           <Button
@@ -301,17 +343,26 @@ export default function GuestsPage() {
                 )}
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                {g.attending === "yes" ? (
-                  <Badge className="rounded-full text-xs">Yes</Badge>
-                ) : g.attending === "no" ? (
-                  <Badge variant="destructive" className="rounded-full text-xs">
-                    No
-                  </Badge>
-                ) : (
-                  <Badge variant="secondary" className="rounded-full text-xs">
-                    Pending
-                  </Badge>
-                )}
+                <button
+                  type="button"
+                  aria-label={`Change RSVP status for ${g.names}`}
+                  title="Change RSVP status"
+                  disabled={busyId === g.id}
+                  onClick={() => setConfirmGuest(g)}
+                  className="rounded-full transition-all hover:opacity-80 hover:ring-2 hover:ring-ring/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+                >
+                  {g.attending === "yes" ? (
+                    <Badge className="rounded-full text-xs">Yes</Badge>
+                  ) : g.attending === "no" ? (
+                    <Badge variant="destructive" className="rounded-full text-xs">
+                      No
+                    </Badge>
+                  ) : (
+                    <Badge variant="secondary" className="rounded-full text-xs">
+                      Pending
+                    </Badge>
+                  )}
+                </button>
                 <button
                   type="button"
                   aria-label={`Remove ${g.names}`}
@@ -452,13 +503,22 @@ export default function GuestsPage() {
                     </div>
                   </td>
                   <td className="p-4 text-center">
-                    {g.attending === "yes" ? (
-                      <Badge className="rounded-full text-xs">Yes</Badge>
-                    ) : g.attending === "no" ? (
-                      <Badge variant="destructive" className="rounded-full text-xs">No</Badge>
-                    ) : (
-                      <Badge variant="secondary" className="rounded-full text-xs">—</Badge>
-                    )}
+                    <button
+                      type="button"
+                      aria-label={`Change RSVP status for ${g.names}`}
+                      title="Change RSVP status"
+                      disabled={busyId === g.id}
+                      onClick={() => setConfirmGuest(g)}
+                      className="rounded-full transition-all hover:opacity-80 hover:ring-2 hover:ring-ring/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+                    >
+                      {g.attending === "yes" ? (
+                        <Badge className="rounded-full text-xs">Yes</Badge>
+                      ) : g.attending === "no" ? (
+                        <Badge variant="destructive" className="rounded-full text-xs">No</Badge>
+                      ) : (
+                        <Badge variant="secondary" className="rounded-full text-xs">—</Badge>
+                      )}
+                    </button>
                   </td>
                   <td className="p-4 text-center text-muted-foreground">
                     {g.attending === "yes" ? (
@@ -533,6 +593,74 @@ export default function GuestsPage() {
           </table>
         </div>
       </Card>
+
+      {/* Confirm modal — force a guest's RSVP status */}
+      {confirmGuest && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="rsvp-dialog-title"
+        >
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setConfirmGuest(null)}
+          />
+          <Card className="surface relative z-10 w-full max-w-sm rounded-2xl p-6 space-y-5 shadow-xl">
+            <div className="space-y-1.5">
+              <h2 id="rsvp-dialog-title" className="font-display text-xl">
+                Change RSVP status
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                <span className="font-medium text-foreground">{confirmGuest.names}</span> is
+                currently marked as{" "}
+                <span className="font-medium text-foreground">
+                  {confirmGuest.attending === "yes"
+                    ? "attending"
+                    : confirmGuest.attending === "no"
+                      ? "not attending"
+                      : "pending"}
+                </span>
+                .
+              </p>
+              {confirmGuest.attending === "yes" && confirmGuest.plusOnes > 0 && (
+                <p className="text-xs text-destructive">
+                  Marking them as not attending will also remove their{" "}
+                  {confirmGuest.plusOnes} +One{confirmGuest.plusOnes > 1 ? "s" : ""}.
+                </p>
+              )}
+            </div>
+            <div className="flex flex-col gap-2">
+              {confirmGuest.attending !== "yes" && (
+                <Button
+                  className="rounded-full w-full"
+                  onClick={() => handleSetAttending(confirmGuest, "yes")}
+                >
+                  <Check className="w-4 h-4 mr-1" />
+                  Mark as attending
+                </Button>
+              )}
+              {confirmGuest.attending !== "no" && (
+                <Button
+                  variant="destructive"
+                  className="rounded-full w-full"
+                  onClick={() => handleSetAttending(confirmGuest, "no")}
+                >
+                  <X className="w-4 h-4 mr-1" />
+                  Mark as not attending
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                className="rounded-full w-full"
+                onClick={() => setConfirmGuest(null)}
+              >
+                Cancel
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
 
       {/* Floating add button — stays reachable while scrolling on mobile */}
       {!showForm && (

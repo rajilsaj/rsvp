@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { appendGuestRsvp, findGuestByName } from "@/lib/google-sheets";
+import { appendGuestHistory, appendGuestRsvp, findGuestByName } from "@/lib/google-sheets";
 import { z } from "zod";
 
 const rsvpSchema = z.object({
@@ -43,6 +43,17 @@ export async function POST(request: NextRequest) {
     attending,
     plusOnes: attending === "yes" ? plusOnes : 0,
   });
+
+  try {
+    await appendGuestHistory({
+      action: "RSVP received",
+      guestNames: names,
+      details:
+        attending === "yes" ? `Attending, +Ones: ${plusOnes}` : "Not attending",
+    });
+  } catch (err) {
+    console.error("Failed to log guest history:", err);
+  }
 
   return NextResponse.json(guest);
 }
