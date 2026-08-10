@@ -101,6 +101,21 @@ export default function GuestsPage() {
     }
   }
 
+  async function handleAddPlusOne(g: Guest) {
+    if (g.plusOnes >= 10) return;
+    setBusyId(g.id);
+    try {
+      const res = await fetch("/api/guests", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: g.id, plusOnes: (Number(g.plusOnes) || 0) + 1 }),
+      });
+      if (res.ok) await loadGuests();
+    } finally {
+      setBusyId(null);
+    }
+  }
+
   async function handleRemovePlusOne(g: Guest) {
     if (g.plusOnes <= 0) return;
     setBusyId(g.id);
@@ -345,9 +360,31 @@ export default function GuestsPage() {
                       >
                         <Minus className="w-3 h-3" />
                       </button>
+                      <button
+                        type="button"
+                        aria-label={`Add one +1 for ${g.names}`}
+                        title="Add one +1"
+                        disabled={busyId === g.id || g.plusOnes >= 10}
+                        onClick={() => handleAddPlusOne(g)}
+                        className="flex h-5 w-5 items-center justify-center rounded-full border border-muted-foreground/40 text-muted-foreground transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground disabled:opacity-50"
+                      >
+                        <Plus className="w-3 h-3" />
+                      </button>
                     </span>
                   ) : (
-                    "0"
+                    <span className="flex items-center gap-1.5">
+                      0
+                      <button
+                        type="button"
+                        aria-label={`Add one +1 for ${g.names}`}
+                        title="Add one +1"
+                        disabled={busyId === g.id}
+                        onClick={() => handleAddPlusOne(g)}
+                        className="flex h-5 w-5 items-center justify-center rounded-full border border-muted-foreground/40 text-muted-foreground transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground disabled:opacity-50"
+                      >
+                        <Plus className="w-3 h-3" />
+                      </button>
+                    </span>
                   )
                 ) : (
                   "—"
@@ -439,9 +476,31 @@ export default function GuestsPage() {
                           >
                             <Minus className="w-3 h-3" />
                           </button>
+                          <button
+                            type="button"
+                            aria-label={`Add one +1 for ${g.names}`}
+                            title="Add one +1"
+                            disabled={busyId === g.id || g.plusOnes >= 10}
+                            onClick={() => handleAddPlusOne(g)}
+                            className="flex h-5 w-5 items-center justify-center rounded-full border border-muted-foreground/40 text-muted-foreground transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground disabled:opacity-50"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </button>
                         </span>
                       ) : (
-                        <X className="w-4 h-4 text-muted-foreground mx-auto" />
+                        <span className="flex items-center justify-center gap-1.5">
+                          <X className="w-4 h-4 text-muted-foreground" />
+                          <button
+                            type="button"
+                            aria-label={`Add one +1 for ${g.names}`}
+                            title="Add one +1"
+                            disabled={busyId === g.id}
+                            onClick={() => handleAddPlusOne(g)}
+                            className="flex h-5 w-5 items-center justify-center rounded-full border border-muted-foreground/40 text-muted-foreground transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground disabled:opacity-50"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </button>
+                        </span>
                       )
                     ) : "—"}
                   </td>
