@@ -1,11 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, Mail, Minus, Phone, Plus, Search, Users, X } from "lucide-react";
+import {
+  Check,
+  FileSpreadsheet,
+  FileText,
+  Mail,
+  Minus,
+  Phone,
+  Plus,
+  Search,
+  Users,
+  X,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { exportGuestsExcel, exportGuestsPdf } from "@/lib/export-guests";
 import type { Guest } from "@/lib/google-sheets";
 
 type Filter = "all" | "confirmed" | "declined" | "pending";
@@ -38,6 +50,7 @@ export default function GuestsPage() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [confirmGuest, setConfirmGuest] = useState<Guest | null>(null);
+  const [exporting, setExporting] = useState<"pdf" | "excel" | null>(null);
 
   function loadGuests() {
     return fetch("/api/guests")
@@ -167,6 +180,17 @@ export default function GuestsPage() {
     return true;
   });
 
+  async function handleExport(format: "pdf" | "excel") {
+    if (exporting || guests.length === 0) return;
+    setExporting(format);
+    try {
+      if (format === "pdf") await exportGuestsPdf(guests, stats);
+      else await exportGuestsExcel(guests, stats);
+    } finally {
+      setExporting(null);
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24 text-muted-foreground">
@@ -182,16 +206,38 @@ export default function GuestsPage() {
           <h1 className="font-display text-2xl sm:text-3xl mb-1">Guests</h1>
           <p className="text-muted-foreground text-sm">All guest RSVPs and their status</p>
         </div>
-        <Button
-          className="rounded-full shrink-0 w-full sm:w-auto"
-          onClick={() => {
-            setShowForm((s) => !s);
-            setFormError(null);
-          }}
-        >
-          <Plus className="w-4 h-4 mr-1" />
-          Add guest
-        </Button>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center shrink-0">
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              className="rounded-full flex-1 sm:flex-none"
+              disabled={exporting !== null || guests.length === 0}
+              onClick={() => handleExport("pdf")}
+            >
+              <FileText className="w-4 h-4 mr-1" />
+              {exporting === "pdf" ? "Exporting…" : "PDF"}
+            </Button>
+            <Button
+              variant="outline"
+              className="rounded-full flex-1 sm:flex-none"
+              disabled={exporting !== null || guests.length === 0}
+              onClick={() => handleExport("excel")}
+            >
+              <FileSpreadsheet className="w-4 h-4 mr-1" />
+              {exporting === "excel" ? "Exporting…" : "Excel"}
+            </Button>
+          </div>
+          <Button
+            className="rounded-full w-full sm:w-auto"
+            onClick={() => {
+              setShowForm((s) => !s);
+              setFormError(null);
+            }}
+          >
+            <Plus className="w-4 h-4 mr-1" />
+            Add guest
+          </Button>
+        </div>
       </div>
 
       {showForm && (
