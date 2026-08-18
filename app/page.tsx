@@ -606,11 +606,12 @@ export default function SaveTheDate() {
   }, []);
 
   useEffect(() => {
+    // Registration on /rsvp is disabled — everyone lands here directly.
     const savedName = getCookie("wedding_rsvp_name");
-    if (!savedName) { router.push("/rsvp"); return; }
+    setChecking(false);
+    if (!savedName) return;
     // Show the page immediately — the guest data loads in the background
     setInviteeName(savedName);
-    setChecking(false);
     fetch(`/api/guests`)
       .then((res) => (res.ok ? res.json() : []))
       .then((guests: any[]) => {

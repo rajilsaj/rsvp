@@ -32,12 +32,9 @@ export default function RsvpPage() {
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // If already RSVP'd (checked via cookie), redirect to home
+  // Registration form is hidden — always send visitors to the homepage.
   useEffect(() => {
-    const savedName = getCookie("wedding_rsvp_name");
-    if (savedName) {
-      router.push("/");
-    }
+    router.replace("/");
   }, [router]);
 
   // Always returns the full 14-char mask: (XXX) XXX-XXXX with _ for unfilled slots
@@ -192,6 +189,9 @@ export default function RsvpPage() {
   }
 
   const phoneDisplay = buildPhoneDisplay(phone);
+
+  // Hidden — render nothing while the redirect above kicks in.
+  return null;
 
   if (submitted) {
     return (
