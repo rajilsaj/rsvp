@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Church, Copy, Heart, MapPin, Wine, X } from "lucide-react";
+import { CalendarX, Church, Copy, Heart, MapPin, Wine, X } from "lucide-react";
 import confetti from "canvas-confetti";
 
 import { useToast } from "@/hooks/use-toast";
@@ -1382,102 +1382,19 @@ export default function SaveTheDate() {
                   <p className="mt-5 text-sm font-medium text-floral-crimson">Please Don&apos;t be late!</p>
                 </div>
               ) : (
-                <div className="space-y-4">
-
-                  {/* Name */}
-                  <div>
-                    <label className="block text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 text-teal-muted">Full Name(s) *</label>
-                    <input
-                      type="text"
-                      value={inviteeName}
-                      onChange={(e) => setInviteeName(e.target.value)}
-                      onBlur={() => setHomeTouched(prev => ({ ...prev, names: true }))}
-                      data-testid="input-name"
-                      placeholder="Your full name"
-                      className={`w-full rounded-xl px-4 py-3 text-base text-gray-700 bg-white border outline-none focus:border-teal-accent transition-colors ${homeTouched.names && homeErrors.names ? "border-red-400" : "border-gray-200"}`}
-                    />
-                    {homeTouched.names && homeErrors.names && <p className="text-xs mt-1 text-red-500">{homeErrors.names}</p>}
+                <div className="text-center py-8">
+                  <div className="w-14 h-14 bg-teal-accent/10 flex items-center justify-center mx-auto mb-4 rounded-2xl">
+                    <CalendarX className="h-7 w-7 text-floral-crimson" />
                   </div>
-
-                  {/* Phone with ghost mask */}
-                  <div>
-                    <label className="block text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 text-teal-muted">Phone *</label>
-                    <div className={`relative w-full rounded-xl bg-white border transition-colors focus-within:border-teal-accent ${homeTouched.phone && homeErrors.phone ? "border-red-400" : "border-gray-200"}`}>
-                      <div aria-hidden="true" className="absolute inset-0 flex items-center px-4 text-base pointer-events-none select-none">
-                        {Array.from(buildHomePhoneDisplay(inviteePhoneDigits)).map((ch, i) => (
-                          <span key={i} className={/\d/.test(ch) ? "text-gray-700" : ch === "_" ? "text-gray-300" : "text-gray-400"}>{ch}</span>
-                        ))}
-                      </div>
-                      <input
-                        ref={homePhoneRef}
-                        type="tel"
-                        inputMode="numeric"
-                        data-testid="input-phone"
-                        value={buildHomePhoneDisplay(inviteePhoneDigits)}
-                        onChange={handleHomePhoneChange}
-                        onKeyDown={handleHomePhoneKeyDown}
-                        onBlur={() => setHomeTouched(prev => ({ ...prev, phone: true }))}
-                        onFocus={() => {
-                          const pos = homePhoneCursorPos(inviteePhoneDigits.length);
-                          requestAnimationFrame(() => homePhoneRef.current?.setSelectionRange(pos, pos));
-                        }}
-                        className="relative w-full rounded-xl px-4 py-3 text-base bg-transparent outline-none text-transparent caret-gray-700"
-                      />
-                    </div>
-                    {homeTouched.phone && homeErrors.phone && <p className="text-xs mt-1 text-red-500">{homeErrors.phone}</p>}
-                  </div>
-
-                  {/* Email */}
-                  <div>
-                    <label className="block text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 text-teal-muted">Email (optional)</label>
-                    <input
-                      type="email"
-                      value={inviteeEmail}
-                      onChange={(e) => setInviteeEmail(e.target.value)}
-                      onBlur={() => setHomeTouched(prev => ({ ...prev, email: true }))}
-                      placeholder="you@email.com"
-                      className={`w-full rounded-xl px-4 py-3 text-base text-gray-700 bg-white border outline-none focus:border-teal-accent transition-colors ${homeTouched.email && homeErrors.email ? "border-red-400" : "border-gray-200"}`}
-                    />
-                    {homeTouched.email && homeErrors.email && <p className="text-xs mt-1 text-red-500">{homeErrors.email}</p>}
-                  </div>
-
-                  {/* Attending yes/no */}
-                  <div>
-                    <label className="block text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 text-teal-muted">Will you attend? *</label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setInviteeStatus("yes")}
-                        data-testid="button-rsvp-yes"
-                        className={`py-3.5 rounded-xl text-sm font-medium transition-all border-2 ${inviteeStatus === "yes" ? "bg-teal-accent/10 border-teal-accent text-floral-crimson" : "border-gray-100 text-gray-500 hover:border-gray-200"}`}
-                      >
-                        ✓ Yes
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setInviteeStatus("no")}
-                        data-testid="button-rsvp-no"
-                        className={`py-3.5 rounded-xl text-sm font-medium transition-all border-2 ${inviteeStatus === "no" ? "bg-rose-50 border-rose-400 text-rose-600" : "border-gray-100 text-gray-500 hover:border-gray-200"}`}
-                      >
-                        ✗ No
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Plus-ones counter */}
-                  <div>
-                    <label className="block text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 text-teal-muted">Additional guests you&apos;re bringing</label>
-                    <div className="flex items-center gap-3">
-                      <button type="button" onClick={() => setInviteePlusOnes(Math.max(0, inviteePlusOnes - 1))} className="w-12 h-12 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-xl hover:bg-gray-50">−</button>
-                      <span className="flex-1 text-center font-semibold text-base">{inviteePlusOnes === 0 ? "None" : `+${inviteePlusOnes}`}</span>
-                      <button type="button" onClick={() => setInviteePlusOnes(Math.min(3, inviteePlusOnes + 1))} className="w-12 h-12 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-xl hover:bg-gray-50">+</button>
-                    </div>
-                  </div>
-
-                  <button onClick={submitRSVP} disabled={rsvpMutation.isPending} data-testid="button-submit-rsvp"
-                    className="w-full py-3.5 bg-teal-accent text-white text-sm tracking-[0.15em] uppercase font-medium hover:brightness-105 active:scale-[0.99] transition-all disabled:opacity-50 shadow-sm rounded-xl">
-                    {rsvpMutation.isPending ? "Saving…" : "Submit RSVP"}
-                  </button>
+                  <h3 className="text-lg font-medium text-dark-teal mb-2">RSVPs are now closed</h3>
+                  <p className="text-sm text-teal-muted leading-relaxed max-w-xs mx-auto">
+                    {countdown.ready && countdown.days > 0
+                      ? `The wedding is only ${countdown.days} ${countdown.days === 1 ? "day" : "days"} away, so we can no longer take new registrations.`
+                      : "The big day is here, so we can no longer take new registrations."}
+                  </p>
+                  <p className="mt-4 text-sm text-teal-muted leading-relaxed max-w-xs mx-auto">
+                    Need to make a change or have a question? Please contact the wedding planner.
+                  </p>
                 </div>
               )}
             </div>
